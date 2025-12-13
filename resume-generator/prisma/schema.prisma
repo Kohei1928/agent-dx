@@ -1,0 +1,382 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth用モデル
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// CAユーザー情報
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+  slackUserId   String?   @db.VarChar(20)  // Slack DM通知用
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  jobSeekers     JobSeeker[]
+  generationLogs GenerationLog[]
+}
+
+// 求職者情報
+model JobSeeker {
+  id                  String    @id @default(cuid())
+  userId              String
+  name                String
+  nameKana            String?
+  email               String?
+  phone               String?
+  gender              String?   @db.VarChar(10)  // 性別
+  birthDate           DateTime?
+  address             String?
+  notes               String?   @db.Text
+  hubspotContactId    String?
+  hubspotContactEmail String?
+  hubspotData         Json?
+  hubspotSyncedAt     DateTime?
+  // 日程調整用URL
+  scheduleToken       String?   @unique @default(cuid())
+  scheduleUrlExpiresAt DateTime?
+  // フォーム用URL
+  formToken           String?   @unique @default(cuid())
+  // 非表示フラグ
+  isHidden            Boolean   @default(false)
+  // 面接前後のブロック時間設定（分）- DBマイグレーション後に有効化
+  // onsiteBlockMinutes  Int       @default(60)   // 対面面接: デフォルト1時間
+  // onlineBlockMinutes  Int       @default(30)   // オンライン面接: デフォルト30分
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  registeredBy         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionnaireData    QuestionnaireData?
+  interviewTranscript  InterviewTranscript?
+  targetCompany        TargetCompany?
+  generatedDocuments   GeneratedDocument[]
+  generationLogs       GenerationLog[]
+  resumeData           ResumeData?
+  cvData               CvData?
+  schedules            Schedule[]
+  scheduleBookings     ScheduleBooking[]
+  recommendationLetter RecommendationLetter?
+
+  @@index([userId])
+  @@index([email])
+  @@index([scheduleToken])
+  @@index([scheduleUrlExpiresAt])
+  @@index([formToken])
+}
+
+// アンケートデータ（正規化データ）
+model QuestionnaireData {
+  id          String   @id @default(cuid())
+  jobSeekerId String   @unique
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+}
+
+// 面談文字起こしデータ（非正規データ）
+model InterviewTranscript {
+  id            String    @id @default(cuid())
+  jobSeekerId   String    @unique
+  content       String    @db.Text
+  interviewDate DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+}
+
+// 応募先企業情報（志望動機生成用）
+model TargetCompany {
+  id                 String   @id @default(cuid())
+  jobSeekerId        String   @unique
+  companyUrl         String?  @db.VarChar(500)
+  companyFeatures    String?  @db.Text
+  generateMotivation Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+}
+
+// 生成されたドキュメント情報
+model GeneratedDocument {
+  id           String   @id @default(cuid())
+  jobSeekerId  String
+  documentType String   // 'resume' or 'cv'
+  googleDocId  String
+  googleDocUrl String   @db.VarChar(500)
+  version      Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+
+  @@index([jobSeekerId])
+}
+
+// 生成履歴
+model GenerationLog {
+  id              String   @id @default(cuid())
+  jobSeekerId     String
+  userId          String
+  documentType    String?  // 'resume' or 'cv'
+  documentUrl     String?  @db.VarChar(500)
+  status          String   // 'success', 'failed', 'processing'
+  errorMessage    String?  @db.Text
+  llmModel        String?
+  inputTokens     Int?
+  outputTokens    Int?
+  dataSourcesUsed Json?
+  createdAt       DateTime @default(now())
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobSeekerId])
+  @@index([userId])
+}
+
+// HubSpot項目マッピング設定
+model HubspotMapping {
+  id              String   @id @default(cuid())
+  resumeField     String   @db.VarChar(50)
+  hubspotProperty String   @db.VarChar(100)
+  isActive        Boolean  @default(true)
+  priority        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// 履歴書フォームデータ
+model ResumeData {
+  id             String    @id @default(cuid())
+  jobSeekerId    String    @unique
+  name           String?
+  nameKana       String?
+  gender         String?   @db.VarChar(10)
+  birthDate      DateTime?
+  postalCode     String?   @db.VarChar(10)
+  address        String?   @db.Text
+  addressKana    String?   @db.Text  // 住所ふりがな
+  phone          String?   @db.VarChar(20)
+  email          String?
+  photoUrl       String?   @db.Text  // Base64画像データを保存
+  education      Json?     // 学歴配列（履歴書用フォーマット）
+  workHistory    Json?     // 職歴配列（履歴書用フォーマット）
+  educationRaw   Json?     // 学歴フォーム生データ（再編集用）
+  workHistoryRaw Json?     // 職歴フォーム生データ（再編集用）
+  qualifications Json?     // 免許・資格配列
+  preferences    String?   @db.Text // 本人希望欄
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+}
+
+// 職務経歴書フォームデータ
+model CvData {
+  id             String    @id @default(cuid())
+  jobSeekerId    String    @unique
+  name           String?
+  createdDate    DateTime?
+  summary        String?   @db.Text  // 職務要約
+  workHistory    Json?     // 職務経歴（会社ごと、リッチテキスト含む）
+  skills         Json?     // 活かせる経験・スキル配列（後方互換性のため残す）
+  skillsText     String?   @db.Text  // 活かせる経験・知識・技術（フリーテキスト、推奨）
+  selfPrTitle    String?   @db.VarChar(200)
+  selfPr         String?   @db.Text
+  // 自由記述Ver用フィールド（DBマイグレーション後に有効化）
+  // freeformSkills String?   @db.Text  // 活かせる経験・知識・技術（フリーテキスト）
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+}
+
+// ========================================
+// 日程調整機能用モデル
+// ========================================
+
+// 企業マスタ
+model Company {
+  id           String   @id @default(cuid())
+  name         String
+  contactName  String?
+  contactEmail String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bookings ScheduleBooking[]
+
+  @@index([name])
+}
+
+// 面接形式
+enum InterviewType {
+  online
+  onsite
+  both    // 両方可能
+}
+
+// 日程ステータス
+enum ScheduleStatus {
+  available  // 空き（選択可能）
+  booked     // 確定済み（企業が選択）
+  blocked    // ブロック（対面面接の前後1時間）
+  cancelled  // NG化・キャンセル済み
+}
+
+// 日程候補
+model Schedule {
+  id            String         @id @default(cuid())
+  jobSeekerId   String
+  date          DateTime       @db.Date
+  startTime     String         @db.VarChar(5)  // "HH:MM" 形式
+  endTime       String         @db.VarChar(5)  // "HH:MM" 形式
+  interviewType InterviewType  @default(online)
+  status        ScheduleStatus @default(available)
+  blockedById   String?        // ブロック元の日程ID（blocked時のみ）
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  jobSeeker        JobSeeker         @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  booking          ScheduleBooking?
+  blockedBy        Schedule?         @relation("BlockedSchedules", fields: [blockedById], references: [id])
+  blockedSchedules Schedule[]        @relation("BlockedSchedules")
+
+  @@index([jobSeekerId])
+  @@index([status])
+  @@index([date])
+}
+
+// 日程確定履歴
+model ScheduleBooking {
+  id            String         @id @default(cuid())
+  scheduleId    String         @unique
+  jobSeekerId   String
+  companyId     String?
+  companyName   String         // 企業名（手入力の場合も含む）
+  // interviewType InterviewType  @default(online)  // 面接形式（オンライン/対面）- DBマイグレーション後に有効化
+  confirmedAt   DateTime       @default(now())
+  cancelledAt   DateTime?
+  cancelReason  String?        @db.Text
+  createdAt     DateTime       @default(now())
+
+  schedule  Schedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  company   Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([jobSeekerId])
+  @@index([companyId])
+  @@index([confirmedAt])
+  @@index([cancelledAt])
+}
+
+// ========================================
+// AI生成機能用モデル
+// ========================================
+
+// 生成テンプレート（推薦文・職務経歴書項目共通）
+model GenerationTemplate {
+  id          String   @id @default(cuid())
+  type        String   @db.VarChar(20)  // "recommendation" | "summary" | "selfPr" | "skills" | "workHistory" | "cvFull"
+  name        String   // パターン名（例：営業職向け）
+  prompt      String   @db.Text  // プロンプト本文
+  exampleText String?  @db.Text  // 例文（任意）
+  isDefault   Boolean  @default(false)  // デフォルトテンプレートフラグ
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([name])
+}
+
+// デフォルト情報ソース設定（全社共通）
+model GenerationSourceDefault {
+  id        String   @id @default(cuid())
+  type      String   @unique @db.VarChar(20)  // "recommendation" | "summary" | "selfPr" | "skills" | "workHistory" | "cvFull"
+  sources   Json     // [{ source: "resume", priority: 1 }, { source: "transcript", priority: 2 }, { source: "questionnaire", priority: 3 }]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 推薦文テンプレート（職種パターン）- 後方互換性のため残す
+model RecommendationTemplate {
+  id          String   @id @default(cuid())
+  name        String   // 職種名（例：エンジニア職）
+  points      String   @db.Text  // 推薦文作成時のポイント
+  exampleText String?  @db.Text  // 推薦文の例文（任意）
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recommendations RecommendationLetter[]
+
+  @@index([name])
+}
+
+// 推薦文
+model RecommendationLetter {
+  id                   String   @id @default(cuid())
+  jobSeekerId          String   @unique  // 求職者ごとに1件のみ
+  templateId           String?  // 旧テンプレート（後方互換性）
+  generationTemplateId String?  // 新テンプレート（GenerationTemplate）
+  content              String   @db.Text  // 推薦文本文
+  editHistory          Json?    // 編集履歴（チャット形式）
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  jobSeeker JobSeeker               @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  template  RecommendationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([jobSeekerId])
+  @@index([templateId])
+}

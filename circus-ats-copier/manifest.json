@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Circus ATS Copier",
+  "version": "1.0.0",
+  "description": "Circusから候補者情報をコピーし、各種ATSに貼り付けるChrome拡張機能",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://circus-job.com/*",
+    "https://manager.snar.jp/*",
+    "https://agent.talentio.com/*",
+    "https://hrmos.co/*",
+    "https://*.herp.cloud/*",
+    "https://*.jobcan.ne.jp/*"
+  ],
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "Circus ATS Copier"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://circus-job.com/selections/*"],
+      "js": ["src/content/circus.ts"]
+    },
+    {
+      "matches": [
+        "https://manager.snar.jp/*",
+        "https://agent.talentio.com/*",
+        "https://hrmos.co/*"
+      ],
+      "js": ["src/content/ats/index.ts"]
+    }
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  }
+}

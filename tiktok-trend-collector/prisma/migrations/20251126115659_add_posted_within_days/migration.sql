@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "settings" ADD COLUMN     "postedWithinDays" INTEGER NOT NULL DEFAULT 7,
+ALTER COLUMN "minViews" SET DEFAULT 0,
+ALTER COLUMN "minLikes" SET DEFAULT 0;

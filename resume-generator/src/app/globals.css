@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f8fa;
+  --foreground: #33475b;
+  --hubspot-orange: #ff7a59;
+  --hubspot-orange-dark: #e8573f;
+  --hubspot-teal: #00a4bd;
+  --hubspot-teal-dark: #0091a8;
+  --hubspot-dark: #2d3e50;
+  --hubspot-light: #f5f8fa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--hubspot-orange);
+  --color-primary-dark: var(--hubspot-orange-dark);
+  --color-secondary: var(--hubspot-teal);
+  --color-secondary-dark: var(--hubspot-teal-dark);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Noto Sans JP', Arial, Helvetica, sans-serif;
+}
+
+/* HubSpotライクなボタンスタイル */
+.btn-primary {
+  background-color: var(--hubspot-orange);
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--hubspot-orange-dark);
+}
+
+.btn-secondary {
+  background-color: var(--hubspot-teal);
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--hubspot-teal-dark);
+}
