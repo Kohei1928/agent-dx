@@ -332,7 +332,7 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-4 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
@@ -345,11 +345,19 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
         <div className="mb-6">
           <Link
             href={`/job-seekers/${id}`}
-            className="text-[#00a4bd] hover:underline text-sm mb-2 inline-block"
+            className="text-slate-500 hover:text-orange-600 text-sm mb-2 inline-flex items-center gap-1 transition-colors"
           >
-            ← {jobSeeker?.name || "求職者詳細"} に戻る
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {jobSeeker?.name || "求職者詳細"} に戻る
           </Link>
-          <h1 className="text-2xl font-bold text-[#33475b]">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
             推薦文作成 - {jobSeeker?.name}
           </h1>
         </div>
@@ -361,8 +369,11 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
         )}
 
         {/* テンプレート選択 */}
-        <div className="bg-white rounded-lg border border-[#dfe3eb] p-6 mb-6">
-          <h2 className="text-lg font-semibold text-[#33475b] mb-4">
+        <div className="card p-6 mb-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
             職種テンプレートを選択
           </h2>
           <div className="flex gap-4 items-end">
@@ -370,7 +381,7 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
               <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
               >
                 <option value="">テンプレートを選択...</option>
                 {templates.map((template) => (
@@ -383,7 +394,7 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
             <button
               onClick={handleGenerate}
               disabled={generating || !selectedTemplateId}
-              className="px-6 py-3 bg-[#6c5ce7] hover:bg-[#5b4cdb] text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {generating ? (
                 <>
@@ -392,15 +403,18 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
                 </>
               ) : (
                 <>
-                  🤖 推薦文を生成
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  推薦文を生成
                 </>
               )}
             </button>
           </div>
           {selectedTemplateId && (
-            <div className="mt-4 p-4 bg-[#f5f8fa] rounded-lg">
-              <p className="text-xs text-[#7c98b6] mb-1">選択中のテンプレート:</p>
-              <p className="text-sm text-[#516f90] whitespace-pre-wrap">
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-xs text-gray-500 mb-1">選択中のテンプレート:</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
                 {templates.find((t) => t.id === selectedTemplateId)?.prompt || "プロンプト未設定"}
               </p>
             </div>
@@ -409,28 +423,28 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
 
         {/* 生成された推薦文 */}
         {(recommendation || editedContent) && (
-          <div className="bg-white rounded-lg border border-[#dfe3eb] p-6 mb-6">
+          <div className="card p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#33475b]">
+              <h2 className="text-lg font-semibold text-slate-900">
                 生成された推薦文
               </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopy}
-                  className="px-4 py-2 text-sm border border-[#dfe3eb] rounded-lg hover:bg-[#f5f8fa] transition-colors flex items-center gap-1"
+                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1 text-slate-700"
                 >
                   📋 {copySuccess ? "コピーしました！" : "コピー"}
                 </button>
                 <button
                   onClick={handleDownloadPDF}
-                  className="px-4 py-2 text-sm border border-[#dfe3eb] rounded-lg hover:bg-[#f5f8fa] transition-colors flex items-center gap-1"
+                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1 text-slate-700"
                 >
                   📄 PDFダウンロード
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || editedContent === recommendation?.content}
-                  className="px-4 py-2 text-sm bg-[#ff7a59] hover:bg-[#e8573f] text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                  className="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
                 >
                   💾 {saving ? "保存中..." : "保存"}
                 </button>
@@ -440,9 +454,9 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
               rows={12}
-              className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] resize-none font-sans text-sm leading-relaxed"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 resize-none font-sans text-sm leading-relaxed"
             />
-            <p className="text-xs text-[#7c98b6] mt-2 text-right">
+            <p className="text-xs text-gray-500 mt-2 text-right">
               {editedContent.length} 文字
             </p>
           </div>
@@ -450,8 +464,8 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
 
         {/* 追加編集（チャット形式） */}
         {recommendation && (
-          <div className="bg-white rounded-lg border border-[#dfe3eb] p-6">
-            <h2 className="text-lg font-semibold text-[#33475b] mb-4">
+          <div className="card p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
               追加の編集指示
             </h2>
             <div className="flex gap-2">
@@ -460,7 +474,7 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
                 value={refineInstruction}
                 onChange={(e) => setRefineInstruction(e.target.value)}
                 placeholder="例: もっとフォーマルな文体にして"
-                className="flex-1 px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !refining) {
                     handleRefine();
@@ -470,7 +484,7 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
               <button
                 onClick={handleRefine}
                 disabled={refining || !refineInstruction.trim()}
-                className="px-6 py-3 bg-[#00a4bd] hover:bg-[#0091a8] text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
               >
                 {refining ? "修正中..." : "送信"}
               </button>
@@ -478,15 +492,15 @@ export default function RecommendationPage({ params }: { params: Promise<{ id: s
 
             {/* 編集履歴 */}
             {recommendation.editHistory && recommendation.editHistory.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-[#dfe3eb]">
-                <p className="text-sm font-medium text-[#33475b] mb-2">編集履歴:</p>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm font-medium text-slate-900 mb-2">編集履歴:</p>
                 <div className="space-y-2">
                   {recommendation.editHistory.map((history, index) => (
                     <div
                       key={index}
-                      className="text-sm text-[#516f90] flex items-center gap-2"
+                      className="text-sm text-gray-600 flex items-center gap-2"
                     >
-                      <span className="text-[#00a4bd]">✓</span>
+                      <span className="text-emerald-500">✓</span>
                       「{history.instruction}」→ 適用済み
                     </div>
                   ))}

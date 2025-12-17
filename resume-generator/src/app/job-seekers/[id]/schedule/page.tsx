@@ -271,10 +271,10 @@ export default function SchedulePage() {
 
   const getStatusBadge = (schedule: Schedule) => {
     const badges = {
-      available: { label: "🟢 空き", className: "bg-[#00a4bd]/10 text-[#00a4bd]" },
-      booked: { label: "🔴 確定", className: "bg-[#ff7a59]/10 text-[#ff7a59]" },
-      blocked: { label: "🟡 ブロック", className: "bg-[#ffb000]/10 text-[#bf8600]" },
-      cancelled: { label: "⚫ 取消済み", className: "bg-[#dfe3eb] text-[#516f90]" },
+      available: { label: "🟢 空き", className: "bg-emerald-100 text-emerald-700" },
+      booked: { label: "🔴 確定", className: "bg-orange-100 text-orange-700" },
+      blocked: { label: "🟡 ブロック", className: "bg-amber-100 text-amber-700" },
+      cancelled: { label: "⚫ 取消済み", className: "bg-gray-100 text-gray-600" },
     };
     const badge = badges[schedule.status];
     return (
@@ -288,7 +288,7 @@ export default function SchedulePage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
@@ -301,14 +301,22 @@ export default function SchedulePage() {
         <div className="mb-6">
           <Link
             href="/job-seekers"
-            className="text-slate-500 hover:text-slate-700 text-sm mb-2 inline-block"
+            className="text-slate-500 hover:text-orange-600 text-sm mb-2 inline-flex items-center gap-1 transition-colors"
           >
-            ← 求職者一覧に戻る
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            求職者一覧に戻る
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                📅 日程調整 - {jobSeeker?.name}
+              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                日程調整 - {jobSeeker?.name}
               </h1>
               <p className="text-slate-500 mt-1">
                 日程候補の追加・編集・企業への共有URL発行
@@ -316,16 +324,22 @@ export default function SchedulePage() {
             </div>
             <Link
               href={`/job-seekers/${id}`}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              📝 レジュメ生成へ
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              レジュメ生成へ
             </Link>
           </div>
         </div>
 
         {/* URL共有セクション */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
+        <div className="card p-6 mb-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
             企業向け共有URL
           </h2>
           {jobSeeker?.scheduleToken ? (
@@ -339,13 +353,16 @@ export default function SchedulePage() {
                 />
                 <button
                   onClick={handleCopyUrl}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                     copiedUrl
-                      ? "bg-emerald-500 text-white"
-                      : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+                      ? "bg-green-500 text-white"
+                      : "bg-orange-500 hover:bg-orange-600 text-white"
                   }`}
                 >
-                  {copiedUrl ? "✓ コピー完了!" : "📋 コピー"}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {copiedUrl ? "コピー完了!" : "コピー"}
                 </button>
               </div>
               <p className="text-sm text-slate-500">
@@ -360,13 +377,16 @@ export default function SchedulePage() {
         </div>
 
         {/* ブロック時間設定（トグル） */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+        <div className="card mb-6">
           <button
             onClick={() => setIsBlockSettingsOpen(!isBlockSettingsOpen)}
             className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors rounded-xl"
           >
-            <h2 className="text-lg font-semibold text-slate-900">
-              ⏱️ 面接前後のブロック時間設定
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              面接前後のブロック時間設定
             </h2>
             <span className="text-slate-500 text-xl">
               {isBlockSettingsOpen ? "▼" : "▶"}
@@ -379,7 +399,7 @@ export default function SchedulePage() {
               </p>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-[#33475b] mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     📹 オンライン面接
                   </label>
                   <div className="flex items-center gap-2">
@@ -387,7 +407,7 @@ export default function SchedulePage() {
                     <select
                       value={onlineBlockMinutes}
                       onChange={(e) => setOnlineBlockMinutes(Number(e.target.value))}
-                      className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                      className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                     >
                       <option value={0}>なし</option>
                       <option value={15}>15分</option>
@@ -401,7 +421,7 @@ export default function SchedulePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#33475b] mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     🏢 対面面接
                   </label>
                   <div className="flex items-center gap-2">
@@ -409,7 +429,7 @@ export default function SchedulePage() {
                     <select
                       value={onsiteBlockMinutes}
                       onChange={(e) => setOnsiteBlockMinutes(Number(e.target.value))}
-                      className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff7a59]/30 focus:border-[#ff7a59]"
+                      className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                     >
                       <option value={0}>なし</option>
                       <option value={30}>30分</option>
@@ -426,7 +446,7 @@ export default function SchedulePage() {
                 <button
                   onClick={handleSaveBlockSettings}
                   disabled={savingBlockSettings}
-                  className="px-4 py-2 bg-[#00a4bd] hover:bg-[#0095ac] disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors"
                 >
                   {savingBlockSettings ? "保存中..." : "設定を保存"}
                 </button>
@@ -436,10 +456,13 @@ export default function SchedulePage() {
         </div>
 
         {/* 日程追加セクション（カレンダー） */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+        <div className="card mb-6">
           <div className="p-6 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">
-              📅 日程候補を追加
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              日程候補を追加
             </h2>
             <p className="text-sm text-slate-500 mt-1">
               カレンダーをドラッグして日程候補を追加できます
@@ -448,7 +471,7 @@ export default function SchedulePage() {
           <div className="p-6">
             {/* 面接形式選択 */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-[#33475b] mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 面接形式
               </label>
               <div className="flex gap-4 flex-wrap">
@@ -459,9 +482,9 @@ export default function SchedulePage() {
                     value="online"
                     checked={interviewType === "online"}
                     onChange={() => setInterviewType("online")}
-                    className="w-4 h-4 accent-[#00a4bd]"
+                    className="w-4 h-4 accent-sky-500"
                   />
-                  <span className="text-[#33475b]">📹 オンライン</span>
+                  <span className="text-slate-700">📹 オンライン</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -470,9 +493,9 @@ export default function SchedulePage() {
                     value="onsite"
                     checked={interviewType === "onsite"}
                     onChange={() => setInterviewType("onsite")}
-                    className="w-4 h-4 accent-[#ff7a59]"
+                    className="w-4 h-4 accent-orange-500"
                   />
-                  <span className="text-[#33475b]">🏢 対面</span>
+                  <span className="text-slate-700">🏢 対面</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -481,9 +504,9 @@ export default function SchedulePage() {
                     value="both"
                     checked={interviewType === "both"}
                     onChange={() => setInterviewType("both")}
-                    className="w-4 h-4 accent-[#7c98b6]"
+                    className="w-4 h-4 accent-slate-500"
                   />
-                  <span className="text-[#33475b]">📹🏢 両方可能</span>
+                  <span className="text-slate-700">📹🏢 両方可能</span>
                 </label>
               </div>
             </div>
@@ -502,9 +525,12 @@ export default function SchedulePage() {
                 <button
                   onClick={handleSaveSlots}
                   disabled={saving}
-                  className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
                 >
-                  {saving ? "保存中..." : `✓ ${selectedSlots.length}件の日程を登録`}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {saving ? "保存中..." : `${selectedSlots.length}件の日程を登録`}
                 </button>
               </div>
             )}
@@ -512,13 +538,16 @@ export default function SchedulePage() {
         </div>
 
         {/* 日程候補一覧セクション（トグル） */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="card">
           <button
             onClick={() => setIsScheduleListOpen(!isScheduleListOpen)}
             className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-50 transition-colors rounded-xl"
           >
-            <h2 className="text-lg font-semibold text-slate-900">
-              📋 登録済み日程候補（{schedules.filter(s => s.status !== "cancelled").length}件）
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              登録済み日程候補（{schedules.filter(s => s.status !== "cancelled").length}件）
             </h2>
             <span className="text-slate-500 text-xl">
               {isScheduleListOpen ? "▼" : "▶"}
@@ -555,11 +584,11 @@ export default function SchedulePage() {
                       </td>
                       <td className="px-6 py-4">
                         {schedule.interviewType === "online" ? (
-                          <span className="text-[#00a4bd]">📹 オンライン</span>
+                          <span className="text-sky-600">📹 オンライン</span>
                         ) : schedule.interviewType === "onsite" ? (
-                          <span className="text-[#ff7a59]">🏢 対面</span>
+                          <span className="text-orange-600">🏢 対面</span>
                         ) : (
-                          <span className="text-[#516f90]">📹🏢 両方可能</span>
+                          <span className="text-slate-600">📹🏢 両方可能</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -586,7 +615,7 @@ export default function SchedulePage() {
                             </button>
                             <button
                               onClick={() => handleCancelSchedule(schedule.id, false)}
-                              className="text-[#f2545b] hover:text-[#d93d44] text-sm font-medium transition-colors"
+                              className="text-red-500 hover:text-red-600 text-sm font-medium transition-colors"
                             >
                               🗑️ 候補日時を取り消す
                             </button>
@@ -616,10 +645,13 @@ export default function SchedulePage() {
         </div>
 
         {/* 確定履歴セクション */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm mt-6">
+        <div className="card mt-6">
           <div className="p-6 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">
-              📋 確定履歴
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              確定履歴
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -649,11 +681,11 @@ export default function SchedulePage() {
                       </td>
                       <td className="px-6 py-4">
                         {booking.schedule.interviewType === "online" ? (
-                          <span className="text-[#00a4bd]">📹 オンライン</span>
+                          <span className="text-sky-600">📹 オンライン</span>
                         ) : booking.schedule.interviewType === "onsite" ? (
-                          <span className="text-[#ff7a59]">🏢 対面</span>
+                          <span className="text-orange-600">🏢 対面</span>
                         ) : (
-                          <span className="text-[#516f90]">📹🏢 両方可能</span>
+                          <span className="text-slate-600">📹🏢 両方可能</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-slate-600">
@@ -731,11 +763,11 @@ export default function SchedulePage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-1">面接形式</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">面接形式</label>
                 <select
                   value={editForm.interviewType}
                   onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value as "online" | "onsite" | "both" })}
-                  className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="online">📹 オンライン</option>
                   <option value="onsite">🏢 対面</option>
@@ -752,7 +784,7 @@ export default function SchedulePage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium"
+                  className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium"
                 >
                   保存
                 </button>

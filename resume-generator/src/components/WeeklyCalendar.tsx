@@ -121,14 +121,14 @@ export default function WeeklyCalendar({
     
     switch (schedule.status) {
       case "available":
-        return "bg-gradient-to-br from-[#00a4bd] to-[#0091a8] shadow-inner"; // 青（候補日）
+        return "bg-gradient-to-br from-sky-500 to-sky-600 shadow-inner"; // 候補日
       case "booked":
-        return "bg-gradient-to-br from-[#00bda5] to-[#00a38d] shadow-inner"; // 緑（確定済み）
+        return "bg-gradient-to-br from-orange-500 to-orange-600 shadow-inner"; // 確定済み
       case "blocked":
-        return "bg-gradient-to-br from-[#ffb400] to-[#e6a200] shadow-inner"; // 黄（ブロック）
+        return "bg-gradient-to-br from-amber-400 to-amber-500 shadow-inner"; // ブロック
       case "cancelled":
         // キャンセル済みは薄いグレーで、再選択可能であることを示す
-        return "bg-[#eaf0f6] hover:bg-gradient-to-br hover:from-[#e8f7f9] hover:to-[#d5f0f4]"; 
+        return "bg-gray-100 hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100"; 
       default:
         return "";
     }
@@ -265,28 +265,28 @@ export default function WeeklyCalendar({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#dfe3eb] shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       {/* ヘッダー：週の切り替え */}
-      <div className="flex items-center justify-between p-4 border-b border-[#dfe3eb] bg-[#f5f8fa]">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
         <button
           onClick={() => setWeekOffset(weekOffset - 1)}
-          className="p-2 hover:bg-[#dfe3eb] rounded-lg transition-colors text-[#33475b]"
+          className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-slate-700"
         >
           ← 前の週
         </button>
-        <div className="font-semibold text-[#33475b]">
+        <div className="font-semibold text-slate-700">
           {formatDisplayDate(weekDates[0])} 〜 {formatDisplayDate(weekDates[6])}
         </div>
         <button
           onClick={() => setWeekOffset(weekOffset + 1)}
-          className="p-2 hover:bg-[#dfe3eb] rounded-lg transition-colors text-[#33475b]"
+          className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-slate-700"
         >
           次の週 →
         </button>
       </div>
 
       {/* 曜日ヘッダー */}
-      <div className="flex border-b border-[#dfe3eb]">
+      <div className="flex border-b border-gray-200">
         <div className="w-16 flex-shrink-0"></div>
         {weekDates.map((date, i) => {
           const isToday = formatDate(date) === formatDate(new Date());
@@ -294,14 +294,14 @@ export default function WeeklyCalendar({
           return (
             <div
               key={i}
-              className={`flex-1 text-center py-3 border-l border-[#dfe3eb] ${
-                isPast ? "bg-[#f5f8fa] text-[#99acc2]" : ""
-              } ${isToday ? "bg-[#e8f7f9]" : ""}`}
+              className={`flex-1 text-center py-3 border-l border-gray-200 ${
+                isPast ? "bg-gray-50 text-gray-400" : ""
+              } ${isToday ? "bg-orange-50" : ""}`}
             >
-              <div className={`text-sm font-medium ${isToday ? "text-[#00a4bd]" : "text-[#516f90]"}`}>
+              <div className={`text-sm font-medium ${isToday ? "text-orange-600" : "text-slate-600"}`}>
                 {DAYS[i]}
               </div>
-              <div className={`text-lg font-bold ${isToday ? "text-[#00a4bd]" : isPast ? "text-[#99acc2]" : "text-[#33475b]"}`}>
+              <div className={`text-lg font-bold ${isToday ? "text-orange-600" : isPast ? "text-gray-400" : "text-slate-700"}`}>
                 {date.getDate()}
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function WeeklyCalendar({
         {HOURS.map((hour) => (
           <div key={hour} className="flex">
             {/* 時間ラベル */}
-            <div className="w-16 flex-shrink-0 text-right pr-2 py-0 text-xs text-[#7c98b6] border-r border-[#eaf0f6]">
+            <div className="w-16 flex-shrink-0 text-right pr-2 py-0 text-xs text-gray-500 border-r border-gray-100">
               <div style={{ height: SLOT_HEIGHT * 2 }} className="flex items-start justify-end pt-1">
                 {hour}:00
               </div>
@@ -353,31 +353,31 @@ export default function WeeklyCalendar({
               // セルのスタイルを決定する関数
               const getCellStyle = (slotIndex: number, isBlocked: boolean, isReselectableSlot: boolean, existingSchedule: ExistingSchedule | null) => {
                 if (isPast) {
-                  return "bg-[#f5f8fa] cursor-not-allowed";
+                  return "bg-gray-50 cursor-not-allowed";
                 }
                 if (isBlocked) {
                   return `${getScheduleStyle(existingSchedule)} cursor-default`;
                 }
                 if (isSlotSelected(dayIndex, slotIndex)) {
-                  return "bg-gradient-to-br from-[#00a4bd] to-[#0091a8] shadow-inner cursor-pointer";
+                  return "bg-gradient-to-br from-sky-500 to-sky-600 shadow-inner cursor-pointer";
                 }
                 if (isSlotInDragRange(dayIndex, slotIndex)) {
-                  return "bg-gradient-to-br from-[#7fd4e4] to-[#5cc7da] cursor-pointer";
+                  return "bg-gradient-to-br from-orange-300 to-orange-400 cursor-pointer";
                 }
                 if (isReselectableSlot) {
                   // キャンセル済み or ブロック解除済みは薄いグレーで表示しつつ、選択可能なホバー効果を追加
-                  return "bg-[#eaf0f6] hover:bg-gradient-to-br hover:from-[#e8f7f9] hover:to-[#d5f0f4] cursor-pointer";
+                  return "bg-gray-100 hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 cursor-pointer";
                 }
-                return "hover:bg-gradient-to-br hover:from-[#e8f7f9] hover:to-[#d5f0f4] cursor-pointer";
+                return "hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 cursor-pointer";
               };
               
               return (
-                <div key={dayIndex} className="flex-1 border-l border-[#eaf0f6]">
+                <div key={dayIndex} className="flex-1 border-l border-gray-100">
                   {/* 00分のセル */}
                   <div
                     data-day={dayIndex}
                     data-slot={slot0}
-                    className={`border-b border-[#eaf0f6] transition-all duration-150 ${getCellStyle(slot0, isBlocked0, isReselectable0, existingSchedule0)}`}
+                    className={`border-b border-gray-100 transition-all duration-150 ${getCellStyle(slot0, isBlocked0, isReselectable0, existingSchedule0)}`}
                     style={{ height: SLOT_HEIGHT }}
                     onMouseDown={(e) => !isPast && !isBlocked0 && handleCellMouseDown(dayIndex, slot0, e)}
                     onMouseEnter={() => handleCellMouseEnter(dayIndex, slot0)}
@@ -387,7 +387,7 @@ export default function WeeklyCalendar({
                   <div
                     data-day={dayIndex}
                     data-slot={slot1}
-                    className={`border-b border-[#dfe3eb] transition-all duration-150 ${getCellStyle(slot1, isBlocked1, isReselectable1, existingSchedule1)}`}
+                    className={`border-b border-gray-200 transition-all duration-150 ${getCellStyle(slot1, isBlocked1, isReselectable1, existingSchedule1)}`}
                     style={{ height: SLOT_HEIGHT }}
                     onMouseDown={(e) => !isPast && !isBlocked1 && handleCellMouseDown(dayIndex, slot1, e)}
                     onMouseEnter={() => handleCellMouseEnter(dayIndex, slot1)}
@@ -402,8 +402,8 @@ export default function WeeklyCalendar({
 
       {/* 選択済みスロット一覧 */}
       {selectedSlots.length > 0 && (
-        <div className="p-4 border-t border-[#dfe3eb] bg-gradient-to-r from-[#f5f8fa] to-[#eaf0f6]">
-          <h4 className="text-sm font-semibold text-[#33475b] mb-2">
+        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-orange-50">
+          <h4 className="text-sm font-semibold text-slate-700 mb-2">
             選択中の日程候補（{selectedSlots.length}件）
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -415,16 +415,16 @@ export default function WeeklyCalendar({
                 return (
                   <div
                     key={i}
-                    className="flex items-center gap-2 bg-white border border-[#00a4bd]/30 rounded-lg px-3 py-1.5 text-sm shadow-sm"
+                    className="flex items-center gap-2 bg-white border border-orange-200 rounded-lg px-3 py-1.5 text-sm shadow-sm"
                   >
-                    <span className="text-[#33475b]">
+                    <span className="text-slate-700">
                       {date.getMonth() + 1}/{date.getDate()}({dayName}) {slot.startTime}〜{slot.endTime}
                     </span>
                     <button
                       onClick={() => {
                         onSlotsChange(selectedSlots.filter((_, idx) => idx !== i));
                       }}
-                      className="text-[#f2545b] hover:text-[#d93d44] transition-colors"
+                      className="text-red-500 hover:text-red-600 transition-colors"
                     >
                       ×
                     </button>
@@ -437,31 +437,31 @@ export default function WeeklyCalendar({
 
       {/* 凡例 */}
       {existingSchedules.length > 0 && (
-        <div className="p-3 border-t border-[#dfe3eb] bg-[#f5f8fa]">
+        <div className="p-3 border-t border-gray-200 bg-gray-50">
           <div className="flex flex-wrap gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-[#00a4bd] to-[#0091a8]"></div>
-              <span className="text-[#33475b]">候補日（空き）</span>
+              <div className="w-4 h-4 rounded bg-gradient-to-br from-sky-500 to-sky-600"></div>
+              <span className="text-slate-700">候補日（空き）</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-[#00bda5] to-[#00a38d]"></div>
-              <span className="text-[#33475b]">面接確定</span>
+              <div className="w-4 h-4 rounded bg-gradient-to-br from-orange-500 to-orange-600"></div>
+              <span className="text-slate-700">面接確定</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-[#ffb400] to-[#e6a200]"></div>
-              <span className="text-[#33475b]">ブロック（移動等）</span>
+              <div className="w-4 h-4 rounded bg-gradient-to-br from-amber-400 to-amber-500"></div>
+              <span className="text-slate-700">ブロック（移動等）</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-4 h-4 rounded bg-[#eaf0f6]"></div>
-              <span className="text-[#7c98b6]">キャンセル/ブロック解除（再選択可）</span>
+              <div className="w-4 h-4 rounded bg-gray-100"></div>
+              <span className="text-gray-500">キャンセル/ブロック解除（再選択可）</span>
             </div>
           </div>
         </div>
       )}
 
       {/* 使い方ガイド */}
-      <div className="p-3 border-t border-[#dfe3eb] bg-[#f5f8fa] text-xs text-[#7c98b6]">
-        💡 <strong className="text-[#33475b]">PC:</strong> クリック＆ドラッグで時間範囲を選択 / <strong className="text-[#33475b]">スマホ:</strong> ロングタップ後スライドで選択 / 選択済みをクリックで削除
+      <div className="p-3 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+        💡 <strong className="text-slate-700">PC:</strong> クリック＆ドラッグで時間範囲を選択 / <strong className="text-slate-700">スマホ:</strong> ロングタップ後スライドで選択 / 選択済みをクリックで削除
       </div>
     </div>
   );

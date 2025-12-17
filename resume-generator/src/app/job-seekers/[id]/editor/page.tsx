@@ -496,7 +496,7 @@ export default function EditorPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
@@ -508,11 +508,17 @@ export default function EditorPage() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href={`/job-seekers/${id}`} className="text-slate-500 hover:text-slate-700">
-              ← 戻る
+            <Link href={`/job-seekers/${id}`} className="text-slate-500 hover:text-orange-600 flex items-center gap-1 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              戻る
             </Link>
-            <h1 className="font-bold text-slate-900">
-              📄 {jobSeekerName}さんの履歴書・職務経歴書
+            <h1 className="font-bold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {jobSeekerName}さんの履歴書・職務経歴書
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -520,24 +526,33 @@ export default function EditorPage() {
               <button
                 onClick={handleSyncHubSpot}
                 disabled={syncing}
-                className="bg-[#ff7a59] hover:bg-[#e8573f] disabled:bg-slate-300 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                className="bg-slate-100 hover:bg-slate-200 disabled:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center gap-1"
               >
-                {syncing ? "同期中..." : "🔄 HubSpot同期"}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {syncing ? "同期中..." : "HubSpot同期"}
               </button>
             )}
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors"
+              className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
             >
-              {saving ? "保存中..." : "💾 保存"}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+              </svg>
+              {saving ? "保存中..." : "保存"}
             </button>
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors"
+              className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
             >
-              {downloading ? "生成中..." : "📥 PDFダウンロード"}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {downloading ? "生成中..." : "PDFダウンロード"}
             </button>
           </div>
         </div>
@@ -549,33 +564,42 @@ export default function EditorPage() {
           <div className="flex gap-1">
             <button
               onClick={() => setActiveTab("resume")}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
                 activeTab === "resume"
-                  ? "text-emerald-600 border-b-2 border-emerald-600"
+                  ? "text-orange-600 border-b-2 border-orange-500"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              📝 履歴書
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              履歴書
             </button>
             <button
               onClick={() => setActiveTab("cv")}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
                 activeTab === "cv"
-                  ? "text-emerald-600 border-b-2 border-emerald-600"
+                  ? "text-orange-600 border-b-2 border-orange-500"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              📄 職務経歴書
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              職務経歴書
             </button>
             <button
               onClick={() => setActiveTab("cv-free")}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium transition-colors flex items-center gap-2 ${
                 activeTab === "cv-free"
-                  ? "text-emerald-600 border-b-2 border-emerald-600"
+                  ? "text-orange-600 border-b-2 border-orange-500"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              📄 職務経歴書(自由記述Ver)
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              職務経歴書(自由記述Ver)
             </button>
           </div>
         </div>
@@ -584,8 +608,13 @@ export default function EditorPage() {
       {/* Content */}
       <main className="container mx-auto px-4 py-6 max-w-5xl">
         {activeTab === "resume" && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">履歴書</h2>
+          <div className="card p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              履歴書
+            </h2>
 
             {/* 基本情報 */}
             <section className="mb-8">
@@ -609,7 +638,7 @@ export default function EditorPage() {
                       type="text"
                       value={resumeData.name}
                       onChange={(e) => setResumeData(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     />
                   </div>
                 <div>
@@ -618,7 +647,7 @@ export default function EditorPage() {
                     type="text"
                     value={resumeData.nameKana}
                     onChange={(e) => setResumeData(prev => ({ ...prev, nameKana: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div>
@@ -626,7 +655,7 @@ export default function EditorPage() {
                   <select
                     value={resumeData.gender}
                     onChange={(e) => setResumeData(prev => ({ ...prev, gender: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="">選択してください</option>
                     <option value="男">男</option>
@@ -635,7 +664,7 @@ export default function EditorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#33475b] mb-1">生年月日 *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">生年月日 *</label>
                   <BirthDateInput
                     value={resumeData.birthDate}
                     onChange={(value) => setResumeData(prev => ({ ...prev, birthDate: value }))}
@@ -648,7 +677,7 @@ export default function EditorPage() {
                     value={resumeData.postalCode}
                     onChange={(e) => setResumeData(prev => ({ ...prev, postalCode: e.target.value }))}
                     placeholder="123-4567"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div>
@@ -657,7 +686,7 @@ export default function EditorPage() {
                     type="tel"
                     value={resumeData.phone}
                     onChange={(e) => setResumeData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div className="col-span-2">
@@ -667,7 +696,7 @@ export default function EditorPage() {
                     value={resumeData.addressKana}
                     onChange={(e) => setResumeData(prev => ({ ...prev, addressKana: e.target.value }))}
                     placeholder="ちばけん やちよし おおわだしんでん"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div className="col-span-2">
@@ -676,7 +705,7 @@ export default function EditorPage() {
                     type="text"
                     value={resumeData.address}
                     onChange={(e) => setResumeData(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div className="col-span-2">
@@ -685,7 +714,7 @@ export default function EditorPage() {
                     type="email"
                     value={resumeData.email}
                     onChange={(e) => setResumeData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 </div>
@@ -698,7 +727,7 @@ export default function EditorPage() {
                 <h3 className="text-lg font-semibold text-slate-800">学歴</h3>
                 <button
                   onClick={addEducation}
-                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded"
+                  className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-lg font-medium transition-colors"
                 >
                   + 追加
                 </button>
@@ -766,7 +795,7 @@ export default function EditorPage() {
                 <h3 className="text-lg font-semibold text-slate-800">職歴</h3>
                 <button
                   onClick={addResumeWorkHistory}
-                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded"
+                  className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-lg font-medium transition-colors"
                 >
                   + 追加
                 </button>
@@ -834,7 +863,7 @@ export default function EditorPage() {
                 <h3 className="text-lg font-semibold text-slate-800">免許・資格</h3>
                 <button
                   onClick={addQualification}
-                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded"
+                  className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-lg font-medium transition-colors"
                 >
                   + 追加
                 </button>
@@ -911,8 +940,13 @@ export default function EditorPage() {
         )}
 
         {activeTab === "cv" && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">職務経歴書</h2>
+          <div className="card p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              職務経歴書
+            </h2>
 
             {/* 基本情報 */}
             <section className="mb-8">
@@ -924,7 +958,7 @@ export default function EditorPage() {
                     type="text"
                     value={cvData.name}
                     onChange={(e) => setCvData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div>
@@ -933,7 +967,7 @@ export default function EditorPage() {
                     type="date"
                     value={cvData.createdDate}
                     onChange={(e) => setCvData(prev => ({ ...prev, createdDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
               </div>
@@ -963,7 +997,7 @@ export default function EditorPage() {
                 </p>
                 <button
                   onClick={addCvWorkHistory}
-                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded"
+                  className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-lg font-medium transition-colors"
                 >
                   + 会社を追加
                 </button>
@@ -1061,7 +1095,7 @@ export default function EditorPage() {
                         />
                       </div>
                       <div className="col-span-2">
-                        <label className="block text-sm font-medium text-[#33475b] mb-1">在籍期間 *</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">在籍期間 *</label>
                         <div className="flex items-center gap-2 flex-wrap">
                           {/* 開始 */}
                           <div className="flex items-center gap-1">
@@ -1077,14 +1111,14 @@ export default function EditorPage() {
                                 newWork[index].period = `${e.target.value}年${newWork[index].startMonth || ""}月〜${endStr}`;
                                 setCvData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                              className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                             >
                               <option value="">年</option>
                               {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                 <option key={year} value={year}>{year}</option>
                               ))}
                             </select>
-                            <span className="text-[#33475b]">年</span>
+                            <span className="text-slate-700">年</span>
                             <select
                               value={work.startMonth || ""}
                               onChange={(e) => {
@@ -1096,22 +1130,22 @@ export default function EditorPage() {
                                 newWork[index].period = `${newWork[index].startYear || ""}年${e.target.value}月〜${endStr}`;
                                 setCvData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                              className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                             >
                               <option value="">月</option>
                               {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                 <option key={month} value={month}>{month}</option>
                               ))}
                             </select>
-                            <span className="text-[#33475b]">月</span>
+                            <span className="text-slate-700">月</span>
                           </div>
 
-                          <span className="text-[#7c98b6] px-2">〜</span>
+                          <span className="text-slate-400 px-2">〜</span>
 
                           {/* 終了 */}
                           <div className="flex items-center gap-1">
                             {work.isCurrentJob ? (
-                              <span className="px-3 py-2 bg-[#00a4bd]/10 text-[#00a4bd] font-medium rounded-lg">現在</span>
+                              <span className="px-3 py-2 bg-orange-100 text-orange-600 font-medium rounded-lg">現在</span>
                             ) : (
                               <>
                                 <select
@@ -1122,14 +1156,14 @@ export default function EditorPage() {
                                     newWork[index].period = `${newWork[index].startYear || ""}年${newWork[index].startMonth || ""}月〜${e.target.value}年${newWork[index].endMonth || ""}月`;
                                     setCvData(prev => ({ ...prev, workHistory: newWork }));
                                   }}
-                                  className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                                  className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                                 >
                                   <option value="">年</option>
                                   {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                     <option key={year} value={year}>{year}</option>
                                   ))}
                                 </select>
-                                <span className="text-[#33475b]">年</span>
+                                <span className="text-slate-700">年</span>
                                 <select
                                   value={work.endMonth || ""}
                                   onChange={(e) => {
@@ -1138,14 +1172,14 @@ export default function EditorPage() {
                                     newWork[index].period = `${newWork[index].startYear || ""}年${newWork[index].startMonth || ""}月〜${newWork[index].endYear || ""}年${e.target.value}月`;
                                     setCvData(prev => ({ ...prev, workHistory: newWork }));
                                   }}
-                                  className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                                  className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                                 >
                                   <option value="">月</option>
                                   {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                     <option key={month} value={month}>{month}</option>
                                   ))}
                                 </select>
-                                <span className="text-[#33475b]">月</span>
+                                <span className="text-slate-700">月</span>
                               </>
                             )}
                             <label className="flex items-center gap-1 ml-2 cursor-pointer">
@@ -1162,9 +1196,9 @@ export default function EditorPage() {
                                   }
                                   setCvData(prev => ({ ...prev, workHistory: newWork }));
                                 }}
-                                className="w-4 h-4 accent-[#00a4bd] rounded"
+                                className="w-4 h-4 accent-orange-500 rounded"
                               />
-                              <span className="text-sm text-[#516f90]">現在も在籍中</span>
+                              <span className="text-sm text-slate-600">現在も在籍中</span>
                             </label>
                           </div>
                         </div>
@@ -1178,7 +1212,7 @@ export default function EditorPage() {
                         <button
                           type="button"
                           onClick={() => addProject(index)}
-                          className="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-1 rounded"
+                          className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-2 py-1 rounded-lg font-medium transition-colors"
                         >
                           + 業務を追加
                         </button>
@@ -1200,9 +1234,9 @@ export default function EditorPage() {
                         onReorder={(newProjects) => reorderProjects(index, newProjects)}
                         getItemId={(project) => project.id}
                         renderItem={(project, projectIndex) => (
-                          <div className="border border-emerald-200 rounded-lg p-3 bg-emerald-50/50 mb-2">
+                          <div className="border border-orange-200 rounded-lg p-3 bg-orange-50/50 mb-2">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-xs font-medium text-emerald-700">業務 {projectIndex + 1}</span>
+                              <span className="text-xs font-medium text-orange-700">業務 {projectIndex + 1}</span>
                               {(work.projects?.length || 0) > 1 && (
                                 <button
                                   type="button"
@@ -1242,7 +1276,7 @@ export default function EditorPage() {
                                 <span className="text-xs">月</span>
                                 <span className="text-slate-400 px-1">〜</span>
                                 {project.isCurrentJob ? (
-                                  <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">現在</span>
+                                  <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">現在</span>
                                 ) : (
                                   <>
                                     <select
@@ -1280,7 +1314,7 @@ export default function EditorPage() {
                                         updateProject(index, projectIndex, "endMonth", "");
                                       }
                                     }}
-                                    className="w-3 h-3 accent-emerald-600 rounded"
+                                    className="w-3 h-3 accent-orange-500 rounded"
                                   />
                                   <span className="text-xs text-slate-500">現在</span>
                                 </label>
@@ -1390,8 +1424,13 @@ export default function EditorPage() {
 
         {activeTab === "cv-free" && (
           /* 自由記述Ver */
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">職務経歴書（自由記述Ver）</h2>
+          <div className="card p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              職務経歴書（自由記述Ver）
+            </h2>
             <p className="text-sm text-slate-500 mb-6">業務内容・成果・取り組みを自由なフォーマットで記述できます</p>
 
             {/* 基本情報 */}
@@ -1404,7 +1443,7 @@ export default function EditorPage() {
                     type="text"
                     value={cvData.name}
                     onChange={(e) => setCvData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
                 <div>
@@ -1413,7 +1452,7 @@ export default function EditorPage() {
                     type="date"
                     value={cvData.createdDate}
                     onChange={(e) => setCvData(prev => ({ ...prev, createdDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
               </div>
@@ -1443,7 +1482,7 @@ export default function EditorPage() {
                 </p>
                 <button
                   onClick={addCvWorkHistory}
-                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded"
+                  className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-lg font-medium transition-colors"
                 >
                   + 会社を追加
                 </button>
@@ -1541,7 +1580,7 @@ export default function EditorPage() {
                         />
                       </div>
                       <div className="col-span-2">
-                        <label className="block text-sm font-medium text-[#33475b] mb-1">在籍期間 *</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">在籍期間 *</label>
                         <div className="flex items-center gap-2 flex-wrap">
                           {/* 開始 */}
                           <div className="flex items-center gap-1">
@@ -1556,14 +1595,14 @@ export default function EditorPage() {
                                 newWork[index].period = `${e.target.value}年${newWork[index].startMonth || ""}月〜${endStr}`;
                                 setCvData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                              className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                             >
                               <option value="">年</option>
                               {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                 <option key={year} value={year}>{year}</option>
                               ))}
                             </select>
-                            <span className="text-[#33475b]">年</span>
+                            <span className="text-slate-700">年</span>
                             <select
                               value={work.startMonth || ""}
                               onChange={(e) => {
@@ -1575,22 +1614,22 @@ export default function EditorPage() {
                                 newWork[index].period = `${newWork[index].startYear || ""}年${e.target.value}月〜${endStr}`;
                                 setCvData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                              className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                             >
                               <option value="">月</option>
                               {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                 <option key={month} value={month}>{month}</option>
                               ))}
                             </select>
-                            <span className="text-[#33475b]">月</span>
+                            <span className="text-slate-700">月</span>
                           </div>
 
-                          <span className="text-[#7c98b6] px-2">〜</span>
+                          <span className="text-slate-400 px-2">〜</span>
 
                           {/* 終了 */}
                           <div className="flex items-center gap-1">
                             {work.isCurrentJob ? (
-                              <span className="px-3 py-2 bg-[#00a4bd]/10 text-[#00a4bd] font-medium rounded-lg">現在</span>
+                              <span className="px-3 py-2 bg-orange-100 text-orange-600 font-medium rounded-lg">現在</span>
                             ) : (
                               <>
                                 <select
@@ -1601,14 +1640,14 @@ export default function EditorPage() {
                                     newWork[index].period = `${newWork[index].startYear || ""}年${newWork[index].startMonth || ""}月〜${e.target.value}年${newWork[index].endMonth || ""}月`;
                                     setCvData(prev => ({ ...prev, workHistory: newWork }));
                                   }}
-                                  className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                                  className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                                 >
                                   <option value="">年</option>
                                   {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                     <option key={year} value={year}>{year}</option>
                                   ))}
                                 </select>
-                                <span className="text-[#33475b]">年</span>
+                                <span className="text-slate-700">年</span>
                                 <select
                                   value={work.endMonth || ""}
                                   onChange={(e) => {
@@ -1617,14 +1656,14 @@ export default function EditorPage() {
                                     newWork[index].period = `${newWork[index].startYear || ""}年${newWork[index].startMonth || ""}月〜${newWork[index].endYear || ""}年${e.target.value}月`;
                                     setCvData(prev => ({ ...prev, workHistory: newWork }));
                                   }}
-                                  className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                                  className="px-2 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500"
                                 >
                                   <option value="">月</option>
                                   {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                                     <option key={month} value={month}>{month}</option>
                                   ))}
                                 </select>
-                                <span className="text-[#33475b]">月</span>
+                                <span className="text-slate-700">月</span>
                               </>
                             )}
                             <label className="flex items-center gap-1 ml-2 cursor-pointer">
@@ -1641,9 +1680,9 @@ export default function EditorPage() {
                                   }
                                   setCvData(prev => ({ ...prev, workHistory: newWork }));
                                 }}
-                                className="w-4 h-4 accent-[#00a4bd] rounded"
+                                className="w-4 h-4 accent-orange-500 rounded"
                               />
-                              <span className="text-sm text-[#516f90]">現在も在籍中</span>
+                              <span className="text-sm text-slate-600">現在も在籍中</span>
                             </label>
                           </div>
                         </div>

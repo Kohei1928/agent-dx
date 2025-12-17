@@ -104,7 +104,6 @@ export default function JobSeekerDetailPage() {
       const responseData = await res.json();
 
       if (res.ok) {
-        // エディタ画面に遷移
         router.push(`/job-seekers/${id}/editor`);
       } else {
         setError(responseData.error || "生成に失敗しました");
@@ -176,7 +175,7 @@ export default function JobSeekerDetailPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="w-8 h-8 border-4 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
@@ -192,118 +191,150 @@ export default function JobSeekerDetailPage() {
         <div className="mb-6">
           <Link
             href="/job-seekers"
-            className="text-sm text-[#7c98b6] hover:text-[#33475b] mb-2 inline-block"
+            className="text-sm text-slate-500 hover:text-orange-600 mb-2 inline-flex items-center gap-1 transition-colors"
           >
-            ← 求職者一覧に戻る
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            求職者一覧に戻る
           </Link>
           <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold text-[#33475b]">
-              👤 {jobSeeker.name}
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              {jobSeeker.name}
               {jobSeeker.nameKana && (
-                <span className="text-lg font-normal text-[#7c98b6] ml-2">
+                <span className="text-lg font-normal text-slate-400 ml-2">
                   （{jobSeeker.nameKana}）
                 </span>
               )}
             </h1>
             
-            {/* メインアクションボタン（大きく目立つ） */}
+            {/* メインアクションボタン */}
             <div className="grid grid-cols-4 gap-3">
               <button
                 onClick={() => setIsGenerateModalOpen(true)}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#00a4bd] to-[#00d4aa] hover:from-[#0091a8] hover:to-[#00a4bd] text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all hover:shadow-xl"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-orange-200 transition-all hover:shadow-orange-300"
               >
-                <span className="text-lg">🤖</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
                 <span>レジュメ生成</span>
               </button>
               <Link
                 href={`/job-seekers/${id}/editor`}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff7a59] to-[#ff957a] hover:from-[#e8573f] hover:to-[#ff7a59] text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all hover:shadow-xl"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-amber-200 transition-all hover:shadow-amber-300"
               >
-                <span className="text-lg">✏️</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
                 <span>エディタ編集</span>
               </Link>
               <Link
                 href={`/job-seekers/${id}/recommendation`}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] hover:from-[#5b4cdb] hover:to-[#6c5ce7] text-white px-4 py-3 rounded-xl font-bold shadow-lg transition-all hover:shadow-xl"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-rose-200 transition-all hover:shadow-rose-300"
               >
-                <span className="text-lg">✉️</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
                 <span>推薦文作成</span>
               </Link>
               <div className="flex flex-col gap-1">
                 <button
                   onClick={() => handleCopyFormUrl("normal")}
                   disabled={!jobSeeker.formToken}
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-t-xl font-bold shadow-lg transition-all hover:shadow-xl text-sm ${
+                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-t-xl font-semibold shadow-lg transition-all text-sm ${
                     copiedFormUrl === "normal"
-                      ? "bg-[#00d4aa] text-white"
-                      : "bg-gradient-to-r from-[#00a4bd] to-[#00d4aa] hover:from-[#0091a8] hover:to-[#00a4bd] text-white"
+                      ? "bg-green-500 text-white"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-200"
                   }`}
                 >
-                  <span>{copiedFormUrl === "normal" ? "✓" : "📝"}</span>
-                  <span>{copiedFormUrl === "normal" ? "コピー完了!" : "通常Ver フォームURL"}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>{copiedFormUrl === "normal" ? "コピー!" : "通常Ver フォームURL"}</span>
                 </button>
                 <button
                   onClick={() => handleCopyFormUrl("free")}
                   disabled={!jobSeeker.formToken}
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-b-xl font-bold shadow-lg transition-all hover:shadow-xl text-sm ${
+                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-b-xl font-semibold shadow-lg transition-all text-sm ${
                     copiedFormUrl === "free"
-                      ? "bg-[#00d4aa] text-white"
-                      : "bg-gradient-to-r from-[#ff7a59] to-[#ff9f7a] hover:from-[#e8573f] hover:to-[#ff7a59] text-white"
+                      ? "bg-green-500 text-white"
+                      : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-200"
                   }`}
                 >
-                  <span>{copiedFormUrl === "free" ? "✓" : "📄"}</span>
-                  <span>{copiedFormUrl === "free" ? "コピー完了!" : "自由記述Ver フォームURL"}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>{copiedFormUrl === "free" ? "コピー!" : "自由記述Ver フォームURL"}</span>
                 </button>
               </div>
             </div>
 
-            {/* サブアクション（小さめ） */}
+            {/* サブアクション */}
             <div className="flex gap-2">
               <Link
                 href={`/job-seekers/${id}/schedule`}
-                className="text-sm text-[#00a4bd] hover:text-[#0091a8] px-3 py-1.5 border border-[#00a4bd]/30 rounded-lg hover:bg-[#00a4bd]/5 transition-colors"
+                className="text-sm text-orange-600 hover:text-orange-700 px-3 py-1.5 border border-orange-200 rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-1"
               >
-                📅 日程調整
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                日程調整
               </Link>
               <Link
                 href={`/job-seekers/${id}/logs`}
-                className="text-sm text-[#516f90] hover:text-[#33475b] px-3 py-1.5 border border-[#dfe3eb] rounded-lg hover:bg-[#f5f8fa] transition-colors"
+                className="text-sm text-slate-600 hover:text-slate-800 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1"
               >
-                📋 生成履歴
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                生成履歴
               </Link>
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            ⚠️ {error}
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {error}
           </div>
         )}
 
         <div className="grid gap-6">
           {/* 基本情報 */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">📝 基本情報</h2>
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                基本情報
+              </h2>
               <Link
                 href={`/job-seekers/${id}/edit`}
-                className="text-sm text-emerald-600 hover:text-emerald-700"
+                className="text-sm text-orange-600 hover:text-orange-700 font-medium"
               >
                 編集
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-sm text-slate-500">メール</div>
+                <div className="text-sm text-slate-500 font-medium">メール</div>
                 <div className="text-slate-900">{jobSeeker.email || "-"}</div>
               </div>
               <div>
-                <div className="text-sm text-slate-500">電話</div>
+                <div className="text-sm text-slate-500 font-medium">電話</div>
                 <div className="text-slate-900">{jobSeeker.phone || "-"}</div>
               </div>
               <div>
-                <div className="text-sm text-slate-500">登録日</div>
+                <div className="text-sm text-slate-500 font-medium">登録日</div>
                 <div className="text-slate-900">
                   {new Date(jobSeeker.createdAt).toLocaleDateString("ja-JP")}
                 </div>
@@ -312,33 +343,36 @@ export default function JobSeekerDetailPage() {
           </div>
 
           {/* HubSpot連携 */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              🔗 HubSpot連携
+          <div className="card p-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              HubSpot連携
             </h2>
             {jobSeeker.hubspotContactId ? (
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                    ✅ 連携済み
-                  </span>
+                  <span className="badge badge-green">連携済み</span>
                 </div>
                 <div className="text-sm text-slate-500 mb-1">
                   コンタクトID: {jobSeeker.hubspotContactId}
                 </div>
                 {jobSeeker.hubspotSyncedAt && (
                   <div className="text-sm text-slate-500 mb-4">
-                    最終同期:{" "}
-                    {new Date(jobSeeker.hubspotSyncedAt).toLocaleString("ja-JP")}
+                    最終同期: {new Date(jobSeeker.hubspotSyncedAt).toLocaleString("ja-JP")}
                   </div>
                 )}
                 <div className="flex gap-2">
                   <button
                     onClick={handleSyncHubSpot}
                     disabled={syncing}
-                    className="text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm bg-orange-600 hover:bg-orange-700 disabled:bg-slate-300 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-1"
                   >
-                    {syncing ? "同期中..." : "🔄 再同期"}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {syncing ? "同期中..." : "再同期"}
                   </button>
                   <button
                     onClick={handleUnlinkHubSpot}
@@ -360,69 +394,71 @@ export default function JobSeekerDetailPage() {
           </div>
 
           {/* 入力データ */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              📋 入力データ
+          <div className="card p-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              入力データ
             </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-orange-50 transition-colors">
                 <div>
-                  <div className="font-medium text-slate-900">
-                    自由入力データ
-                  </div>
+                  <div className="font-medium text-slate-900">自由入力データ</div>
                   <div className="text-sm text-slate-500">
-                    {jobSeeker.questionnaireData
-                      ? "✅ 入力済み"
-                      : "❌ 未入力"}
+                    {jobSeeker.questionnaireData ? (
+                      <span className="text-green-600">✓ 入力済み</span>
+                    ) : (
+                      <span className="text-slate-400">未入力</span>
+                    )}
                   </div>
                 </div>
                 <Link
                   href={`/job-seekers/${id}/questionnaire`}
-                  className="text-sm text-emerald-600 hover:text-emerald-700"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                 >
                   {jobSeeker.questionnaireData ? "編集" : "入力"}
                 </Link>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-orange-50 transition-colors">
                 <div>
-                  <div className="font-medium text-slate-900">
-                    面談文字起こしデータ
-                  </div>
+                  <div className="font-medium text-slate-900">面談文字起こしデータ</div>
                   <div className="text-sm text-slate-500">
-                    {jobSeeker.interviewTranscript
-                      ? "✅ 入力済み"
-                      : "❌ 未入力"}
+                    {jobSeeker.interviewTranscript ? (
+                      <span className="text-green-600">✓ 入力済み</span>
+                    ) : (
+                      <span className="text-slate-400">未入力</span>
+                    )}
                   </div>
                 </div>
                 <Link
                   href={`/job-seekers/${id}/interview`}
-                  className="text-sm text-emerald-600 hover:text-emerald-700"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                 >
                   {jobSeeker.interviewTranscript ? "編集" : "入力"}
                 </Link>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-orange-50 transition-colors">
                 <div>
-                  <div className="font-medium text-slate-900">
-                    企業情報（志望動機生成用）
-                  </div>
+                  <div className="font-medium text-slate-900">企業情報（志望動機生成用）</div>
                   <div className="text-sm text-slate-500">
-                    {jobSeeker.targetCompany?.companyUrl
-                      ? "✅ 入力済み"
-                      : "❌ 未入力"}
+                    {jobSeeker.targetCompany?.companyUrl ? (
+                      <span className="text-green-600">✓ 入力済み</span>
+                    ) : (
+                      <span className="text-slate-400">未入力</span>
+                    )}
                     {jobSeeker.targetCompany && (
                       <span className="ml-2">
-                        志望動機生成:{" "}
-                        {jobSeeker.targetCompany.generateMotivation ? "ON" : "OFF"}
+                        志望動機生成: {jobSeeker.targetCompany.generateMotivation ? "ON" : "OFF"}
                       </span>
                     )}
                   </div>
                 </div>
                 <Link
                   href={`/job-seekers/${id}/company`}
-                  className="text-sm text-emerald-600 hover:text-emerald-700"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
                 >
                   {jobSeeker.targetCompany?.companyUrl ? "編集" : "入力"}
                 </Link>
@@ -431,29 +467,38 @@ export default function JobSeekerDetailPage() {
           </div>
 
           {/* 生成ドキュメント */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">
-                📄 履歴書・職務経歴書
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                履歴書・職務経歴書
               </h2>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Link
                   href={`/job-seekers/${id}/editor`}
-                  className="text-sm text-emerald-600 hover:text-emerald-700"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                 >
-                  ✏️ エディタで編集
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  エディタで編集
                 </Link>
                 <Link
                   href={`/job-seekers/${id}/pdf`}
-                  className="text-sm text-blue-600 hover:text-blue-700"
+                  className="text-sm text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1"
                 >
-                  📥 PDFダウンロード
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  PDFダウンロード
                 </Link>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-lg mb-6">
-              <p className="text-sm text-slate-600">
+            <div className="p-4 bg-orange-50 rounded-xl mb-6 border border-orange-100">
+              <p className="text-sm text-slate-700">
                 「履歴書・職務経歴書を生成」ボタンを押すと、入力データからAIが自動で情報を抽出し、
                 エディタ画面で編集できるようになります。編集後、PDFでダウンロードできます。
               </p>
@@ -462,19 +507,24 @@ export default function JobSeekerDetailPage() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="w-full btn-orange py-4 text-lg"
             >
               {generating ? (
                 <span className="flex items-center justify-center gap-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
                   生成中...
                 </span>
               ) : (
-                "🚀 履歴書・職務経歴書を生成"
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  履歴書・職務経歴書を生成
+                </span>
               )}
             </button>
 
-            <p className="text-xs text-slate-500 mt-2 text-center">
+            <p className="text-xs text-slate-500 mt-3 text-center">
               ※ 生成には約30秒〜1分かかります
             </p>
           </div>
@@ -487,7 +537,6 @@ export default function JobSeekerDetailPage() {
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
         onGenerated={async (results) => {
-          // 生成結果を保存
           try {
             const res = await fetch(`/api/job-seekers/${id}/cv`, {
               method: "PUT",
@@ -497,7 +546,6 @@ export default function JobSeekerDetailPage() {
                 skillsText: results.skills,
                 selfPrTitle: results.selfPr?.split("\n")[0]?.replace(/^【|】$/g, "") || "",
                 selfPr: results.selfPr?.split("\n").slice(2).join("\n") || results.selfPr,
-                // cvFullの場合はパースして各フィールドに保存
                 ...(results.cvFull && parseCvFullContent(results.cvFull)),
               }),
             });
@@ -518,7 +566,6 @@ export default function JobSeekerDetailPage() {
   );
 }
 
-// cvFullの内容をパースしてフィールドに分解
 function parseCvFullContent(content: string): {
   summary?: string;
   skillsText?: string;
@@ -527,19 +574,16 @@ function parseCvFullContent(content: string): {
 } {
   const result: any = {};
 
-  // 職務要約
   const summaryMatch = content.match(/===職務要約===\n([\s\S]*?)(?=\n===|$)/);
   if (summaryMatch) {
     result.summary = summaryMatch[1].trim();
   }
 
-  // 活かせる経験・知識・技術
   const skillsMatch = content.match(/===活かせる経験・知識・技術===\n([\s\S]*?)(?=\n===|$)/);
   if (skillsMatch) {
     result.skillsText = skillsMatch[1].trim();
   }
 
-  // 自己PR
   const selfPrMatch = content.match(/===自己PR===\n([\s\S]*?)(?=\n===|$)/);
   if (selfPrMatch) {
     const selfPrContent = selfPrMatch[1].trim();

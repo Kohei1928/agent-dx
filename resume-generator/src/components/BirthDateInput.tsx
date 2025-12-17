@@ -184,20 +184,20 @@ export default function BirthDateInput({
           maxLength={10}
           className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
             error
-              ? "border-[#f2545b] focus:ring-[#f2545b]/30 focus:border-[#f2545b]"
-              : "border-[#dfe3eb] focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+              ? "border-red-500 focus:ring-red-500/30 focus:border-red-500"
+              : "border-slate-300 focus:ring-orange-500/30 focus:border-orange-500"
           }`}
         />
         {age !== null && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-[#00a4bd] font-medium">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-orange-600 font-medium">
             現在 {age}歳
           </div>
         )}
       </div>
       {error && (
-        <p className="mt-1 text-sm text-[#f2545b]">{error}</p>
+        <p className="mt-1 text-sm text-red-500">{error}</p>
       )}
-      <p className="mt-1 text-xs text-[#7c98b6]">
+      <p className="mt-1 text-xs text-gray-500">
         形式: YYYY/MM/DD（数字のみ入力）
       </p>
     </div>
