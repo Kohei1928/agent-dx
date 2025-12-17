@@ -42,10 +42,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (status === "loading" || !isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">読み込み中...</p>
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-slate-500">読み込み中...</p>
         </div>
       </div>
     );
@@ -64,13 +64,3 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-

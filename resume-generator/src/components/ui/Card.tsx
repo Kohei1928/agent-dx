@@ -14,7 +14,7 @@ export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-[#dfe3eb] shadow-sm",
+        "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow",
         className
       )}
       {...props}
@@ -34,7 +34,7 @@ interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
 export function CardHeader({ className, children, ...props }: CardHeaderProps) {
   return (
     <div
-      className={cn("p-6 border-b border-[#dfe3eb]", className)}
+      className={cn("p-6 border-b border-slate-100", className)}
       {...props}
     >
       {children}
@@ -52,7 +52,7 @@ interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {
 export function CardTitle({ className, children, ...props }: CardTitleProps) {
   return (
     <h3
-      className={cn("text-lg font-semibold text-[#33475b]", className)}
+      className={cn("text-lg font-bold text-slate-900", className)}
       {...props}
     >
       {children}
@@ -86,7 +86,7 @@ export function CardFooter({ className, children, ...props }: CardFooterProps) {
   return (
     <div
       className={cn(
-        "p-6 border-t border-[#dfe3eb] flex items-center gap-3",
+        "p-6 border-t border-slate-100 flex items-center gap-3 bg-slate-50 rounded-b-2xl",
         className
       )}
       {...props}
@@ -95,12 +95,3 @@ export function CardFooter({ className, children, ...props }: CardFooterProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

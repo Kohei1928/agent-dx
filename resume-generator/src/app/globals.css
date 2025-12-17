@@ -1,50 +1,304 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f8fa;
-  --foreground: #33475b;
-  --hubspot-orange: #ff7a59;
-  --hubspot-orange-dark: #e8573f;
-  --hubspot-teal: #00a4bd;
-  --hubspot-teal-dark: #0091a8;
-  --hubspot-dark: #2d3e50;
-  --hubspot-light: #f5f8fa;
+  /* Base Colors */
+  --background: #ffffff;
+  --background-secondary: #fafbfc;
+  --foreground: #1a1a2e;
+  --foreground-secondary: #64748b;
+  
+  /* Orange Palette - Vibrant & Modern */
+  --orange-50: #fff7ed;
+  --orange-100: #ffedd5;
+  --orange-200: #fed7aa;
+  --orange-300: #fdba74;
+  --orange-400: #fb923c;
+  --orange-500: #f97316;
+  --orange-600: #ea580c;
+  --orange-700: #c2410c;
+  
+  /* Accent Colors */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--hubspot-orange);
-  --color-primary-dark: var(--hubspot-orange-dark);
-  --color-secondary: var(--hubspot-teal);
-  --color-secondary-dark: var(--hubspot-teal-dark);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--orange-500);
+  --color-primary-dark: var(--orange-600);
+  --font-sans: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Noto Sans JP', Arial, Helvetica, sans-serif;
+  font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
 }
 
-/* HubSpotライクなボタンスタイル */
-.btn-primary {
-  background-color: var(--hubspot-orange);
+/* Modern Card Styles */
+.card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--slate-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.card-elevated {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Orange Gradient Button */
+.btn-orange {
+  background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%);
   color: white;
-  transition: all 0.2s;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 
-.btn-primary:hover {
-  background-color: var(--hubspot-orange-dark);
+.btn-orange:hover {
+  background: linear-gradient(135deg, var(--orange-600) 0%, var(--orange-700) 100%);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
 }
 
+.btn-orange:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
 .btn-secondary {
-  background-color: var(--hubspot-teal);
-  color: white;
-  transition: all 0.2s;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background-color: var(--hubspot-teal-dark);
+  background: var(--slate-200);
+}
+
+/* Outline Button */
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--orange-500);
+  color: var(--orange-600);
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: var(--orange-50);
+}
+
+/* Text Gradient */
+.text-gradient-orange {
+  background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Modern Input */
+.input-modern {
+  background: var(--slate-50);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.input-modern:focus {
+  background: white;
+  border-color: var(--orange-500);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+}
+
+/* Sidebar Styles */
+.sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, var(--slate-50) 100%);
+  border-right: 1px solid var(--slate-200);
+}
+
+.sidebar-item {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: var(--orange-50);
+}
+
+.sidebar-item.active {
+  background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* Stats Card */
+.stats-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--slate-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--orange-500) 0%, var(--orange-400) 100%);
+}
+
+/* Table Styles */
+.table-modern {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-modern thead th {
+  background: var(--slate-50);
+  color: var(--slate-600);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.table-modern tbody tr {
+  transition: all 0.15s ease;
+}
+
+.table-modern tbody tr:hover {
+  background: var(--orange-50);
+}
+
+.table-modern tbody td {
+  padding: 16px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-orange {
+  background: var(--orange-100);
+  color: var(--orange-700);
+}
+
+.badge-green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-gray {
+  background: var(--slate-100);
+  color: var(--slate-600);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes pulse-orange {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(249, 115, 22, 0);
+  }
+}
+
+.pulse-orange {
+  animation: pulse-orange 2s infinite;
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--slate-200);
+  border-top-color: var(--orange-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+/* Focus Ring */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
 }

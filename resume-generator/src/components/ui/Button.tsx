@@ -16,20 +16,20 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#ff7a59] hover:bg-[#e8573f] text-white disabled:bg-[#ff7a59]/50",
+    "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-200 hover:shadow-orange-300 disabled:from-orange-300 disabled:to-orange-400 disabled:shadow-none",
   secondary:
-    "bg-[#00a4bd] hover:bg-[#0091a8] text-white disabled:bg-[#00a4bd]/50",
+    "bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:bg-slate-50 disabled:text-slate-400",
   outline:
-    "border border-[#dfe3eb] hover:border-[#cbd6e2] bg-white text-[#33475b] hover:bg-[#f5f8fa] disabled:opacity-50",
+    "border-2 border-orange-500 bg-transparent text-orange-600 hover:bg-orange-50 disabled:opacity-50 disabled:border-orange-200 disabled:text-orange-300",
   danger:
-    "bg-[#f2545b] hover:bg-[#dc444b] text-white disabled:bg-[#f2545b]/50",
+    "bg-red-600 hover:bg-red-700 text-white disabled:bg-red-300",
   ghost:
-    "bg-transparent hover:bg-[#f5f8fa] text-[#516f90] disabled:opacity-50",
+    "bg-transparent hover:bg-slate-100 text-slate-600 disabled:opacity-50",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-sm",
+  md: "px-4 py-2.5 text-sm",
   lg: "px-6 py-3 text-base",
 };
 
@@ -55,7 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#00a4bd] focus:ring-offset-2 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all focus:outline-none focus:ring-4 focus:ring-orange-100 disabled:cursor-not-allowed",
           variantStyles[variant],
           sizeStyles[size],
           className
@@ -74,12 +74,3 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = "Button";
-
-
-
-
-
-
-
-
-
