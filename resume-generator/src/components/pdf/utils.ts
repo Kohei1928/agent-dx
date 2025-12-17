@@ -3,17 +3,42 @@
  */
 
 /**
- * 年齢計算
+ * 日付文字列から年・月・日を抽出（タイムゾーン安全）
+ */
+function extractDateParts(dateStr: string): { year: number; month: number; day: number } | null {
+  if (!dateStr) return null;
+  
+  // "YYYY-MM-DD" 形式または "YYYY-MM-DDTHH:mm:ss.sssZ" 形式から日付部分を抽出
+  const datePart = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
+  const parts = datePart.split("-");
+  
+  if (parts.length === 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+      return { year, month, day };
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * 年齢計算（タイムゾーン安全）
  */
 export function calculateAge(birthDate: string): string {
   if (!birthDate) return "";
   
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
+  const parts = extractDateParts(birthDate);
+  if (!parts) return "";
   
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+  const today = new Date();
+  let age = today.getFullYear() - parts.year;
+  const m = today.getMonth() + 1 - parts.month;
+  
+  if (m < 0 || (m === 0 && today.getDate() < parts.day)) {
     age--;
   }
   
@@ -21,12 +46,15 @@ export function calculateAge(birthDate: string): string {
 }
 
 /**
- * 生年月日をフォーマット
+ * 生年月日をフォーマット（タイムゾーン安全）
  */
 export function formatBirthDate(dateStr: string): string {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日生`;
+  
+  const parts = extractDateParts(dateStr);
+  if (!parts) return "";
+  
+  return `${parts.year}年${parts.month}月${parts.day}日生`;
 }
 
 /**

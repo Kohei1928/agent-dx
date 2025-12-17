@@ -3,40 +3,151 @@
  */
 
 /**
+ * 日付文字列をタイムゾーン安全にDateオブジェクトに変換
+ * ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" または "YYYY-MM-DD" 形式から
+ * UTCの深夜0時を表すDateを返す
+ * @example parseDateSafe("2003-05-18") => Date representing 2003-05-18T00:00:00.000Z
+ */
+export function parseDateSafe(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null;
+  
+  // "YYYY-MM-DD" 形式の場合
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return new Date(`${dateStr}T00:00:00.000Z`);
+  }
+  
+  // ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" の場合
+  // 時刻部分を無視して日付部分だけを使用
+  if (dateStr.includes("T")) {
+    const datePart = dateStr.split("T")[0];
+    return new Date(`${datePart}T00:00:00.000Z`);
+  }
+  
+  // その他の形式
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * 日付文字列からタイムゾーン安全なISO形式を取得
+ * @example toSafeISOString("2003-05-18") => "2003-05-18T00:00:00.000Z"
+ */
+export function toSafeISOString(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  
+  // "YYYY-MM-DD" 形式の場合
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return `${dateStr}T00:00:00.000Z`;
+  }
+  
+  // ISO形式の場合、日付部分だけを抽出して再構築
+  if (dateStr.includes("T")) {
+    const datePart = dateStr.split("T")[0];
+    return `${datePart}T00:00:00.000Z`;
+  }
+  
+  return null;
+}
+
+/**
  * 日付を日本語形式にフォーマット
+ * タイムゾーンの影響を受けないよう、日付文字列から直接パース
  * @example formatDateJapanese(new Date()) => "2024年1月15日"
  */
 export function formatDateJapanese(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  if (isNaN(d.getTime())) return "";
+  let year: number, month: number, day: number;
   
-  return d.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  if (typeof date === "string") {
+    // "YYYY-MM-DD" 形式または "YYYY-MM-DDTHH:mm:ss.sssZ" 形式から日付部分を抽出
+    const datePart = date.includes("T") ? date.split("T")[0] : date;
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+      day = parseInt(parts[2], 10);
+      
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return `${year}年${month}月${day}日`;
+      }
+    }
+    // パースできない場合はDateオブジェクトに変換
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    year = d.getFullYear();
+    month = d.getMonth() + 1;
+    day = d.getDate();
+  } else {
+    if (isNaN(date.getTime())) return "";
+    year = date.getFullYear();
+    month = date.getMonth() + 1;
+    day = date.getDate();
+  }
+  
+  return `${year}年${month}月${day}日`;
 }
 
 /**
  * 日付をISO形式にフォーマット（日付のみ）
+ * タイムゾーンの影響を受けないよう、ローカル日付を使用
  * @example formatDateISO(new Date()) => "2024-01-15"
  */
 export function formatDateISO(date: Date | string): string {
+  // 文字列の場合、ISO形式から日付部分を直接抽出
+  if (typeof date === "string") {
+    // "YYYY-MM-DD" 形式の場合
+    if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return date;
+    }
+    // ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" の場合
+    if (date.includes("T")) {
+      return date.split("T")[0];
+    }
+  }
+  
+  // Dateオブジェクトの場合、ローカルタイムゾーンで日付を取得
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d.getTime())) return "";
   
-  return d.toISOString().split("T")[0];
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  
+  return `${year}-${month}-${day}`;
 }
 
 /**
  * 日付を和暦にフォーマット
+ * タイムゾーンの影響を受けないよう、日付文字列から直接パース
  * @example formatDateWareki(new Date("2024-01-15")) => "令和6年1月15日"
  */
 export function formatDateWareki(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  if (isNaN(d.getTime())) return "";
+  let localDate: Date;
   
-  return d.toLocaleDateString("ja-JP-u-ca-japanese", {
+  if (typeof date === "string") {
+    // "YYYY-MM-DD" 形式または "YYYY-MM-DDTHH:mm:ss.sssZ" 形式から日付部分を抽出
+    const datePart = date.includes("T") ? date.split("T")[0] : date;
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      const day = parseInt(parts[2], 10);
+      
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        // ローカルタイムゾーンで日付を作成
+        localDate = new Date(year, month - 1, day);
+      } else {
+        return "";
+      }
+    } else {
+      localDate = new Date(date);
+    }
+  } else {
+    localDate = date;
+  }
+  
+  if (isNaN(localDate.getTime())) return "";
+  
+  return localDate.toLocaleDateString("ja-JP-u-ca-japanese", {
     era: "long",
     year: "numeric",
     month: "long",

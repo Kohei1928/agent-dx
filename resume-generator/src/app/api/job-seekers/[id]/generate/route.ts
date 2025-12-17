@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessJobSeeker } from "@/lib/authorization";
+import { formatDateISO, parseDateSafe } from "@/lib/utils/date";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -126,7 +127,7 @@ export async function POST(
 メールアドレス: ${jobSeeker.email || ""}
 電話番号: ${jobSeeker.phone || ""}
 性別: ${jobSeeker.gender || ""}
-生年月日: ${jobSeeker.birthDate ? new Date(jobSeeker.birthDate).toISOString().split('T')[0] : ""}
+生年月日: ${jobSeeker.birthDate ? formatDateISO(jobSeeker.birthDate.toISOString()) : ""}
 住所: ${jobSeeker.address || ""}
 
 【アンケートデータ（正規化データ）】
@@ -246,7 +247,7 @@ URL: ${jobSeeker.targetCompany.companyUrl || "（なし）"}
           name: resumeData.name || jobSeeker.name,
           nameKana: resumeData.nameKana || jobSeeker.nameKana,
           gender: resumeData.gender,
-          birthDate: resumeData.birthDate ? new Date(resumeData.birthDate) : null,
+          birthDate: parseDateSafe(resumeData.birthDate as string | null),
           postalCode: resumeData.postalCode,
           address: resumeData.address,
           phone: resumeData.phone || jobSeeker.phone,
@@ -260,7 +261,7 @@ URL: ${jobSeeker.targetCompany.companyUrl || "（なし）"}
           name: resumeData.name || jobSeeker.name,
           nameKana: resumeData.nameKana || jobSeeker.nameKana,
           gender: resumeData.gender,
-          birthDate: resumeData.birthDate ? new Date(resumeData.birthDate) : null,
+          birthDate: parseDateSafe(resumeData.birthDate as string | null),
           postalCode: resumeData.postalCode,
           address: resumeData.address,
           phone: resumeData.phone || jobSeeker.phone,

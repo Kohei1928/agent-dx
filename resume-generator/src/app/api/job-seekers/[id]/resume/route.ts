@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessJobSeeker } from "@/lib/authorization";
+import { parseDateSafe } from "@/lib/utils/date";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -102,6 +103,9 @@ export async function PUT(
       return NextResponse.json({ error: "求職者が見つかりません" }, { status: 404 });
     }
 
+    // タイムゾーン安全な日付パース
+    const parsedBirthDate = parseDateSafe(body.birthDate);
+
     // upsert（作成または更新）
     const resumeData = await prisma.resumeData.upsert({
       where: { jobSeekerId: id },
@@ -110,7 +114,7 @@ export async function PUT(
         name: body.name,
         nameKana: body.nameKana,
         gender: body.gender,
-        birthDate: body.birthDate ? new Date(body.birthDate) : null,
+        birthDate: parsedBirthDate,
         postalCode: body.postalCode,
         address: body.address,
         addressKana: body.addressKana,
@@ -126,7 +130,7 @@ export async function PUT(
         name: body.name,
         nameKana: body.nameKana,
         gender: body.gender,
-        birthDate: body.birthDate ? new Date(body.birthDate) : null,
+        birthDate: parsedBirthDate,
         postalCode: body.postalCode,
         address: body.address,
         addressKana: body.addressKana,

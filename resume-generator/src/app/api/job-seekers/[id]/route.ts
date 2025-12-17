@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseDateSafe } from "@/lib/utils/date";
 
 // GET: 求職者詳細取得
 export async function GET(
@@ -80,6 +81,9 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // タイムゾーン安全な日付パース
+    const parsedBirthDate = parseDateSafe(birthDate);
+
     // トランザクションで求職者とレジュメデータを同時更新
     const jobSeeker = await prisma.$transaction(async (tx) => {
       // 求職者を更新
@@ -91,7 +95,7 @@ export async function PUT(
           email,
           phone,
           gender: gender || null,
-          birthDate: birthDate ? new Date(birthDate) : null,
+          birthDate: parsedBirthDate,
           address,
           notes,
         },
@@ -106,7 +110,7 @@ export async function PUT(
           gender: gender || undefined,
           phone: phone || undefined,
           email: email || undefined,
-          birthDate: birthDate ? new Date(birthDate) : undefined,
+          birthDate: parsedBirthDate ?? undefined,
           address: address || undefined,
         },
         create: {
@@ -116,7 +120,7 @@ export async function PUT(
           gender: gender || null,
           phone,
           email,
-          birthDate: birthDate ? new Date(birthDate) : null,
+          birthDate: parsedBirthDate,
           address,
         },
       });

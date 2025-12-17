@@ -21,9 +21,29 @@ export default function BirthDateInput({
   useEffect(() => {
     if (value) {
       // ISO日付形式をYYYY/MM/DD形式に変換
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) {
-        const formatted = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
+      // タイムゾーン問題を避けるため、日付文字列から直接パース
+      let formatted = "";
+      
+      // "YYYY-MM-DD" 形式の場合
+      if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = value.split("-");
+        formatted = `${year}/${month}/${day}`;
+      }
+      // ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" の場合
+      else if (value.includes("T")) {
+        const datePart = value.split("T")[0];
+        const [year, month, day] = datePart.split("-");
+        formatted = `${year}/${month}/${day}`;
+      }
+      // その他の形式はDateオブジェクトを使用（ローカルタイムで解釈）
+      else {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          formatted = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
+        }
+      }
+      
+      if (formatted) {
         setDisplayValue(formatted);
         calculateAge(formatted);
       }
@@ -138,12 +158,13 @@ export default function BirthDateInput({
     // 完全な日付が入力されたら親コンポーネントに通知
     if (formatted.length === 10 && !validationError) {
       const parts = formatted.split("/");
-      const isoDate = new Date(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[2], 10)
-      ).toISOString();
-      onChange(isoDate);
+      // タイムゾーン問題を避けるため、YYYY-MM-DD形式の文字列として保存
+      // toISOString()を使うとUTCに変換されて日付がずれる可能性がある
+      const year = parts[0];
+      const month = parts[1].padStart(2, "0");
+      const day = parts[2].padStart(2, "0");
+      const dateString = `${year}-${month}-${day}T00:00:00.000Z`;
+      onChange(dateString);
       calculateAge(formatted);
     } else {
       setAge(null);
