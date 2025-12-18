@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { EXTERNAL_API } from "@/lib/config";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -72,7 +73,7 @@ export async function PUT(
 
     if (hubspotToken && hubspotContactId) {
       const response = await fetch(
-        `https://api.hubapi.com/crm/v3/objects/contacts/${hubspotContactId}`,
+        `${EXTERNAL_API.hubspotBase}/crm/${EXTERNAL_API.hubspotVersion}/objects/contacts/${hubspotContactId}`,
         {
           headers: {
             Authorization: `Bearer ${hubspotToken}`,

@@ -120,6 +120,97 @@ export const bookScheduleSchema = z.object({
 export type BookScheduleInput = z.infer<typeof bookScheduleSchema>;
 
 // ========================================
+// 履歴書JSONカラム用バリデーション
+// ========================================
+
+/** 履歴書の学歴項目（DBに保存される形式） */
+export const resumeEducationItemSchema = z.object({
+  year: z.number().int().min(1900).max(2100),
+  month: z.number().int().min(1).max(12),
+  content: z.string().max(500),
+});
+
+/** 履歴書の職歴項目（DBに保存される形式） */
+export const resumeWorkHistoryItemSchema = z.object({
+  year: z.number().int().min(1900).max(2100),
+  month: z.number().int().min(1).max(12),
+  content: z.string().max(500),
+});
+
+/** 履歴書の資格項目（DBに保存される形式） */
+export const resumeQualificationItemSchema = z.object({
+  year: z.number().int().min(1900).max(2100).optional(),
+  month: z.number().int().min(1).max(12).optional(),
+  name: z.string().max(200),
+});
+
+/** 職務経歴書の職歴項目（DBに保存される形式） */
+export const cvWorkHistoryItemSchema = z.object({
+  companyName: z.string().max(200).optional(),
+  businessContent: z.string().max(1000).optional(),
+  established: z.string().max(50).optional(),
+  capital: z.string().max(50).optional(),
+  employees: z.string().max(50).optional(),
+  period: z.string().max(100).optional(),
+  startYear: z.string().max(4).optional(),
+  startMonth: z.string().max(2).optional(),
+  endYear: z.string().max(4).optional(),
+  endMonth: z.string().max(2).optional(),
+  isCurrentJob: z.boolean().optional(),
+  projects: z.array(projectItemSchema).max(20).optional(),
+  content: z.string().max(5000).optional(),
+  achievements: z.string().max(5000).optional(),
+  initiatives: z.string().max(5000).optional(),
+  freeformContent: z.string().max(10000).optional(),
+});
+
+export type ResumeEducationItem = z.infer<typeof resumeEducationItemSchema>;
+export type ResumeWorkHistoryItem = z.infer<typeof resumeWorkHistoryItemSchema>;
+export type ResumeQualificationItem = z.infer<typeof resumeQualificationItemSchema>;
+export type CvWorkHistoryItem = z.infer<typeof cvWorkHistoryItemSchema>;
+
+/**
+ * JSONカラムを安全にパース
+ * パースに失敗した場合は空配列を返す
+ */
+export function safeParseJsonArray<T>(
+  data: unknown,
+  schema: z.ZodArray<z.ZodType<T>>
+): T[] {
+  if (!data) return [];
+  if (!Array.isArray(data)) return [];
+  
+  const result = schema.safeParse(data);
+  if (result.success) {
+    return result.data;
+  }
+  
+  console.warn("JSON parse validation failed:", result.error.issues);
+  return [];
+}
+
+/**
+ * 履歴書の学歴データをパース
+ */
+export function parseEducationData(data: unknown): ResumeEducationItem[] {
+  return safeParseJsonArray(data, z.array(resumeEducationItemSchema));
+}
+
+/**
+ * 履歴書の職歴データをパース
+ */
+export function parseResumeWorkHistory(data: unknown): ResumeWorkHistoryItem[] {
+  return safeParseJsonArray(data, z.array(resumeWorkHistoryItemSchema));
+}
+
+/**
+ * 職務経歴書の職歴データをパース
+ */
+export function parseCvWorkHistory(data: unknown): CvWorkHistoryItem[] {
+  return safeParseJsonArray(data, z.array(cvWorkHistoryItemSchema));
+}
+
+// ========================================
 // 推薦文テンプレート関連
 // ========================================
 

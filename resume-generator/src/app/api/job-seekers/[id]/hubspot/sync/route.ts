@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { EXTERNAL_API } from "@/lib/config";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -97,7 +98,7 @@ export async function POST(
     console.log("Requesting HubSpot properties:", propertiesParam);
 
     const response = await fetch(
-      `https://api.hubapi.com/crm/v3/objects/contacts/${jobSeeker.hubspotContactId}?properties=${propertiesParam}`,
+      `${EXTERNAL_API.hubspotBase}/crm/${EXTERNAL_API.hubspotVersion}/objects/contacts/${jobSeeker.hubspotContactId}?properties=${propertiesParam}`,
       {
         headers: {
           Authorization: `Bearer ${hubspotToken}`,

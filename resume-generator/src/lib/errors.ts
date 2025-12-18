@@ -3,6 +3,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 /**
  * アプリケーションエラー基底クラス
@@ -90,7 +91,7 @@ export function handleApiError(error: unknown): NextResponse {
 
   // AppErrorの場合
   if (error instanceof AppError) {
-    const response: Record<string, any> = {
+    const response: Record<string, unknown> = {
       error: error.code,
       message: error.message,
     };
@@ -111,6 +112,38 @@ export function handleApiError(error: unknown): NextResponse {
     }
 
     return NextResponse.json(response, { status: error.statusCode });
+  }
+
+  // Prismaエラーの場合
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (error.code) {
+      case "P2002": // Unique constraint violation
+        return NextResponse.json(
+          {
+            error: "CONFLICT",
+            message: "データが重複しています",
+          },
+          { status: 409 }
+        );
+      case "P2025": // Record not found
+        return NextResponse.json(
+          {
+            error: "NOT_FOUND",
+            message: "データが見つかりません。既に削除された可能性があります",
+          },
+          { status: 404 }
+        );
+      case "P2003": // Foreign key constraint violation
+        return NextResponse.json(
+          {
+            error: "CONFLICT",
+            message: "関連するデータが存在するため削除できません",
+          },
+          { status: 409 }
+        );
+      default:
+        console.error("Unhandled Prisma error code:", error.code);
+    }
   }
 
   // Zodエラーの場合
@@ -144,6 +177,29 @@ export function handleApiError(error: unknown): NextResponse {
     },
     { status: 500 }
   );
+}
+
+/**
+ * Prismaエラーかどうか判定
+ */
+export function isPrismaError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
+  return error instanceof Prisma.PrismaClientKnownRequestError;
+}
+
+/**
+ * Prismaエラーコードに応じたメッセージを取得
+ */
+export function getPrismaErrorMessage(error: Prisma.PrismaClientKnownRequestError): string {
+  switch (error.code) {
+    case "P2002":
+      return "データが重複しています";
+    case "P2025":
+      return "データが見つかりません。既に削除された可能性があります";
+    case "P2003":
+      return "関連するデータが存在するため削除できません";
+    default:
+      return "データベースエラーが発生しました";
+  }
 }
 
 /**

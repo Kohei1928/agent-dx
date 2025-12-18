@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { EXTERNAL_API } from "@/lib/config";
 
 // GET: HubSpotプロパティ一覧取得
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
     }
 
     const response = await fetch(
-      "https://api.hubapi.com/crm/v3/properties/contacts",
+      `${EXTERNAL_API.hubspotBase}/crm/${EXTERNAL_API.hubspotVersion}/properties/contacts`,
       {
         headers: {
           Authorization: `Bearer ${hubspotToken}`,

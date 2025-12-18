@@ -7,12 +7,11 @@ import { checkRateLimit, RATE_LIMITS, getClientIP } from "@/lib/rate-limit";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GenerationType, GENERATION_TYPES } from "@/app/api/generation-templates/route";
 import { SourceConfig, DEFAULT_SOURCES } from "@/app/api/generation-source-defaults/route";
+import { AI_CONFIG } from "@/lib/config";
 
 type Context = {
   params: Promise<{ id: string }>;
 };
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // 生成タイプの日本語ラベル
 const TYPE_LABELS: Record<GenerationType, string> = {
@@ -75,7 +74,7 @@ export async function POST(request: NextRequest, context: Context) {
       }
     }
 
-    if (!GEMINI_API_KEY) {
+    if (!AI_CONFIG.apiKey) {
       return NextResponse.json(
         { error: "AI機能が設定されていません" },
         { status: 503 }
@@ -101,8 +100,8 @@ export async function POST(request: NextRequest, context: Context) {
     }
 
     // 並列で生成
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const genAI = new GoogleGenerativeAI(AI_CONFIG.apiKey);
+    const model = genAI.getGenerativeModel({ model: AI_CONFIG.model });
 
     const results = await Promise.allSettled(
       items.map(async (item: { type: GenerationType; templateId?: string; sources?: SourceConfig[] }) => {

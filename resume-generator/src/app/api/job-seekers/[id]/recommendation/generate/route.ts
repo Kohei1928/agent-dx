@@ -6,14 +6,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { canAccessJobSeeker } from "@/lib/authorization";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { sanitizeForPrompt, wrapUserContent, validateAIOutput } from "@/lib/ai-safety";
+import { AI_CONFIG, VALIDATION_CONFIG } from "@/lib/config";
 
 type Context = {
   params: Promise<{ id: string }>;
 };
 
 // 環境変数チェック
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-if (!GEMINI_API_KEY) {
+if (!AI_CONFIG.apiKey) {
   console.error("GEMINI_API_KEY is not configured");
 }
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, context: Context) {
     }
 
     // API キーチェック
-    if (!GEMINI_API_KEY) {
+    if (!AI_CONFIG.apiKey) {
       return NextResponse.json(
         { error: "AI機能が設定されていません" },
         { status: 503 }
@@ -99,13 +99,21 @@ export async function POST(request: NextRequest, context: Context) {
     const prompt = buildPrompt(jobSeeker, template);
 
     // Gemini API呼び出し
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const genAI = new GoogleGenerativeAI(AI_CONFIG.apiKey);
+    const model = genAI.getGenerativeModel({ model: AI_CONFIG.model });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const generatedContent = response.text();
 
     // AI出力の検証
+    if (!generatedContent || generatedContent.trim().length < VALIDATION_CONFIG.aiOutputMinLength) {
+      console.error("AI output is too short or empty:", generatedContent?.length || 0);
+      return NextResponse.json(
+        { error: "AI生成結果が不正です。再度お試しください" },
+        { status: 500 }
+      );
+    }
+
     const outputValidation = validateAIOutput(generatedContent);
     if (!outputValidation.valid) {
       console.warn("AI output validation warnings:", outputValidation.warnings);

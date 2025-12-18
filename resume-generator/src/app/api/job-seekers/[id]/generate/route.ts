@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessJobSeeker } from "@/lib/authorization";
 import { formatDateISO, parseDateSafe } from "@/lib/utils/date";
+import { AI_CONFIG } from "@/lib/config";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -95,16 +96,14 @@ export async function POST(
         jobSeekerId: id,
         userId: session.user.id,
         status: "processing",
-        llmModel: "gemini-2.0-flash",
+        llmModel: AI_CONFIG.model,
         documentType: "resume",
       },
     });
 
     try {
       // Gemini APIで情報抽出・生成
-      const geminiApiKey = process.env.GEMINI_API_KEY;
-
-      if (!geminiApiKey) {
+      if (!AI_CONFIG.apiKey) {
         console.error("GEMINI_API_KEY is not configured");
         throw new Error("AI機能が設定されていません。管理者にお問い合わせください。");
       }
@@ -198,7 +197,7 @@ URL: ${jobSeeker.targetCompany.companyUrl || "（なし）"}
 
       console.log("Calling Gemini API...");
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.apiKey}`,
         {
           method: "POST",
           headers: {

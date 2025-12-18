@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { AUTH_CONFIG } from "@/lib/config";
 
 // OAuth2クライアントの初期化（リフレッシュトークン対応）
 export async function getOAuth2ClientWithRefresh(
@@ -67,7 +68,10 @@ export async function createResumeDocument(
     },
   });
 
-  const documentId = doc.data.documentId!;
+  const documentId = doc.data.documentId;
+  if (!documentId) {
+    throw new Error("Google Docsのドキュメント作成に失敗しました（IDが取得できません）");
+  }
   console.log("Document created with ID:", documentId);
 
   // ドキュメントにコンテンツを追加
@@ -229,13 +233,13 @@ export async function createResumeDocument(
 
   console.log("Document content added successfully");
 
-  // 共有設定（ミギナナメウエグループへの編集権限）
+  // 共有設定（ワークスペースドメインへの編集権限）
   try {
     await drive.permissions.create({
       fileId: documentId,
       requestBody: {
         type: "domain",
-        domain: "migi-nanameue.co.jp",
+        domain: AUTH_CONFIG.googleWorkspaceDomain,
         role: "writer",
       },
     });
@@ -283,7 +287,10 @@ export async function createCVDocument(
     },
   });
 
-  const documentId = doc.data.documentId!;
+  const documentId = doc.data.documentId;
+  if (!documentId) {
+    throw new Error("Google Docsの職務経歴書作成に失敗しました（IDが取得できません）");
+  }
   console.log("CV Document created with ID:", documentId);
 
   // ドキュメントにコンテンツを追加
@@ -373,13 +380,13 @@ export async function createCVDocument(
 
   console.log("CV Document content added successfully");
 
-  // 共有設定（ミギナナメウエグループへの編集権限）
+  // 共有設定（ワークスペースドメインへの編集権限）
   try {
     await drive.permissions.create({
       fileId: documentId,
       requestBody: {
         type: "domain",
-        domain: "migi-nanameue.co.jp",
+        domain: AUTH_CONFIG.googleWorkspaceDomain,
         role: "writer",
       },
     });

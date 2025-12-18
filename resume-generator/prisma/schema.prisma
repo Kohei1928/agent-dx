@@ -86,9 +86,9 @@ model JobSeeker {
   formToken           String?   @unique @default(cuid())
   // 非表示フラグ
   isHidden            Boolean   @default(false)
-  // 面接前後のブロック時間設定（分）- DBマイグレーション後に有効化
-  // onsiteBlockMinutes  Int       @default(60)   // 対面面接: デフォルト1時間
-  // onlineBlockMinutes  Int       @default(30)   // オンライン面接: デフォルト30分
+  // 面接前後のブロック時間設定（分）
+  onsiteBlockMinutes  Int       @default(60)   // 対面面接: デフォルト1時間
+  onlineBlockMinutes  Int       @default(30)   // オンライン面接: デフォルト30分
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 

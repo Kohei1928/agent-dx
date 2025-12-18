@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
+import { AUTH_CONFIG } from "./config";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
@@ -20,13 +21,13 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user }) {
-      // @migi-nanameue.co.jp ドメインのみ許可
-      const allowedDomain = "@migi-nanameue.co.jp";
-      if (user.email && user.email.endsWith(allowedDomain)) {
+      // 許可されたドメインのみ許可
+      if (user.email && user.email.endsWith(AUTH_CONFIG.allowedDomain)) {
         return true;
       }
       // 開発環境では全てのドメインを許可（テスト用）
       if (process.env.NODE_ENV === "development") {
+        console.warn("⚠️ Development mode: All domains allowed for auth");
         return true;
       }
       return false;

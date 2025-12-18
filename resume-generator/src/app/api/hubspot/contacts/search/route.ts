@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { EXTERNAL_API } from "@/lib/config";
 
 // GET: HubSpotコンタクト検索
 export async function GET(request: NextRequest) {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // HubSpot API でコンタクト検索
     const response = await fetch(
-      "https://api.hubapi.com/crm/v3/objects/contacts/search",
+      `${EXTERNAL_API.hubspotBase}/crm/${EXTERNAL_API.hubspotVersion}/objects/contacts/search`,
       {
         method: "POST",
         headers: {
