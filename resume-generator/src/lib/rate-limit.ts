@@ -40,6 +40,8 @@ let redisAvailable = false;
 /**
  * Redisクライアントを初期化
  * 環境変数 REDIS_URL が設定されている場合のみ有効化
+ * 
+ * 注意: Redisを使用する場合は `npm install ioredis` が必要です
  */
 async function initRedis(): Promise<boolean> {
   if (redisInitialized) {
@@ -57,11 +59,20 @@ async function initRedis(): Promise<boolean> {
   try {
     // 動的インポートでRedisクライアントを読み込み
     // ioredis がインストールされていない場合はエラーになる
-    const Redis = (await import("ioredis")).default;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ioredisModule = await import("ioredis" as any).catch(() => null);
+    
+    if (!ioredisModule) {
+      console.warn("⚠️ ioredis not installed, falling back to in-memory rate limiting");
+      console.warn("   To enable Redis, run: npm install ioredis");
+      return false;
+    }
+    
+    const Redis = ioredisModule.default;
     const client = new Redis(redisUrl, {
       maxRetriesPerRequest: 1,
       connectTimeout: 3000,
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         if (times > 3) {
           console.warn("⚠️ Redis connection failed, falling back to in-memory");
           return null;
