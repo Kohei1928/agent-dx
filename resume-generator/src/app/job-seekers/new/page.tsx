@@ -92,7 +92,7 @@ export default function NewJobSeekerPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
@@ -101,31 +101,44 @@ export default function NewJobSeekerPage() {
   return (
     <DashboardLayout>
       <div className="p-8 max-w-2xl mx-auto">
-        <div className="mb-6">
+        <div className="mb-8">
           <Link
             href="/job-seekers"
             className="text-sm text-slate-500 hover:text-slate-700 mb-2 inline-block"
           >
             ← 求職者一覧に戻る
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900">➕ 新規求職者登録</h1>
+          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+            <span className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </span>
+            新規求職者登録
+          </h1>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              📝 基本情報
+          <div className="card p-6 mb-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              基本情報
             </h2>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {error}
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   氏名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -135,13 +148,13 @@ export default function NewJobSeekerPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="input-modern"
                   placeholder="山田 太郎"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   氏名（ふりがな）
                 </label>
                 <input
@@ -150,13 +163,13 @@ export default function NewJobSeekerPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, nameKana: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="input-modern"
                   placeholder="やまだ たろう"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   メールアドレス
                 </label>
                 <input
@@ -165,13 +178,13 @@ export default function NewJobSeekerPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="input-modern"
                   placeholder="example@email.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   電話番号
                 </label>
                 <input
@@ -180,82 +193,61 @@ export default function NewJobSeekerPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                  className="input-modern"
                   placeholder="090-1234-5678"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-3">
                   性別
                 </label>
                 <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="男性"
-                      checked={formData.gender === "男性"}
-                      onChange={(e) =>
-                        setFormData({ ...formData, gender: e.target.value })
-                      }
-                      className="w-4 h-4 accent-[#00a4bd]"
-                    />
-                    <span className="text-[#33475b]">男性</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="女性"
-                      checked={formData.gender === "女性"}
-                      onChange={(e) =>
-                        setFormData({ ...formData, gender: e.target.value })
-                      }
-                      className="w-4 h-4 accent-[#00a4bd]"
-                    />
-                    <span className="text-[#33475b]">女性</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="その他"
-                      checked={formData.gender === "その他"}
-                      onChange={(e) =>
-                        setFormData({ ...formData, gender: e.target.value })
-                      }
-                      className="w-4 h-4 accent-[#00a4bd]"
-                    />
-                    <span className="text-[#33475b]">その他</span>
-                  </label>
+                  {["男性", "女性", "その他"].map((gender) => (
+                    <label key={gender} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={gender}
+                        checked={formData.gender === gender}
+                        onChange={(e) =>
+                          setFormData({ ...formData, gender: e.target.value })
+                        }
+                        className="w-5 h-5 border-slate-300 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="text-slate-700 group-hover:text-slate-900">{gender}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
           {/* HubSpot連携 */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              🔗 HubSpot連携
+          <div className="card p-6 mb-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              HubSpot連携
             </h2>
 
             {hubspotSearching ? (
-              <div className="text-slate-500 flex items-center gap-2">
-                <div className="animate-spin w-4 h-4 border-2 border-slate-300 border-t-emerald-500 rounded-full"></div>
+              <div className="text-slate-500 flex items-center gap-3 py-4">
+                <div className="animate-spin w-5 h-5 border-2 border-slate-300 border-t-orange-500 rounded-full"></div>
                 HubSpotで検索中...
               </div>
             ) : hubspotContacts.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-sm text-slate-600 mb-2">
+              <div className="space-y-3">
+                <p className="text-sm text-slate-600 mb-3">
                   該当するコンタクトが見つかりました：
                 </p>
                 {hubspotContacts.map((contact) => (
                   <label
                     key={contact.id}
-                    className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${
                       selectedHubspotContact?.id === contact.id
-                        ? "border-emerald-500 bg-emerald-50"
+                        ? "border-orange-500 bg-orange-50 shadow-sm"
                         : "border-slate-200 hover:bg-slate-50"
                     }`}
                   >
@@ -264,7 +256,7 @@ export default function NewJobSeekerPage() {
                       name="hubspotContact"
                       checked={selectedHubspotContact?.id === contact.id}
                       onChange={() => setSelectedHubspotContact(contact)}
-                      className="mt-1"
+                      className="mt-1 w-5 h-5 border-slate-300 text-orange-500 focus:ring-orange-500"
                     />
                     <div>
                       <div className="font-medium text-slate-900">
@@ -280,9 +272,9 @@ export default function NewJobSeekerPage() {
                   </label>
                 ))}
                 <label
-                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${
                     selectedHubspotContact === null
-                      ? "border-emerald-500 bg-emerald-50"
+                      ? "border-orange-500 bg-orange-50 shadow-sm"
                       : "border-slate-200 hover:bg-slate-50"
                   }`}
                 >
@@ -291,18 +283,25 @@ export default function NewJobSeekerPage() {
                     name="hubspotContact"
                     checked={selectedHubspotContact === null}
                     onChange={() => setSelectedHubspotContact(null)}
+                    className="w-5 h-5 border-slate-300 text-orange-500 focus:ring-orange-500"
                   />
                   <span className="text-slate-600">連携しない</span>
                 </label>
               </div>
             ) : formData.email ? (
-              <p className="text-slate-500">
+              <div className="py-4 text-slate-500 flex items-center gap-2">
+                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
                 HubSpotに該当するコンタクトが見つかりませんでした
-              </p>
+              </div>
             ) : (
-              <p className="text-slate-500">
+              <div className="py-4 text-slate-500 flex items-center gap-2">
+                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 メールアドレスを入力すると、HubSpotで自動検索されます
-              </p>
+              </div>
             )}
           </div>
 
@@ -310,14 +309,14 @@ export default function NewJobSeekerPage() {
           <div className="flex gap-4">
             <Link
               href="/job-seekers"
-              className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+              className="btn-secondary px-6 py-3"
             >
               キャンセル
             </Link>
             <button
               type="submit"
               disabled={loading || !formData.name}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="btn-orange flex-1 px-6 py-3"
             >
               {loading ? "登録中..." : "求職者を登録"}
             </button>

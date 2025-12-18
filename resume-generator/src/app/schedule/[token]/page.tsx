@@ -289,26 +289,30 @@ export default function PublicSchedulePage() {
 
   const getInterviewTypeBadgeStyle = (type: string) => {
     switch (type) {
-      case "online": return "bg-[#00a4bd]/10 text-[#00a4bd]";
-      case "onsite": return "bg-[#ff7a59]/10 text-[#ff7a59]";
-      case "both": return "bg-[#7c98b6]/10 text-[#33475b]";
+      case "online": return "bg-emerald-100 text-emerald-700";
+      case "onsite": return "bg-orange-100 text-orange-700";
+      case "both": return "bg-slate-100 text-slate-700";
       default: return "bg-slate-100 text-slate-700";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (error && !schedules.length) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-          <div className="text-6xl mb-4">⚠️</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-2xl flex items-center justify-center">
+            <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
           <h1 className="text-xl font-bold text-slate-900 mb-2">エラー</h1>
           <p className="text-slate-600">{error}</p>
         </div>
@@ -319,23 +323,28 @@ export default function PublicSchedulePage() {
   // キャンセル完了画面
   if (cancelled) {
     return (
-      <div className="min-h-screen bg-[#f5f8fa] flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center border border-[#dfe3eb]">
-          <div className="w-20 h-20 bg-[#f5f8fa] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#dfe3eb]">
-            <span className="text-4xl text-[#7c98b6]">✓</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-2xl flex items-center justify-center">
+            <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[#33475b] mb-4">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">
             キャンセルしました
           </h1>
-          <p className="text-[#516f90] mb-8">
+          <p className="text-slate-600 mb-8">
             面接日程のキャンセルが完了しました。<br />
             別の日程をご希望の場合は、下記ボタンより再調整してください。
           </p>
           <button
             onClick={handleReschedule}
-            className="w-full bg-[#ff7a59] hover:bg-[#e8573f] text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
           >
-            📅 日程を再調整する
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            日程を再調整する
           </button>
         </div>
       </div>
@@ -345,49 +354,51 @@ export default function PublicSchedulePage() {
   // 確定画面（キャンセルボタン付き）
   if (confirmed) {
     return (
-      <div className="min-h-screen bg-[#f5f8fa] flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center border border-[#dfe3eb]">
-          <div className="w-20 h-20 bg-[#00a4bd]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl text-[#00a4bd]">✓</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-2xl flex items-center justify-center">
+            <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[#33475b] mb-4">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">
             面接日程が確定しました
           </h1>
-          <div className="bg-[#f5f8fa] rounded-lg p-6 mb-6 text-left border border-[#dfe3eb]">
-            <div className="space-y-3">
+          <div className="bg-slate-50 rounded-xl p-6 mb-6 text-left">
+            <div className="space-y-4">
               <div>
-                <span className="text-[#7c98b6] text-sm">候補者名</span>
-                <p className="font-medium text-[#33475b]">{confirmedData?.candidateName} 様</p>
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">候補者名</span>
+                <p className="font-semibold text-slate-900 mt-1">{confirmedData?.candidateName} 様</p>
               </div>
               <div>
-                <span className="text-[#7c98b6] text-sm">企業名</span>
-                <p className="font-medium text-[#33475b]">{confirmedData?.companyName}</p>
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">企業名</span>
+                <p className="font-semibold text-slate-900 mt-1">{confirmedData?.companyName}</p>
               </div>
               <div>
-                <span className="text-[#7c98b6] text-sm">日時</span>
-                <p className="font-medium text-[#33475b]">
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">日時</span>
+                <p className="font-semibold text-slate-900 mt-1">
                   {confirmedData?.date} {confirmedData?.startTime}〜{confirmedData?.endTime}
                 </p>
               </div>
               <div>
-                <span className="text-[#7c98b6] text-sm">形式</span>
-                <p className="font-medium text-[#33475b]">
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">形式</span>
+                <p className="font-semibold text-slate-900 mt-1">
                   {getInterviewTypeLabel(confirmedData?.interviewType || "")}
                 </p>
               </div>
             </div>
           </div>
-          <p className="text-[#516f90] text-sm mb-6">
+          <p className="text-slate-500 text-sm mb-6">
             担当キャリアアドバイザーより<br />
             改めてご連絡させていただきます。
           </p>
           
-          {/* キャンセルリンク（控えめに表示） */}
-          <div className="border-t border-[#dfe3eb] pt-4 mt-2">
+          {/* キャンセルリンク */}
+          <div className="border-t border-slate-100 pt-4 mt-2">
             <button
               onClick={handleCancel}
               disabled={canceling}
-              className="text-sm text-[#7c98b6] hover:text-[#ff7a59] underline transition-colors disabled:text-[#cbd6e2]"
+              className="text-sm text-slate-400 hover:text-red-500 underline transition-colors disabled:text-slate-300"
             >
               {canceling ? "キャンセル処理中..." : "この日程をキャンセルする"}
             </button>
@@ -398,33 +409,38 @@ export default function PublicSchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f8fa] py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* ロゴ */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#00a4bd] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">📅</span>
+            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
             </div>
             <div className="text-left">
-              <span className="font-bold text-[#33475b] text-lg block">スマート面接調整</span>
-              <span className="text-[#7c98b6] text-xs">by エージェントDX</span>
+              <span className="font-bold text-slate-900 text-lg block">スマート面接調整</span>
+              <span className="text-slate-400 text-xs">by エージェントDX</span>
             </div>
           </div>
         </div>
 
         {/* メインカード */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#dfe3eb]">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-8">
-            <h1 className="text-xl font-bold text-[#33475b] mb-2">
-              候補者名: {jobSeeker?.name} 様
+            <h1 className="text-xl font-bold text-slate-900 mb-2">
+              候補者名: <span className="text-orange-600">{jobSeeker?.name}</span> 様
             </h1>
-            <p className="text-[#516f90] mb-8">
+            <p className="text-slate-500 mb-8">
               ご希望の面接日程と時間帯をお選びください
             </p>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {error}
               </div>
             )}
@@ -432,14 +448,20 @@ export default function PublicSchedulePage() {
             <form onSubmit={handleSubmit}>
               {/* ステップ1: 日程選択 */}
               <div className="mb-8">
-                <h2 className="text-sm font-semibold text-[#33475b] mb-3">
-                  ① 希望日を選択
+                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                  希望日を選択
                 </h2>
                 <div className="space-y-3">
                   {schedules.length === 0 ? (
-                    <p className="text-[#7c98b6] text-center py-8">
-                      現在選択可能な日程がありません
-                    </p>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-slate-500">現在選択可能な日程がありません</p>
+                    </div>
                   ) : (
                     schedules.map((schedule) => {
                       // 30分のみの枠かどうかをチェック
@@ -451,8 +473,8 @@ export default function PublicSchedulePage() {
                           key={schedule.id}
                           className={`flex items-center gap-4 p-5 border-2 rounded-xl cursor-pointer transition-all ${
                             selectedScheduleId === schedule.id
-                              ? "border-[#00a4bd] bg-[#00a4bd]/5 shadow-md"
-                              : "border-[#dfe3eb] hover:border-[#00a4bd]/50 hover:shadow-sm"
+                              ? "border-orange-500 bg-orange-50 shadow-lg shadow-orange-100"
+                              : "border-slate-200 hover:border-orange-300 hover:shadow-md"
                           }`}
                         >
                           <input
@@ -461,28 +483,28 @@ export default function PublicSchedulePage() {
                             value={schedule.id}
                             checked={selectedScheduleId === schedule.id}
                             onChange={() => handleScheduleSelect(schedule.id)}
-                            className="w-6 h-6 accent-[#00a4bd]"
+                            className="w-5 h-5 text-orange-500 border-slate-300 focus:ring-orange-500"
                           />
                           <div className="flex-1">
-                            <div className="text-lg font-bold text-[#33475b]">
+                            <div className="text-lg font-bold text-slate-900">
                               {formatDate(schedule.date)}
                             </div>
                             <div className="flex items-center gap-2 mt-2">
-                              <span className="inline-flex items-center px-3 py-1.5 bg-[#33475b] rounded-lg">
+                              <span className="inline-flex items-center px-4 py-2 bg-slate-900 rounded-lg">
                                 <span className="text-lg font-bold text-white">
                                   {schedule.startTime}
                                 </span>
-                                <span className="mx-2 text-[#7c98b6]">〜</span>
+                                <span className="mx-2 text-slate-400">〜</span>
                                 <span className="text-lg font-bold text-white">
                                   {schedule.endTime}
                                 </span>
                               </span>
-                              <span className="text-sm text-[#516f90]">
+                              <span className="text-sm text-slate-500">
                                 {isExactly30Min ? "（30分）" : "の間で選択可能"}
                               </span>
                             </div>
                           </div>
-                          <span className={`px-4 py-2 rounded-full text-sm font-bold ${getInterviewTypeBadgeStyle(schedule.interviewType)}`}>
+                          <span className={`px-4 py-2 rounded-xl text-sm font-bold ${getInterviewTypeBadgeStyle(schedule.interviewType)}`}>
                             {getInterviewTypeLabel(schedule.interviewType)}
                           </span>
                         </label>
@@ -494,17 +516,21 @@ export default function PublicSchedulePage() {
 
               {/* ステップ2: 時間選択 */}
               {selectedSchedule && (
-                <div className="mb-8 p-4 bg-[#f5f8fa] rounded-lg border border-[#dfe3eb]">
-                  <h2 className="text-sm font-semibold text-[#33475b] mb-3">
-                    ② 時間帯を選択（30分単位）
+                <div className="mb-8 p-5 bg-slate-50 rounded-xl">
+                  <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    時間帯を選択（30分単位）
                   </h2>
                   {/* 30分の枠の場合は自動選択表示 */}
                   {availableSlots.length === 1 ? (
-                    <div className="p-4 bg-[#00a4bd]/10 border border-[#00a4bd]/30 rounded-lg text-center">
-                      <div className="text-[#00a4bd] font-medium mb-1">
-                        ✓ 時間が自動的に選択されました
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center">
+                      <div className="text-green-600 font-medium mb-1 flex items-center justify-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        時間が自動的に選択されました
                       </div>
-                      <div className="text-lg font-bold text-[#33475b]">
+                      <div className="text-lg font-bold text-slate-900">
                         {selectedSchedule.startTime} 〜 {selectedSchedule.endTime}
                       </div>
                     </div>
@@ -512,11 +538,11 @@ export default function PublicSchedulePage() {
                     <>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm text-[#516f90] mb-1">開始時間</label>
+                          <label className="block text-sm font-medium text-slate-600 mb-2">開始時間</label>
                           <select
                             value={selectedStartTime || ""}
                             onChange={(e) => handleStartTimeChange(e.target.value)}
-                            className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg bg-white focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                            className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
                           >
                             <option value="">選択してください</option>
                             {availableSlots.slice(0, -1).map((slot) => (
@@ -525,12 +551,12 @@ export default function PublicSchedulePage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm text-[#516f90] mb-1">終了時間</label>
+                          <label className="block text-sm font-medium text-slate-600 mb-2">終了時間</label>
                           <select
                             value={selectedEndTime || ""}
                             onChange={(e) => setSelectedEndTime(e.target.value)}
                             disabled={!selectedStartTime}
-                            className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg bg-white disabled:bg-[#f5f8fa] focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                            className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white disabled:bg-slate-100 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
                           >
                             <option value="">選択してください</option>
                             {endTimeOptions.map((slot) => (
@@ -540,8 +566,8 @@ export default function PublicSchedulePage() {
                         </div>
                       </div>
                       {selectedStartTime && selectedEndTime && (
-                        <div className="mt-4 p-3 bg-[#00a4bd]/10 border border-[#00a4bd]/30 rounded-lg text-center">
-                          <span className="text-[#00a4bd] font-medium">
+                        <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-center">
+                          <span className="text-orange-600 font-medium">
                             選択中: {selectedStartTime} 〜 {selectedEndTime}
                           </span>
                         </div>
@@ -554,15 +580,16 @@ export default function PublicSchedulePage() {
               {/* ステップ3: 面接形式選択 */}
               {selectedSchedule && selectedStartTime && selectedEndTime && (
                 <div className="mb-8">
-                  <h2 className="text-sm font-semibold text-[#33475b] mb-3">
-                    ③ 面接形式を選択
+                  <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    面接形式を選択
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                     <label
-                      className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      className={`flex flex-col items-center gap-3 p-5 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedInterviewType === "online"
-                          ? "border-[#00a4bd] bg-[#00a4bd]/5 shadow-md"
-                          : "border-[#dfe3eb] hover:border-[#00a4bd]/50"
+                          ? "border-emerald-500 bg-emerald-50 shadow-lg"
+                          : "border-slate-200 hover:border-emerald-300"
                       }`}
                     >
                       <input
@@ -573,14 +600,14 @@ export default function PublicSchedulePage() {
                         onChange={() => setSelectedInterviewType("online")}
                         className="sr-only"
                       />
-                      <span className="text-3xl">📹</span>
-                      <span className="font-bold text-[#33475b]">オンライン</span>
+                      <span className="text-4xl">📹</span>
+                      <span className="font-bold text-slate-900">オンライン</span>
                     </label>
                     <label
-                      className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      className={`flex flex-col items-center gap-3 p-5 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedInterviewType === "onsite"
-                          ? "border-[#ff7a59] bg-[#ff7a59]/5 shadow-md"
-                          : "border-[#dfe3eb] hover:border-[#ff7a59]/50"
+                          ? "border-orange-500 bg-orange-50 shadow-lg"
+                          : "border-slate-200 hover:border-orange-300"
                       }`}
                     >
                       <input
@@ -591,8 +618,8 @@ export default function PublicSchedulePage() {
                         onChange={() => setSelectedInterviewType("onsite")}
                         className="sr-only"
                       />
-                      <span className="text-3xl">🏢</span>
-                      <span className="font-bold text-[#33475b]">対面</span>
+                      <span className="text-4xl">🏢</span>
+                      <span className="font-bold text-slate-900">対面</span>
                     </label>
                   </div>
                 </div>
@@ -600,8 +627,11 @@ export default function PublicSchedulePage() {
 
               {/* ステップ4: 企業名入力 */}
               <div className="mb-8">
-                <h2 className="text-sm font-semibold text-[#33475b] mb-3">
-                  {selectedSchedule && selectedStartTime && selectedEndTime ? "④" : "③"} 貴社名を入力
+                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    {selectedSchedule && selectedStartTime && selectedEndTime ? "4" : "3"}
+                  </span>
+                  貴社名を入力
                 </h2>
                 {companies.length > 0 ? (
                   <>
@@ -611,7 +641,7 @@ export default function PublicSchedulePage() {
                         setSelectedCompanyId(e.target.value || null);
                         if (e.target.value) setCompanyName("");
                       }}
-                      className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg mb-2 focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl mb-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
                     >
                       <option value="">直接入力する</option>
                       {companies.map((company) => (
@@ -626,7 +656,7 @@ export default function PublicSchedulePage() {
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
                         placeholder="株式会社〇〇"
-                        className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
                       />
                     )}
                   </>
@@ -636,7 +666,7 @@ export default function PublicSchedulePage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="株式会社〇〇"
-                    className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:border-[#00a4bd] focus:ring-1 focus:ring-[#00a4bd]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
                   />
                 )}
               </div>
@@ -645,7 +675,7 @@ export default function PublicSchedulePage() {
               <button
                 type="submit"
                 disabled={!selectedScheduleId || !selectedStartTime || !selectedEndTime || (!companyName && !selectedCompanyId) || submitting}
-                className="w-full bg-[#ff7a59] hover:bg-[#e8573f] disabled:bg-[#cbd6e2] disabled:cursor-not-allowed text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-orange-200 disabled:shadow-none"
               >
                 {submitting ? "処理中..." : "この日程で確定する"}
               </button>
@@ -654,7 +684,7 @@ export default function PublicSchedulePage() {
         </div>
 
         {/* フッター */}
-        <div className="text-center mt-8 text-[#7c98b6] text-sm">
+        <div className="text-center mt-8 text-slate-400 text-sm">
           © 2025 株式会社ミギナナメウエ - エージェントDX
         </div>
       </div>

@@ -478,8 +478,8 @@ export default function PublicFormPage() {
   // ローディング
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f5f8fa] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -487,11 +487,15 @@ export default function PublicFormPage() {
   // エラー画面
   if (error && !formData.name) {
     return (
-      <div className="min-h-screen bg-[#f5f8fa] flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center border border-[#dfe3eb]">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-xl font-bold text-[#33475b] mb-2">エラー</h1>
-          <p className="text-[#516f90]">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-2xl flex items-center justify-center">
+            <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 mb-2">エラー</h1>
+          <p className="text-slate-600">{error}</p>
         </div>
       </div>
     );
@@ -500,21 +504,23 @@ export default function PublicFormPage() {
   // 送信完了画面
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#f5f8fa] flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center border border-[#dfe3eb]">
-          <div className="w-20 h-20 bg-[#00a4bd]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl text-[#00a4bd]">✓</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-2xl flex items-center justify-center">
+            <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[#33475b] mb-4">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">
             ご回答ありがとうございました
           </h1>
-          <p className="text-[#516f90] mb-6">
+          <p className="text-slate-600 mb-6">
             フォームの内容を保存しました。<br />
             担当者が確認後、ご連絡いたします。
           </p>
           <button
             onClick={() => setSubmitted(false)}
-            className="w-full bg-[#ff7a59] hover:bg-[#e8573f] text-white py-3 rounded-lg font-medium transition-colors"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-xl font-medium transition-all shadow-lg shadow-orange-200"
           >
             内容を編集する
           </button>
@@ -529,17 +535,19 @@ export default function PublicFormPage() {
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
   return (
-    <div className="min-h-screen bg-[#f5f8fa] py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* ロゴ */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#ff7a59] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">📝</span>
+            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
             </div>
             <div className="text-left">
-              <span className="font-bold text-[#33475b] text-lg block">簡単レジュメ作成</span>
-              <span className="text-[#7c98b6] text-xs">by エージェントDX</span>
+              <span className="font-bold text-slate-900 text-lg block">簡単レジュメ作成</span>
+              <span className="text-slate-400 text-xs">by エージェントDX</span>
             </div>
           </div>
         </div>
@@ -547,20 +555,24 @@ export default function PublicFormPage() {
         {/* 自動保存インジケーター */}
         <div className="fixed top-4 right-4 z-50">
           {autoSaveStatus === "saving" && (
-            <div className="bg-white border border-[#dfe3eb] rounded-lg px-4 py-2 shadow-lg flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm text-[#516f90]">保存中...</span>
+            <div className="bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-sm text-slate-600">保存中...</span>
             </div>
           )}
           {autoSaveStatus === "saved" && (
-            <div className="bg-[#00a4bd]/10 border border-[#00a4bd]/30 rounded-lg px-4 py-2 shadow-lg flex items-center gap-2">
-              <span className="text-[#00a4bd]">✓</span>
-              <span className="text-sm text-[#00a4bd]">保存しました</span>
+            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-sm text-green-600">保存しました</span>
             </div>
           )}
           {autoSaveStatus === "error" && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2 shadow-lg flex items-center gap-2">
-              <span className="text-red-500">⚠</span>
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2 shadow-lg flex items-center gap-2">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <span className="text-sm text-red-600">保存に失敗</span>
             </div>
           )}
@@ -568,12 +580,12 @@ export default function PublicFormPage() {
 
         {/* フォーム */}
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-xl shadow-lg border border-[#dfe3eb] overflow-hidden">
-            <div className="p-6 border-b border-[#dfe3eb] bg-gradient-to-r from-[#ff7a59]/5 to-[#ff7a59]/10">
-              <h1 className="text-xl font-bold text-[#33475b]">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-orange-50 to-orange-100">
+              <h1 className="text-xl font-bold text-slate-900">
                 履歴書・職務経歴書情報の入力
               </h1>
-              <p className="text-[#516f90] text-sm mt-1">
+              <p className="text-slate-600 text-sm mt-1">
                 以下の項目をご記入ください。入力内容は自動で保存されます。
               </p>
             </div>
@@ -588,7 +600,7 @@ export default function PublicFormPage() {
               {/* 証明写真 */}
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
-                  <label className="block text-sm font-medium text-[#33475b] mb-2">
+                  <label className="block text-sm font-medium text-[slate-900] mb-2">
                     証明写真
                   </label>
                   <PhotoUpload
@@ -600,8 +612,8 @@ export default function PublicFormPage() {
                 <div className="flex-1">
                   {/* 名前 */}
                   <div>
-                    <label className="block text-sm font-medium text-[#33475b] mb-2">
-                      お名前 <span className="text-[#f2545b]">*</span>
+                    <label className="block text-sm font-medium text-[slate-900] mb-2">
+                      お名前 <span className="text-[red-500]">*</span>
                     </label>
                     <input
                       type="text"
@@ -609,7 +621,7 @@ export default function PublicFormPage() {
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="山田 太郎"
-                      className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] text-lg"
+                      className="w-full px-4 py-3 border border-[slate-200] rounded-lg focus:outline-none focus:ring-2 focus:ring-[emerald-500]/30 focus:border-[emerald-500] text-lg"
                     />
                   </div>
                 </div>
@@ -617,9 +629,9 @@ export default function PublicFormPage() {
 
               {/* 郵便番号 + 住所自動入力 */}
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-2">
+                <label className="block text-sm font-medium text-[slate-900] mb-2">
                   郵便番号
-                  <span className="text-xs text-[#7c98b6] ml-2">※入力すると住所が自動で入ります</span>
+                  <span className="text-xs text-[slate-400] ml-2">※入力すると住所が自動で入ります</span>
                 </label>
                 <div className="relative">
                   <input
@@ -629,11 +641,11 @@ export default function PublicFormPage() {
                     onChange={(e) => handlePostalCodeChange(e.target.value)}
                     placeholder="123-4567"
                     maxLength={8}
-                    className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                    className="w-full px-4 py-3 border border-[slate-200] rounded-lg focus:outline-none focus:ring-2 focus:ring-[emerald-500]/30 focus:border-[emerald-500]"
                   />
                   {fetchingAddress && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <div className="w-5 h-5 border-2 border-[#00a4bd] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-[emerald-500] border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>
@@ -641,7 +653,7 @@ export default function PublicFormPage() {
 
               {/* 住所 */}
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-2">
+                <label className="block text-sm font-medium text-[slate-900] mb-2">
                   住所
                 </label>
                 <input
@@ -649,41 +661,41 @@ export default function PublicFormPage() {
                   value={formData.address}
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="東京都渋谷区〇〇 1-2-3"
-                  className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                  className="w-full px-4 py-3 border border-[slate-200] rounded-lg focus:outline-none focus:ring-2 focus:ring-[emerald-500]/30 focus:border-[emerald-500]"
                 />
               </div>
 
               {/* 学歴 */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-[#33475b]">
+                  <label className="text-sm font-medium text-[slate-900]">
                     学歴
                   </label>
                   <button
                     type="button"
                     onClick={addEducation}
-                    className="text-sm text-[#00a4bd] hover:text-[#0091a8] font-medium"
+                    className="text-sm text-[emerald-500] hover:text-[emerald-600] font-medium"
                   >
                     + 学校を追加
                   </button>
                 </div>
-                <div className="bg-[#fff8e6] border border-[#ffd666] rounded-lg px-4 py-2 mb-4">
-                  <p className="text-sm text-[#b8860b] font-medium">
+                <div className="bg-[amber-50] border border-[amber-300] rounded-lg px-4 py-2 mb-4">
+                  <p className="text-sm text-[amber-700] font-medium">
                     💡 古い順に入力してください（高校 → 大学など）
                   </p>
                 </div>
                 <div className="space-y-4">
                   {formData.education.map((edu, index) => (
-                    <div key={index} className="bg-[#f5f8fa] rounded-lg p-4 border border-[#dfe3eb]">
+                    <div key={index} className="bg-[slate-50] rounded-lg p-4 border border-[slate-200]">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-[#516f90]">
+                        <span className="text-sm font-medium text-[slate-600]">
                           学歴 {index + 1}
                         </span>
                         {formData.education.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeEducation(index)}
-                            className="text-[#f2545b] hover:text-[#d93d44] text-sm"
+                            className="text-[red-500] hover:text-[red-600] text-sm"
                           >
                             削除
                           </button>
@@ -692,7 +704,7 @@ export default function PublicFormPage() {
 
                       {/* 学校名 */}
                       <div className="mb-3">
-                        <label className="block text-xs text-[#7c98b6] mb-1">学校名</label>
+                        <label className="block text-xs text-[slate-400] mb-1">学校名</label>
                         <input
                           type="text"
                           value={edu.schoolName}
@@ -702,13 +714,13 @@ export default function PublicFormPage() {
                             setFormData(prev => ({ ...prev, education: newEdu }));
                           }}
                           placeholder="〇〇大学 / 〇〇高等学校"
-                          className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30"
+                          className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30"
                         />
                       </div>
 
                       {/* 学部・学科 */}
                       <div className="mb-4">
-                        <label className="block text-xs text-[#7c98b6] mb-1">学部・学科（任意）</label>
+                        <label className="block text-xs text-[slate-400] mb-1">学部・学科（任意）</label>
                         <input
                           type="text"
                           value={edu.faculty}
@@ -718,13 +730,13 @@ export default function PublicFormPage() {
                             setFormData(prev => ({ ...prev, education: newEdu }));
                           }}
                           placeholder="経済学部 経済学科"
-                          className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30"
+                          className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30"
                         />
                       </div>
 
                       {/* 入学年月 */}
                       <div className="mb-3">
-                        <label className="block text-xs text-[#7c98b6] mb-1">入学年月</label>
+                        <label className="block text-xs text-[slate-400] mb-1">入学年月</label>
                         <div className="flex gap-2">
                           <select
                             value={edu.entranceYear}
@@ -733,7 +745,7 @@ export default function PublicFormPage() {
                               newEdu[index].entranceYear = e.target.value;
                               setFormData(prev => ({ ...prev, education: newEdu }));
                             }}
-                            className="flex-1 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                            className="flex-1 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                           >
                             <option value="">年</option>
                             {years.map(y => <option key={y} value={y}>{y}年</option>)}
@@ -745,7 +757,7 @@ export default function PublicFormPage() {
                               newEdu[index].entranceMonth = e.target.value;
                               setFormData(prev => ({ ...prev, education: newEdu }));
                             }}
-                            className="w-24 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                            className="w-24 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                           >
                             <option value="">月</option>
                             {months.map(m => <option key={m} value={m}>{m}月</option>)}
@@ -756,7 +768,7 @@ export default function PublicFormPage() {
                       {/* 卒業年月 */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-xs text-[#7c98b6]">卒業年月</label>
+                          <label className="text-xs text-[slate-400]">卒業年月</label>
                           <select
                             value={edu.status}
                             onChange={(e) => {
@@ -770,7 +782,7 @@ export default function PublicFormPage() {
                               }
                               setFormData(prev => ({ ...prev, education: newEdu }));
                             }}
-                            className="text-xs px-2 py-1 border border-[#dfe3eb] rounded bg-white"
+                            className="text-xs px-2 py-1 border border-[slate-200] rounded bg-white"
                           >
                             <option value="graduated">卒業</option>
                             <option value="attending">在学中</option>
@@ -778,7 +790,7 @@ export default function PublicFormPage() {
                           </select>
                         </div>
                         {edu.status === "attending" ? (
-                          <div className="px-3 py-2 bg-[#f5f8fa] text-[#516f90] rounded-lg text-sm text-center border border-[#dfe3eb]">
+                          <div className="px-3 py-2 bg-[slate-50] text-[slate-600] rounded-lg text-sm text-center border border-[slate-200]">
                             在学中
                           </div>
                         ) : edu.status === "dropped_out" ? (
@@ -790,7 +802,7 @@ export default function PublicFormPage() {
                                 newEdu[index].graduationYear = e.target.value;
                                 setFormData(prev => ({ ...prev, education: newEdu }));
                               }}
-                              className="flex-1 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                              className="flex-1 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                             >
                               <option value="">中退年</option>
                               {years.map(y => <option key={y} value={y}>{y}年</option>)}
@@ -802,7 +814,7 @@ export default function PublicFormPage() {
                                 newEdu[index].graduationMonth = e.target.value;
                                 setFormData(prev => ({ ...prev, education: newEdu }));
                               }}
-                              className="w-24 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                              className="w-24 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                             >
                               <option value="">月</option>
                               {months.map(m => <option key={m} value={m}>{m}月</option>)}
@@ -817,7 +829,7 @@ export default function PublicFormPage() {
                                 newEdu[index].graduationYear = e.target.value;
                                 setFormData(prev => ({ ...prev, education: newEdu }));
                               }}
-                              className="flex-1 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                              className="flex-1 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                             >
                               <option value="">年</option>
                               {years.map(y => <option key={y} value={y}>{y}年</option>)}
@@ -829,7 +841,7 @@ export default function PublicFormPage() {
                                 newEdu[index].graduationMonth = e.target.value;
                                 setFormData(prev => ({ ...prev, education: newEdu }));
                               }}
-                              className="w-24 px-3 py-2 border border-[#dfe3eb] rounded-lg bg-white focus:ring-2 focus:ring-[#00a4bd]/30"
+                              className="w-24 px-3 py-2 border border-[slate-200] rounded-lg bg-white focus:ring-2 focus:ring-[emerald-500]/30"
                             >
                               <option value="">月</option>
                               {months.map(m => <option key={m} value={m}>{m}月</option>)}
@@ -845,19 +857,19 @@ export default function PublicFormPage() {
               {/* 職歴 */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-[#33475b]">
+                  <label className="text-sm font-medium text-[slate-900]">
                     職歴
                   </label>
                   <button
                     type="button"
                     onClick={() => addWorkHistory("end")}
-                    className="text-sm text-[#00a4bd] hover:text-[#0091a8] font-medium"
+                    className="text-sm text-[emerald-500] hover:text-[emerald-600] font-medium"
                   >
                     + 会社を追加
                   </button>
                 </div>
-                <div className="bg-[#e6f7ff] border border-[#69c0ff] rounded-lg px-4 py-2 mb-4">
-                  <p className="text-sm text-[#0050b3] font-medium">
+                <div className="bg-[sky-50] border border-[sky-300] rounded-lg px-4 py-2 mb-4">
+                  <p className="text-sm text-[sky-700] font-medium">
                     💡 1社目から順に入力してください（古い順）
                   </p>
                 </div>
@@ -865,15 +877,15 @@ export default function PublicFormPage() {
                   {formData.workHistory.map((work, index) => (
                     <div 
                       key={index} 
-                      className="bg-[#f5f8fa] rounded-lg p-4 border border-[#dfe3eb]"
+                      className="bg-[slate-50] rounded-lg p-4 border border-[slate-200]"
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <span className="bg-[#33475b] text-white text-xs font-bold px-2 py-1 rounded">
+                          <span className="bg-[slate-900] text-white text-xs font-bold px-2 py-1 rounded">
                             {index + 1}社目
                           </span>
                           {work.companyName && (
-                            <span className="text-sm font-medium text-[#516f90]">
+                            <span className="text-sm font-medium text-[slate-600]">
                               {work.companyName}
                             </span>
                           )}
@@ -882,7 +894,7 @@ export default function PublicFormPage() {
                           <button
                             type="button"
                             onClick={() => removeWorkHistory(index)}
-                            className="text-[#f2545b] hover:text-[#d93d44] text-sm"
+                            className="text-[red-500] hover:text-[red-600] text-sm"
                           >
                             削除
                           </button>
@@ -891,7 +903,7 @@ export default function PublicFormPage() {
 
                       {/* 会社名 */}
                       <div className="mb-4">
-                        <label className="block text-xs text-[#7c98b6] mb-1">会社名</label>
+                        <label className="block text-xs text-[slate-400] mb-1">会社名</label>
                         <input
                           type="text"
                           value={work.companyName}
@@ -901,13 +913,13 @@ export default function PublicFormPage() {
                             setFormData(prev => ({ ...prev, workHistory: newWork }));
                           }}
                           placeholder="株式会社〇〇"
-                          className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30"
+                          className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30"
                         />
                       </div>
 
                       {/* 在籍期間 */}
                       <div className="mb-4">
-                        <label className="block text-xs text-[#7c98b6] mb-1">在籍期間</label>
+                        <label className="block text-xs text-[slate-400] mb-1">在籍期間</label>
                         <div className="flex flex-wrap items-center gap-2">
                           <div className="flex items-center gap-1">
                             <select
@@ -917,7 +929,7 @@ export default function PublicFormPage() {
                                 newWork[index].startYear = e.target.value;
                                 setFormData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white text-sm"
+                              className="px-2 py-2 border border-[slate-200] rounded-lg bg-white text-sm"
                             >
                               <option value="">年</option>
                               {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -929,15 +941,15 @@ export default function PublicFormPage() {
                                 newWork[index].startMonth = e.target.value;
                                 setFormData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white text-sm"
+                              className="px-2 py-2 border border-[slate-200] rounded-lg bg-white text-sm"
                             >
                               <option value="">月</option>
                               {months.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                           </div>
-                          <span className="text-[#7c98b6]">〜</span>
+                          <span className="text-[slate-400]">〜</span>
                           {work.isCurrentJob ? (
-                            <span className="px-3 py-2 bg-[#00a4bd]/10 text-[#00a4bd] font-medium rounded-lg text-sm">現在</span>
+                            <span className="px-3 py-2 bg-[emerald-500]/10 text-[emerald-500] font-medium rounded-lg text-sm">現在</span>
                           ) : (
                             <div className="flex items-center gap-1">
                               <select
@@ -947,7 +959,7 @@ export default function PublicFormPage() {
                                   newWork[index].endYear = e.target.value;
                                   setFormData(prev => ({ ...prev, workHistory: newWork }));
                                 }}
-                                className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white text-sm"
+                                className="px-2 py-2 border border-[slate-200] rounded-lg bg-white text-sm"
                               >
                                 <option value="">年</option>
                                 {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -959,7 +971,7 @@ export default function PublicFormPage() {
                                   newWork[index].endMonth = e.target.value;
                                   setFormData(prev => ({ ...prev, workHistory: newWork }));
                                 }}
-                                className="px-2 py-2 border border-[#dfe3eb] rounded-lg bg-white text-sm"
+                                className="px-2 py-2 border border-[slate-200] rounded-lg bg-white text-sm"
                               >
                                 <option value="">月</option>
                                 {months.map(m => <option key={m} value={m}>{m}</option>)}
@@ -979,16 +991,16 @@ export default function PublicFormPage() {
                                 }
                                 setFormData(prev => ({ ...prev, workHistory: newWork }));
                               }}
-                              className="w-4 h-4 accent-[#00a4bd] rounded"
+                              className="w-4 h-4 accent-[emerald-500] rounded"
                             />
-                            <span className="text-xs text-[#516f90]">現在も在籍中</span>
+                            <span className="text-xs text-[slate-600]">現在も在籍中</span>
                           </label>
                         </div>
                       </div>
 
                       {/* 事業内容 */}
                       <div className="mb-4">
-                        <label className="block text-xs text-[#7c98b6] mb-1">事業内容</label>
+                        <label className="block text-xs text-[slate-400] mb-1">事業内容</label>
                         <input
                           type="text"
                           value={work.businessContent}
@@ -998,23 +1010,23 @@ export default function PublicFormPage() {
                             setFormData(prev => ({ ...prev, workHistory: newWork }));
                           }}
                           placeholder="ITサービス、人材紹介など"
-                          className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30"
+                          className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30"
                         />
                       </div>
 
                       {/* 業務セット */}
-                      <div className="mt-4 border-t border-[#dfe3eb] pt-4">
+                      <div className="mt-4 border-t border-[slate-200] pt-4">
                         <div className="flex items-center justify-between mb-3">
-                          <label className="block text-xs text-[#7c98b6] font-medium">業務セット</label>
+                          <label className="block text-xs text-[slate-400] font-medium">業務セット</label>
                           <button
                             type="button"
                             onClick={() => addProject(index)}
-                            className="text-xs bg-[#00a4bd]/10 hover:bg-[#00a4bd]/20 text-[#00a4bd] px-2 py-1 rounded font-medium"
+                            className="text-xs bg-[emerald-500]/10 hover:bg-[emerald-500]/20 text-[emerald-500] px-2 py-1 rounded font-medium"
                           >
                             + 業務を追加
                           </button>
                         </div>
-                        <p className="text-xs text-[#7c98b6] mb-3">※ 1社で複数のポジションや業務がある場合は追加してください</p>
+                        <p className="text-xs text-[slate-400] mb-3">※ 1社で複数のポジションや業務がある場合は追加してください</p>
                         
                         {(work.projects || [{
                           id: `project-legacy-${index}`,
@@ -1027,14 +1039,14 @@ export default function PublicFormPage() {
                           achievements: work.achievements || "",
                           initiatives: work.initiatives || "",
                         }]).map((project, projectIndex) => (
-                          <div key={project.id} className="border border-[#00a4bd]/30 rounded-lg p-3 bg-white mb-3">
+                          <div key={project.id} className="border border-[emerald-500]/30 rounded-lg p-3 bg-white mb-3">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-xs font-medium text-[#00a4bd]">業務 {projectIndex + 1}</span>
+                              <span className="text-xs font-medium text-[emerald-500]">業務 {projectIndex + 1}</span>
                               {(work.projects?.length || 0) > 1 && (
                                 <button
                                   type="button"
                                   onClick={() => removeProject(index, projectIndex)}
-                                  className="text-xs text-[#f2545b] hover:text-[#d93d44]"
+                                  className="text-xs text-[red-500] hover:text-[red-600]"
                                 >
                                   削除
                                 </button>
@@ -1043,49 +1055,49 @@ export default function PublicFormPage() {
 
                             {/* 業務期間 */}
                             <div className="mb-3">
-                              <label className="block text-xs text-[#7c98b6] mb-1">業務期間</label>
+                              <label className="block text-xs text-[slate-400] mb-1">業務期間</label>
                               <div className="flex flex-wrap items-center gap-1 text-sm">
                                 <select
                                   value={project.startYear || ""}
                                   onChange={(e) => updateProject(index, projectIndex, "startYear", e.target.value)}
-                                  className="px-1 py-1 border border-[#dfe3eb] rounded text-xs bg-white"
+                                  className="px-1 py-1 border border-[slate-200] rounded text-xs bg-white"
                                 >
                                   <option value="">年</option>
                                   {years.map(y => <option key={y} value={y}>{y}</option>)}
                                 </select>
-                                <span className="text-xs text-[#7c98b6]">年</span>
+                                <span className="text-xs text-[slate-400]">年</span>
                                 <select
                                   value={project.startMonth || ""}
                                   onChange={(e) => updateProject(index, projectIndex, "startMonth", e.target.value)}
-                                  className="px-1 py-1 border border-[#dfe3eb] rounded text-xs bg-white"
+                                  className="px-1 py-1 border border-[slate-200] rounded text-xs bg-white"
                                 >
                                   <option value="">月</option>
                                   {months.map(m => <option key={m} value={m}>{m}</option>)}
                                 </select>
-                                <span className="text-xs text-[#7c98b6]">月</span>
-                                <span className="text-[#7c98b6] px-1">〜</span>
+                                <span className="text-xs text-[slate-400]">月</span>
+                                <span className="text-[slate-400] px-1">〜</span>
                                 {project.isCurrentJob ? (
-                                  <span className="px-2 py-1 bg-[#00a4bd]/10 text-[#00a4bd] text-xs font-medium rounded">現在</span>
+                                  <span className="px-2 py-1 bg-[emerald-500]/10 text-[emerald-500] text-xs font-medium rounded">現在</span>
                                 ) : (
                                   <>
                                     <select
                                       value={project.endYear || ""}
                                       onChange={(e) => updateProject(index, projectIndex, "endYear", e.target.value)}
-                                      className="px-1 py-1 border border-[#dfe3eb] rounded text-xs bg-white"
+                                      className="px-1 py-1 border border-[slate-200] rounded text-xs bg-white"
                                     >
                                       <option value="">年</option>
                                       {years.map(y => <option key={y} value={y}>{y}</option>)}
                                     </select>
-                                    <span className="text-xs text-[#7c98b6]">年</span>
+                                    <span className="text-xs text-[slate-400]">年</span>
                                     <select
                                       value={project.endMonth || ""}
                                       onChange={(e) => updateProject(index, projectIndex, "endMonth", e.target.value)}
-                                      className="px-1 py-1 border border-[#dfe3eb] rounded text-xs bg-white"
+                                      className="px-1 py-1 border border-[slate-200] rounded text-xs bg-white"
                                     >
                                       <option value="">月</option>
                                       {months.map(m => <option key={m} value={m}>{m}</option>)}
                                     </select>
-                                    <span className="text-xs text-[#7c98b6]">月</span>
+                                    <span className="text-xs text-[slate-400]">月</span>
                                   </>
                                 )}
                                 <label className="flex items-center gap-1 ml-1">
@@ -1099,46 +1111,46 @@ export default function PublicFormPage() {
                                         updateProject(index, projectIndex, "endMonth", "");
                                       }
                                     }}
-                                    className="w-3 h-3 accent-[#00a4bd] rounded"
+                                    className="w-3 h-3 accent-[emerald-500] rounded"
                                   />
-                                  <span className="text-xs text-[#516f90]">現在</span>
+                                  <span className="text-xs text-[slate-600]">現在</span>
                                 </label>
                               </div>
                             </div>
 
                             {/* 業務内容 */}
                             <div className="mb-2">
-                              <label className="block text-xs text-[#7c98b6] mb-1">業務内容</label>
+                              <label className="block text-xs text-[slate-400] mb-1">業務内容</label>
                               <textarea
                                 value={project.content || ""}
                                 onChange={(e) => updateProject(index, projectIndex, "content", e.target.value)}
                                 placeholder="担当した業務内容を記載してください"
                                 rows={3}
-                                className="w-full px-2 py-1.5 border border-[#dfe3eb] rounded text-sm focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                                className="w-full px-2 py-1.5 border border-[slate-200] rounded text-sm focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                               />
                             </div>
 
                             {/* 成果 */}
                             <div className="mb-2">
-                              <label className="block text-xs text-[#7c98b6] mb-1">成果・実績</label>
+                              <label className="block text-xs text-[slate-400] mb-1">成果・実績</label>
                               <textarea
                                 value={project.achievements || ""}
                                 onChange={(e) => updateProject(index, projectIndex, "achievements", e.target.value)}
                                 placeholder="数値や具体的な成果を記載してください"
                                 rows={2}
-                                className="w-full px-2 py-1.5 border border-[#dfe3eb] rounded text-sm focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                                className="w-full px-2 py-1.5 border border-[slate-200] rounded text-sm focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                               />
                             </div>
 
                             {/* 取り組み */}
                             <div>
-                              <label className="block text-xs text-[#7c98b6] mb-1">取り組み</label>
+                              <label className="block text-xs text-[slate-400] mb-1">取り組み</label>
                               <textarea
                                 value={project.initiatives || ""}
                                 onChange={(e) => updateProject(index, projectIndex, "initiatives", e.target.value)}
                                 placeholder="工夫したことや改善したことを記載してください"
                                 rows={2}
-                                className="w-full px-2 py-1.5 border border-[#dfe3eb] rounded text-sm focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                                className="w-full px-2 py-1.5 border border-[slate-200] rounded text-sm focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                               />
                             </div>
                           </div>
@@ -1151,7 +1163,7 @@ export default function PublicFormPage() {
                   <button
                     type="button"
                     onClick={() => addWorkHistory("end")}
-                    className="w-full py-3 border-2 border-dashed border-[#dfe3eb] rounded-lg text-[#7c98b6] hover:border-[#00a4bd] hover:text-[#00a4bd] transition-colors font-medium"
+                    className="w-full py-3 border-2 border-dashed border-[slate-200] rounded-lg text-[slate-400] hover:border-[emerald-500] hover:text-[emerald-500] transition-colors font-medium"
                   >
                     + 会社を追加
                   </button>
@@ -1159,11 +1171,11 @@ export default function PublicFormPage() {
               </div>
 
               {/* 職務要約 */}
-              <div className="bg-white rounded-xl border border-[#dfe3eb] p-6">
-                <h2 className="text-lg font-bold text-[#33475b] mb-4 pb-2 border-b border-[#dfe3eb]">
+              <div className="bg-white rounded-xl border border-[slate-200] p-6">
+                <h2 className="text-lg font-bold text-[slate-900] mb-4 pb-2 border-b border-[slate-200]">
                   職務要約
                 </h2>
-                <p className="text-xs text-[#7c98b6] mb-2">
+                <p className="text-xs text-[slate-400] mb-2">
                   これまでのキャリアを300〜400文字程度で簡潔にまとめてください。
                 </p>
                 <textarea
@@ -1171,19 +1183,19 @@ export default function PublicFormPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
                   placeholder="例: 私は新卒で○○株式会社に入社し、5年間営業職として勤務してまいりました..."
                   rows={6}
-                  className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                  className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                 />
-                <div className="text-right text-xs text-[#7c98b6] mt-1">
+                <div className="text-right text-xs text-[slate-400] mt-1">
                   {formData.summary.length} 文字
                 </div>
               </div>
 
               {/* 活かせる経験・知識・技術 */}
-              <div className="bg-white rounded-xl border border-[#dfe3eb] p-6">
-                <h2 className="text-lg font-bold text-[#33475b] mb-4 pb-2 border-b border-[#dfe3eb]">
+              <div className="bg-white rounded-xl border border-[slate-200] p-6">
+                <h2 className="text-lg font-bold text-[slate-900] mb-4 pb-2 border-b border-[slate-200]">
                   活かせる経験・知識・技術
                 </h2>
-                <p className="text-xs text-[#7c98b6] mb-2">
+                <p className="text-xs text-[slate-400] mb-2">
                   自由なフォーマットで記述してください。<code className="bg-slate-100 px-1 rounded">**太字**</code> で太字になります。
                 </p>
                 <textarea
@@ -1196,39 +1208,39 @@ export default function PublicFormPage() {
 【マネジメント】
 ・チームリーダーとして5名のメンバーをマネジメント`}
                   rows={8}
-                  className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg font-mono text-sm focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                  className="w-full px-3 py-2 border border-[slate-200] rounded-lg font-mono text-sm focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                 />
               </div>
 
               {/* 自己PR */}
-              <div className="bg-white rounded-xl border border-[#dfe3eb] p-6">
-                <h2 className="text-lg font-bold text-[#33475b] mb-4 pb-2 border-b border-[#dfe3eb]">
+              <div className="bg-white rounded-xl border border-[slate-200] p-6">
+                <h2 className="text-lg font-bold text-[slate-900] mb-4 pb-2 border-b border-[slate-200]">
                   自己PR
                 </h2>
-                <p className="text-xs text-[#7c98b6] mb-2">
+                <p className="text-xs text-[slate-400] mb-2">
                   <code className="bg-slate-100 px-1 rounded">**太字**</code> で太字になります。
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs text-[#7c98b6] mb-1">タイトル（強みを一言で）</label>
+                    <label className="block text-xs text-[slate-400] mb-1">タイトル（強みを一言で）</label>
                     <input
                       type="text"
                       value={formData.selfPrTitle}
                       onChange={(e) => setFormData(prev => ({ ...prev, selfPrTitle: e.target.value }))}
                       placeholder="【高い親和性に基づく関係構築力と目標達成への泥臭いコミットメント】"
-                      className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:ring-2 focus:ring-[#00a4bd]/30"
+                      className="w-full px-3 py-2 border border-[slate-200] rounded-lg focus:ring-2 focus:ring-[emerald-500]/30"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#7c98b6] mb-1">本文（400文字程度）</label>
+                    <label className="block text-xs text-[slate-400] mb-1">本文（400文字程度）</label>
                     <textarea
                       value={formData.selfPr}
                       onChange={(e) => setFormData(prev => ({ ...prev, selfPr: e.target.value }))}
                       placeholder="私の最大の強みは..."
                       rows={8}
-                      className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg font-mono text-sm focus:ring-2 focus:ring-[#00a4bd]/30 resize-none"
+                      className="w-full px-3 py-2 border border-[slate-200] rounded-lg font-mono text-sm focus:ring-2 focus:ring-[emerald-500]/30 resize-none"
                     />
-                    <div className="text-right text-xs text-[#7c98b6] mt-1">
+                    <div className="text-right text-xs text-[slate-400] mt-1">
                       {formData.selfPr.length} 文字
                     </div>
                   </div>
@@ -1239,12 +1251,12 @@ export default function PublicFormPage() {
               <button
                 type="submit"
                 disabled={submitting || !formData.name}
-                className="w-full bg-[#ff7a59] hover:bg-[#e8573f] disabled:bg-[#cbd6e2] text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+                className="w-full bg-[orange-500] hover:bg-[orange-600] disabled:bg-[slate-300] text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
               >
                 {submitting ? "送信中..." : "内容を確定する"}
               </button>
               
-              <p className="text-center text-xs text-[#7c98b6] mt-2">
+              <p className="text-center text-xs text-[slate-400] mt-2">
                 ※ 入力内容は自動で保存されています。このボタンを押すと入力完了となります。
               </p>
             </div>
@@ -1252,7 +1264,7 @@ export default function PublicFormPage() {
         </form>
 
         {/* フッター */}
-        <div className="text-center mt-8 text-[#7c98b6] text-sm">
+        <div className="text-center mt-8 text-[slate-400] text-sm">
           © 2025 株式会社ミギナナメウエ - エージェントDX
         </div>
       </div>

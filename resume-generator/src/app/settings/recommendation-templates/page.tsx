@@ -123,77 +123,92 @@ export default function RecommendationTemplatesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-8">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-[#33475b]">推薦文設定</h1>
-            <p className="text-[#516f90] text-sm mt-1">
+            <h1 className="text-3xl font-bold text-slate-900">推薦文設定</h1>
+            <p className="text-slate-500 mt-2">
               職種別の推薦文テンプレートを管理します
             </p>
           </div>
           <button
             onClick={() => openModal()}
-            className="bg-[#ff7a59] hover:bg-[#e8573f] text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="btn-orange px-5 py-3 flex items-center gap-2"
           >
-            <span>➕</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             新規テンプレート追加
           </button>
         </div>
 
         {/* テンプレート一覧 */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex items-center justify-center py-16">
+            <div className="spinner"></div>
           </div>
         ) : templates.length === 0 ? (
-          <div className="bg-white rounded-lg border border-[#dfe3eb] p-8 text-center">
-            <p className="text-[#516f90]">テンプレートがありません</p>
+          <div className="card p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 bg-slate-100 rounded-2xl flex items-center justify-center">
+              <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-slate-500 mb-4">テンプレートがありません</p>
             <button
               onClick={() => openModal()}
-              className="mt-4 text-[#ff7a59] hover:underline"
+              className="text-orange-600 hover:text-orange-700 font-medium"
             >
-              最初のテンプレートを追加
+              最初のテンプレートを追加 →
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="bg-white rounded-lg border border-[#dfe3eb] p-6 hover:shadow-md transition-shadow"
+                className="card p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-[#33475b] flex items-center gap-2">
-                      <span className="text-[#ff7a59]">📝</span>
+                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                      <span className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </span>
                       {template.name}
                     </h3>
-                    <div className="mt-3">
-                      <p className="text-xs text-[#7c98b6] mb-1">作成時のポイント:</p>
-                      <p className="text-sm text-[#516f90] whitespace-pre-wrap bg-[#f5f8fa] rounded p-3">
+                    <div className="mt-4">
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+                        作成時のポイント
+                      </p>
+                      <p className="text-sm text-slate-600 whitespace-pre-wrap bg-slate-50 rounded-xl p-4">
                         {template.points || "（未設定）"}
                       </p>
                     </div>
                     {template.exampleText && (
-                      <div className="mt-3">
-                        <p className="text-xs text-[#7c98b6] mb-1">例文:</p>
-                        <p className="text-sm text-[#516f90] whitespace-pre-wrap bg-[#f5f8fa] rounded p-3 line-clamp-3">
+                      <div className="mt-4">
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+                          例文
+                        </p>
+                        <p className="text-sm text-slate-600 whitespace-pre-wrap bg-slate-50 rounded-xl p-4 line-clamp-3">
                           {template.exampleText}
                         </p>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 ml-6">
                     <button
                       onClick={() => openModal(template)}
-                      className="px-3 py-1.5 text-sm text-[#00a4bd] hover:bg-[#00a4bd]/10 rounded transition-colors"
+                      className="btn-secondary px-4 py-2 text-sm"
                     >
                       編集
                     </button>
                     <button
                       onClick={() => handleDelete(template.id)}
-                      className="px-3 py-1.5 text-sm text-[#f2545b] hover:bg-[#f2545b]/10 rounded transition-colors"
+                      className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                     >
                       削除
                     </button>
@@ -207,48 +222,48 @@ export default function RecommendationTemplatesPage() {
 
       {/* モーダル */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-[#dfe3eb]">
-              <h2 className="text-xl font-bold text-[#33475b]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-2xl font-bold text-slate-900">
                 {editingTemplate ? "テンプレート編集" : "新規テンプレート追加"}
               </h2>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-2">
-                  職種名 <span className="text-[#f2545b]">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  職種名 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="例：エンジニア職"
-                  className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd]"
+                  className="input-modern"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-2">
-                  推薦文作成時のポイント <span className="text-[#f2545b]">*</span>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  推薦文作成時のポイント <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.points}
                   onChange={(e) => setFormData({ ...formData, points: e.target.value })}
                   placeholder="・継続力や学習力をアピールする文章にすること&#10;・ブランク期間があればマイナスに感じないような説明を入れること"
                   rows={5}
-                  className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] resize-none"
+                  className="input-modern resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#33475b] mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   推薦文の例文（任意）
                 </label>
                 <textarea
@@ -256,7 +271,7 @@ export default function RecommendationTemplatesPage() {
                   onChange={(e) => setFormData({ ...formData, exampleText: e.target.value })}
                   placeholder="〇〇様をご推薦申し上げます。&#10;〇〇様は、前職で..."
                   rows={8}
-                  className="w-full px-4 py-3 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] resize-none"
+                  className="input-modern resize-none"
                 />
               </div>
 
@@ -264,14 +279,14 @@ export default function RecommendationTemplatesPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 text-[#516f90] hover:bg-[#f5f8fa] rounded-lg transition-colors"
+                  className="btn-secondary px-6 py-3"
                 >
                   キャンセル
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-[#ff7a59] hover:bg-[#e8573f] text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  className="btn-orange px-6 py-3"
                 >
                   {saving ? "保存中..." : "保存"}
                 </button>
@@ -283,12 +298,3 @@ export default function RecommendationTemplatesPage() {
     </DashboardLayout>
   );
 }
-
-
-
-
-
-
-
-
-

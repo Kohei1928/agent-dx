@@ -153,84 +153,75 @@ export default function HubSpotMappingsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-screen">
-          <div className="w-8 h-8 border-4 border-[#ff7a59] border-t-transparent rounded-full animate-spin"></div>
+          <div className="spinner"></div>
         </div>
       </DashboardLayout>
     );
   }
 
-  // カテゴリごとにマッピングをフィルタリング
-  const resumeMappings = mappings.filter(m => 
-    RESUME_FIELDS.some(f => f.value === m.resumeField)
-  );
-  const cvMappings = mappings.filter(m => 
-    CV_FIELDS.some(f => f.value === m.resumeField)
-  );
-
   return (
     <DashboardLayout>
-      <div className="p-8 max-w-4xl mx-auto">
-        <div className="mb-6">
+      <div className="p-8">
+        <div className="mb-8">
           <Link
             href="/job-seekers"
-            className="text-sm text-[#7c98b6] hover:text-[#33475b] mb-2 inline-block"
+            className="text-sm text-slate-500 hover:text-slate-700 mb-2 inline-block"
           >
             ← 求職者一覧に戻る
           </Link>
-          <h1 className="text-2xl font-bold text-[#33475b]">
-            ⚙️ HubSpot項目マッピング設定
+          <h1 className="text-3xl font-bold text-slate-900">
+            HubSpot項目マッピング設定
           </h1>
-          <p className="text-[#516f90] mt-1">
+          <p className="text-slate-500 mt-2">
             HubSpotのコンタクトプロパティと履歴書・職務経歴書項目の紐づけを設定します
           </p>
-          <p className="text-sm text-[#ffb000] mt-1">
-            ※ 正規データ（アンケート）が空の場合にHubSpotデータが使用されます
+          <p className="text-sm text-amber-600 mt-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            正規データ（アンケート）が空の場合にHubSpotデータが使用されます
           </p>
         </div>
 
         {/* 履歴書項目 */}
-        <div className="bg-white rounded-xl border border-[#dfe3eb] shadow-sm overflow-hidden mb-6">
-          <div className="bg-[#ff7a59]/10 px-6 py-4 border-b border-[#dfe3eb]">
-            <h2 className="text-lg font-semibold text-[#33475b] flex items-center gap-2">
-              <span>📄</span>
-              <span>履歴書（JIS規格）</span>
+        <div className="card overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-6 py-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              履歴書（JIS規格）
             </h2>
           </div>
-          <table className="w-full">
-            <thead className="bg-[#f5f8fa] border-b border-[#dfe3eb]">
+          <table className="w-full table-modern">
+            <thead>
               <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90] w-16">
-                  有効
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  項目名
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  HubSpotプロパティ
-                </th>
+                <th className="w-16 text-center">有効</th>
+                <th className="text-left">項目名</th>
+                <th className="text-left">HubSpotプロパティ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eaf0f6]">
+            <tbody>
               {RESUME_FIELDS.map((field) => {
                 const mapping = mappings.find(m => m.resumeField === field.value);
                 return (
-                  <tr key={field.value} className="hover:bg-[#f5f8fa]">
-                    <td className="px-6 py-4">
+                  <tr key={field.value}>
+                    <td className="text-center">
                       <input
                         type="checkbox"
                         checked={mapping?.isActive || false}
                         onChange={() => handleToggle(field.value)}
-                        className="w-5 h-5 accent-[#ff7a59] rounded cursor-pointer"
+                        className="w-5 h-5 rounded-lg border-slate-300 text-orange-500 focus:ring-orange-500 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 font-medium text-[#33475b]">
+                    <td className="font-medium text-slate-900">
                       {field.label}
                     </td>
-                    <td className="px-6 py-4">
+                    <td>
                       <select
                         value={mapping?.hubspotProperty || ""}
                         onChange={(e) => handlePropertyChange(field.value, e.target.value)}
-                        className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] cursor-pointer"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer bg-white"
                       >
                         <option value="">（未設定）</option>
                         {properties.map((prop) => (
@@ -248,48 +239,44 @@ export default function HubSpotMappingsPage() {
         </div>
 
         {/* 職務経歴書項目 */}
-        <div className="bg-white rounded-xl border border-[#dfe3eb] shadow-sm overflow-hidden mb-6">
-          <div className="bg-[#00a4bd]/10 px-6 py-4 border-b border-[#dfe3eb]">
-            <h2 className="text-lg font-semibold text-[#33475b] flex items-center gap-2">
-              <span>📋</span>
-              <span>職務経歴書</span>
+        <div className="card overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              職務経歴書
             </h2>
           </div>
-          <table className="w-full">
-            <thead className="bg-[#f5f8fa] border-b border-[#dfe3eb]">
+          <table className="w-full table-modern">
+            <thead>
               <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90] w-16">
-                  有効
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  項目名
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  HubSpotプロパティ
-                </th>
+                <th className="w-16 text-center">有効</th>
+                <th className="text-left">項目名</th>
+                <th className="text-left">HubSpotプロパティ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eaf0f6]">
+            <tbody>
               {CV_FIELDS.map((field) => {
                 const mapping = mappings.find(m => m.resumeField === field.value);
                 return (
-                  <tr key={field.value} className="hover:bg-[#f5f8fa]">
-                    <td className="px-6 py-4">
+                  <tr key={field.value}>
+                    <td className="text-center">
                       <input
                         type="checkbox"
                         checked={mapping?.isActive || false}
                         onChange={() => handleToggle(field.value)}
-                        className="w-5 h-5 accent-[#00a4bd] rounded cursor-pointer"
+                        className="w-5 h-5 rounded-lg border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 font-medium text-[#33475b]">
+                    <td className="font-medium text-slate-900">
                       {field.label}
                     </td>
-                    <td className="px-6 py-4">
+                    <td>
                       <select
                         value={mapping?.hubspotProperty || ""}
                         onChange={(e) => handlePropertyChange(field.value, e.target.value)}
-                        className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a4bd]/30 focus:border-[#00a4bd] cursor-pointer"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer bg-white"
                       >
                         <option value="">（未設定）</option>
                         {properties.map((prop) => (
@@ -307,51 +294,47 @@ export default function HubSpotMappingsPage() {
         </div>
 
         {/* AI生成用データ */}
-        <div className="bg-white rounded-xl border border-[#dfe3eb] shadow-sm overflow-hidden mb-6">
-          <div className="bg-[#7c3aed]/10 px-6 py-4 border-b border-[#dfe3eb]">
-            <h2 className="text-lg font-semibold text-[#33475b] flex items-center gap-2">
-              <span>🤖</span>
-              <span>AI生成用データ</span>
+        <div className="card overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              AI生成用データ
             </h2>
-            <p className="text-sm text-[#516f90] mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               履歴書・職務経歴書のAI自動生成時に材料として使用されます
             </p>
           </div>
-          <table className="w-full">
-            <thead className="bg-[#f5f8fa] border-b border-[#dfe3eb]">
+          <table className="w-full table-modern">
+            <thead>
               <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90] w-16">
-                  有効
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  項目名
-                </th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-[#516f90]">
-                  HubSpotプロパティ
-                </th>
+                <th className="w-16 text-center">有効</th>
+                <th className="text-left">項目名</th>
+                <th className="text-left">HubSpotプロパティ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eaf0f6]">
+            <tbody>
               {AI_GENERATION_FIELDS.map((field) => {
                 const mapping = mappings.find(m => m.resumeField === field.value);
                 return (
-                  <tr key={field.value} className="hover:bg-[#f5f8fa]">
-                    <td className="px-6 py-4">
+                  <tr key={field.value}>
+                    <td className="text-center">
                       <input
                         type="checkbox"
                         checked={mapping?.isActive || false}
                         onChange={() => handleToggle(field.value)}
-                        className="w-5 h-5 accent-[#7c3aed] rounded cursor-pointer"
+                        className="w-5 h-5 rounded-lg border-slate-300 text-purple-500 focus:ring-purple-500 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 font-medium text-[#33475b]">
+                    <td className="font-medium text-slate-900">
                       {field.label}
                     </td>
-                    <td className="px-6 py-4">
+                    <td>
                       <select
                         value={mapping?.hubspotProperty || ""}
                         onChange={(e) => handlePropertyChange(field.value, e.target.value)}
-                        className="w-full px-3 py-2 border border-[#dfe3eb] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/30 focus:border-[#7c3aed] cursor-pointer"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer bg-white"
                       >
                         <option value="">（未設定）</option>
                         {properties.map((prop) => (
@@ -369,33 +352,38 @@ export default function HubSpotMappingsPage() {
         </div>
 
         {/* 項目一覧サマリー */}
-        <div className="bg-white rounded-xl border border-[#dfe3eb] shadow-sm p-6 mb-6">
-          <h3 className="text-lg font-semibold text-[#33475b] mb-4">📊 入力項目一覧</h3>
+        <div className="card p-6 mb-8">
+          <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            入力項目一覧
+          </h3>
           
           <div className="grid md:grid-cols-2 gap-6">
             {/* 履歴書 */}
             <div>
-              <h4 className="font-medium text-[#ff7a59] mb-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#ff7a59] rounded-full"></span>
+              <h4 className="font-medium text-orange-600 mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                 履歴書（JIS規格）
               </h4>
-              <div className="bg-[#f5f8fa] rounded-lg p-4">
-                <p className="text-sm text-[#33475b] mb-2 font-medium">基本情報</p>
-                <ul className="text-sm text-[#516f90] space-y-1 mb-3">
+              <div className="bg-slate-50 rounded-xl p-4">
+                <p className="text-sm text-slate-700 mb-2 font-medium">基本情報</p>
+                <ul className="text-sm text-slate-500 space-y-1 mb-4">
                   <li>・氏名 / 氏名（ふりがな）</li>
                   <li>・性別 / 生年月日</li>
                   <li>・郵便番号 / 住所 / 住所（ふりがな）</li>
                   <li>・電話番号 / メールアドレス</li>
                   <li>・証明写真</li>
                 </ul>
-                <p className="text-sm text-[#33475b] mb-2 font-medium">経歴・資格</p>
-                <ul className="text-sm text-[#516f90] space-y-1 mb-3">
+                <p className="text-sm text-slate-700 mb-2 font-medium">経歴・資格</p>
+                <ul className="text-sm text-slate-500 space-y-1 mb-4">
                   <li>・学歴（年月・内容）</li>
                   <li>・職歴（年月・内容）</li>
                   <li>・免許・資格（年月・名称）</li>
                 </ul>
-                <p className="text-sm text-[#33475b] mb-2 font-medium">その他</p>
-                <ul className="text-sm text-[#516f90] space-y-1">
+                <p className="text-sm text-slate-700 mb-2 font-medium">その他</p>
+                <ul className="text-sm text-slate-500 space-y-1">
                   <li>・本人希望欄</li>
                 </ul>
               </div>
@@ -403,24 +391,24 @@ export default function HubSpotMappingsPage() {
 
             {/* 職務経歴書 */}
             <div>
-              <h4 className="font-medium text-[#00a4bd] mb-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#00a4bd] rounded-full"></span>
+              <h4 className="font-medium text-emerald-600 mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
                 職務経歴書
               </h4>
-              <div className="bg-[#f5f8fa] rounded-lg p-4">
-                <p className="text-sm text-[#33475b] mb-2 font-medium">職務要約</p>
-                <ul className="text-sm text-[#516f90] space-y-1 mb-3">
+              <div className="bg-slate-50 rounded-xl p-4">
+                <p className="text-sm text-slate-700 mb-2 font-medium">職務要約</p>
+                <ul className="text-sm text-slate-500 space-y-1 mb-4">
                   <li>・職務要約（テキスト）</li>
                 </ul>
-                <p className="text-sm text-[#33475b] mb-2 font-medium">職務経歴（会社ごと）</p>
-                <ul className="text-sm text-[#516f90] space-y-1 mb-3">
+                <p className="text-sm text-slate-700 mb-2 font-medium">職務経歴（会社ごと）</p>
+                <ul className="text-sm text-slate-500 space-y-1 mb-4">
                   <li>・会社名 / 事業内容</li>
                   <li>・設立年 / 資本金 / 従業員数</li>
                   <li>・在籍期間（開始年月〜終了年月/現在）</li>
                   <li>・業務内容 / 成果・実績 / 取り組み</li>
                 </ul>
-                <p className="text-sm text-[#33475b] mb-2 font-medium">スキル・自己PR</p>
-                <ul className="text-sm text-[#516f90] space-y-1">
+                <p className="text-sm text-slate-700 mb-2 font-medium">スキル・自己PR</p>
+                <ul className="text-sm text-slate-500 space-y-1">
                   <li>・スキル・資格（複数追加可）</li>
                   <li>・自己PRタイトル / 自己PR本文</li>
                 </ul>
@@ -432,24 +420,27 @@ export default function HubSpotMappingsPage() {
         <div className="flex gap-4">
           <Link
             href="/job-seekers"
-            className="px-6 py-3 border border-[#dfe3eb] rounded-lg text-[#516f90] hover:bg-[#f5f8fa] transition-colors"
+            className="btn-secondary px-6 py-3"
           >
             キャンセル
           </Link>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 bg-[#ff7a59] hover:bg-[#e8573f] disabled:bg-[#cbd6e2] text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg"
+            className="btn-orange flex-1 px-6 py-3"
           >
             {saving ? "保存中..." : "設定を保存"}
           </button>
         </div>
 
-        <div className="mt-8 p-4 bg-[#00a4bd]/10 rounded-lg border border-[#00a4bd]/20">
-          <h3 className="font-medium text-[#00a4bd] mb-2">
-            💡 ヒント
+        <div className="mt-8 p-5 bg-gradient-to-r from-sky-50 to-sky-100 rounded-xl border border-sky-200">
+          <h3 className="font-medium text-sky-700 mb-2 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ヒント
           </h3>
-          <p className="text-sm text-[#33475b]">
+          <p className="text-sm text-slate-600">
             HubSpotにカスタムプロパティを作成すれば、より多くの情報を自動連携できます。
             HubSpotの設定画面から「プロパティ」→「プロパティを作成」で追加できます。
           </p>
@@ -458,8 +449,3 @@ export default function HubSpotMappingsPage() {
     </DashboardLayout>
   );
 }
-
-
-
-
-
