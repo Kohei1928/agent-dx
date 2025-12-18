@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessJobSeeker } from "@/lib/authorization";
 import { formatDateISO, parseDateSafe } from "@/lib/utils/date";
 import { AI_CONFIG } from "@/lib/config";
+import { safeJsonParse } from "@/lib/utils/json";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -195,46 +197,90 @@ URL: ${jobSeeker.targetCompany.companyUrl || "（なし）"}
 - 日付はYYYY-MM-DD形式で
 `;
 
-      console.log("Calling Gemini API...");
-      const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      console.log("Calling Gemini API via official SDK...");
+      
+      // 公式SDKを使用してGemini APIを呼び出し
+      const genAI = new GoogleGenerativeAI(AI_CONFIG.apiKey);
+      const model = genAI.getGenerativeModel({
+        model: AI_CONFIG.model,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 8192,
+        },
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
           },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: prompt }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 8192,
-            },
-          }),
-        }
-      );
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
+          },
+        ],
+      });
 
-      if (!geminiResponse.ok) {
-        const errorText = await geminiResponse.text();
-        // 詳細はログにのみ記録（本番環境では適切なログ管理システムを使用）
-        console.error("Gemini API error:", errorText);
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const generatedText = response.text();
+      
+      if (!generatedText) {
+        console.error("Gemini API returned empty response");
         throw new Error("AIによる生成に失敗しました。しばらくしてから再度お試しください。");
       }
-
-      const geminiData = await geminiResponse.json();
-      const generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
       console.log("Gemini response received, parsing JSON...");
 
-      // JSONを抽出
-      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("生成結果の解析に失敗しました");
+      // 安全にJSONをパース（try-catch付き）
+      const parseResult = safeJsonParse<{
+        resume: {
+          name?: string;
+          nameKana?: string;
+          gender?: string;
+          birthDate?: string;
+          postalCode?: string;
+          address?: string;
+          phone?: string;
+          email?: string;
+          education?: Array<{ year: number; month: number; content: string }>;
+          workHistory?: Array<{ year: number; month: number; content: string }>;
+          qualifications?: Array<{ year: number; month: number; name: string }>;
+          preferences?: string;
+        };
+        cv: {
+          name?: string;
+          summary?: string;
+          workHistory?: Array<{
+            companyName: string;
+            businessContent?: string;
+            established?: string;
+            capital?: string;
+            employees?: string;
+            period?: string;
+            content?: string;
+            achievements?: string;
+            initiatives?: string;
+          }>;
+          skills?: string[];
+          selfPrTitle?: string;
+          selfPr?: string;
+        };
+      }>(generatedText);
+
+      if (!parseResult.success || !parseResult.data) {
+        console.error("JSON parse error:", parseResult.error);
+        console.error("Raw text:", parseResult.rawText);
+        throw new Error(`生成結果の解析に失敗しました: ${parseResult.error}`);
       }
 
-      const generatedContent = JSON.parse(jsonMatch[0]);
+      const generatedContent = parseResult.data;
       console.log("Generated content parsed successfully");
 
       // 履歴書データを保存
