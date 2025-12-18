@@ -171,11 +171,9 @@ export function validateJsonColumn<T>(
   }
 
   // Zod v4では issues プロパティを使用
-  const issues = result.error.issues || result.error.errors || [];
+  const issues = result.error.issues;
   const errorMessage = issues
-    .map((e: { path: (string | number)[]; message: string }) => 
-      `${e.path.join(".")}: ${e.message}`
-    )
+    .map((e) => `${e.path.join(".")}: ${e.message}`)
     .join(", ");
 
   if (options?.logErrors) {
