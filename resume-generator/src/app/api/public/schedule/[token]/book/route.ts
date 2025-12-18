@@ -4,6 +4,27 @@ import { sendBookingNotifications } from "@/lib/notifications";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { SCHEDULE_BLOCK_CONFIG } from "@/lib/config";
 
+// ブロック時間設定を取得（DBカラムが存在しない場合のフォールバック）
+async function getBlockMinutes(jobSeekerId: string): Promise<{ onsite: number; online: number }> {
+  try {
+    const result = await prisma.$queryRaw<{ onsiteBlockMinutes?: number; onlineBlockMinutes?: number }[]>`
+      SELECT "onsiteBlockMinutes", "onlineBlockMinutes" FROM "JobSeeker" WHERE id = ${jobSeekerId}
+    `;
+    if (result && result[0]) {
+      return {
+        onsite: result[0].onsiteBlockMinutes ?? SCHEDULE_BLOCK_CONFIG.onsiteBlockMinutes,
+        online: result[0].onlineBlockMinutes ?? SCHEDULE_BLOCK_CONFIG.onlineBlockMinutes,
+      };
+    }
+  } catch {
+    // カラムが存在しない場合はデフォルト値を使用
+  }
+  return {
+    onsite: SCHEDULE_BLOCK_CONFIG.onsiteBlockMinutes,
+    online: SCHEDULE_BLOCK_CONFIG.onlineBlockMinutes,
+  };
+}
+
 type Context = {
   params: Promise<{ token: string }>;
 };
@@ -65,14 +86,12 @@ export async function POST(request: NextRequest, context: Context) {
       );
     }
 
-    // トークンで求職者を検索（登録したCAの情報も取得、ブロック時間設定も含む）
+    // トークンで求職者を検索（登録したCAの情報も取得）
     const jobSeeker = await prisma.jobSeeker.findUnique({
       where: { scheduleToken: token },
       select: {
         id: true,
         name: true,
-        onsiteBlockMinutes: true,
-        onlineBlockMinutes: true,
         registeredBy: {
           select: {
             email: true,
@@ -101,9 +120,10 @@ export async function POST(request: NextRequest, context: Context) {
       );
     }
 
-    // ブロック時間設定を取得（DBに設定がなければデフォルト値を使用）
-    const onsiteBlockMinutes = jobSeeker.onsiteBlockMinutes ?? SCHEDULE_BLOCK_CONFIG.onsiteBlockMinutes;
-    const onlineBlockMinutes = jobSeeker.onlineBlockMinutes ?? SCHEDULE_BLOCK_CONFIG.onlineBlockMinutes;
+    // ブロック時間設定を取得（DBカラムが存在しない場合はデフォルト値を使用）
+    const blockMinutes = await getBlockMinutes(jobSeeker.id);
+    const onsiteBlockMinutes = blockMinutes.onsite;
+    const onlineBlockMinutes = blockMinutes.online;
 
     // 選択した時間範囲をカバーする全ての空きスケジュールを取得
     const coveringSchedules = await prisma.schedule.findMany({
