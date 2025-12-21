@@ -214,71 +214,102 @@ export default function JobSeekerDetailPage() {
             </h1>
             
             {/* メインアクションボタン */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <button
                 onClick={() => setIsGenerateModalOpen(true)}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-orange-200 transition-all hover:shadow-orange-300"
+                className="group w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>レジュメ生成</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center transition-colors group-hover:bg-orange-100">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-base font-bold text-slate-900">レジュメ生成</div>
+                    <div className="text-xs text-slate-500 mt-0.5">履歴書・職務経歴書・推薦文</div>
+                  </div>
+                </div>
               </button>
+
               <Link
                 href={`/job-seekers/${id}/editor`}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-amber-200 transition-all hover:shadow-amber-300"
+                className="group w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                <span>エディタ編集</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center transition-colors group-hover:bg-orange-100">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-base font-bold text-slate-900">エディタ編集</div>
+                    <div className="text-xs text-slate-500 mt-0.5">入力・編集してPDF出力</div>
+                  </div>
+                </div>
               </Link>
+
               <Link
                 href={`/job-seekers/${id}/recommendation`}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-rose-200 transition-all hover:shadow-rose-300"
+                className="group w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>推薦文作成</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center transition-colors group-hover:bg-orange-100">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-base font-bold text-slate-900">推薦文作成</div>
+                    <div className="text-xs text-slate-500 mt-0.5">テンプレから生成・編集</div>
+                  </div>
+                </div>
               </Link>
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() => handleCopyFormUrl("normal")}
-                  disabled={!jobSeeker.formToken}
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-t-xl font-semibold shadow-lg transition-all text-sm ${
-                    copiedFormUrl === "normal"
-                      ? "bg-green-500 text-white"
-                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-200"
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>{copiedFormUrl === "normal" ? "コピー!" : "通常Ver フォームURL"}</span>
-                </button>
-                <button
-                  onClick={() => handleCopyFormUrl("free")}
-                  disabled={!jobSeeker.formToken}
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-b-xl font-semibold shadow-lg transition-all text-sm ${
-                    copiedFormUrl === "free"
-                      ? "bg-green-500 text-white"
-                      : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-200"
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>{copiedFormUrl === "free" ? "コピー!" : "自由記述Ver フォームURL"}</span>
-                </button>
+
+              {/* フォームURL */}
+              <div className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-sm font-bold text-slate-900">フォームURL</div>
+                  <div className="text-xs text-slate-500">ワンクリックでコピー</div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    onClick={() => handleCopyFormUrl("normal")}
+                    disabled={!jobSeeker.formToken}
+                    className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold border transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      copiedFormUrl === "normal"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-200"
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>{copiedFormUrl === "normal" ? "コピーしました" : "通常Ver をコピー"}</span>
+                  </button>
+                  <button
+                    onClick={() => handleCopyFormUrl("free")}
+                    disabled={!jobSeeker.formToken}
+                    className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold border transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      copiedFormUrl === "free"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-200"
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>{copiedFormUrl === "free" ? "コピーしました" : "自由記述Ver をコピー"}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* サブアクション */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link
                 href={`/job-seekers/${id}/schedule`}
-                className="text-sm text-orange-600 hover:text-orange-700 px-3 py-1.5 border border-orange-200 rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-1"
+                className="text-sm text-orange-700 hover:text-orange-800 px-3 py-2 border border-orange-200 rounded-xl hover:bg-orange-50 transition-colors flex items-center gap-1.5 bg-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -287,7 +318,7 @@ export default function JobSeekerDetailPage() {
               </Link>
               <Link
                 href={`/job-seekers/${id}/logs`}
-                className="text-sm text-slate-600 hover:text-slate-800 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1"
+                className="text-sm text-slate-700 hover:text-slate-900 px-3 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-1.5 bg-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
