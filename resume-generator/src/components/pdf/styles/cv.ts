@@ -99,12 +99,15 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPBold",
     fontSize: 11,
     color: "#000",
+    flexGrow: 1,
+    flexShrink: 1,
+    marginRight: 8,
   },
 
   // 会社情報コンテナ
   companyInfoContainer: {
-    marginTop: 6,
-    marginBottom: 6,
+    marginTop: 8,
+    marginBottom: 8,
   },
 
   // 会社情報
@@ -112,8 +115,8 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPMedium",
     fontSize: 9,
     color: "#000",
-    marginBottom: 2,
-    lineHeight: 1.4,
+    marginBottom: 3,
+    lineHeight: 1.6,
   },
 
   // 職歴テーブル
@@ -282,16 +285,17 @@ export const cvStyles = StyleSheet.create({
   // 会社名と在籍期間を横並びにするコンテナ
   companyNameContainer: {
     flexDirection: "row",
-    alignItems: "baseline",  // ベースライン揃えで行ずれを解消
+    flexWrap: "wrap",
+    alignItems: "flex-end",
     marginBottom: 4,
   },
 
   // 在籍期間（会社名の横）
   companyPeriod: {
     fontFamily: "NotoSansJPBold",
-    fontSize: 11,
+    fontSize: 10,
     color: "#000",
-    marginLeft: 16, // 2スペース分
+    marginLeft: 8,
   },
 
   // 自由記述テキスト

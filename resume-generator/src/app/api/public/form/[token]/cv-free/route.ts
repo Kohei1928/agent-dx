@@ -303,7 +303,7 @@ export async function POST(request: NextRequest, context: Context) {
 
     // 完了通知（重複防止）
     if (isComplete && canSendNotification(jobSeeker.id)) {
-      const baseUrl = request.headers.get("origin") || process.env.NEXTAUTH_URL || "";
+      const baseUrl = process.env.NEXTAUTH_URL || request.headers.get("origin") || "";
       sendFormSubmissionNotifications({
         candidateName: name || jobSeeker.name,
         userEmail: jobSeeker.registeredBy?.email || undefined,

@@ -40,19 +40,53 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
         {/* 職務経歴 */}
         <Text style={cvStyles.sectionTitle}>■職務経歴</Text>
 
-        {(data.workHistory || []).map((work, i) => (
-          <View key={`cv-free-work-${i}`} style={cvStyles.companySection} wrap={false}>
-            {/* 会社名 */}
-            <Text style={cvStyles.companyName}>○{work.companyName || ""}</Text>
+        {(data.workHistory || []).map((work, i) => {
+          // 在籍期間を生成
+          const companyPeriod = (() => {
+            if (work.startYear && work.startMonth) {
+              const startPart = `${work.startYear}年${work.startMonth}月`;
+              const endPart = work.isCurrentJob
+                ? "現在"
+                : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "");
+              return endPart ? `${startPart}〜${endPart}` : startPart;
+            }
+            return work.period || "";
+          })();
 
-            {/* 会社情報（2行） */}
+          // 空でない項目だけ表示
+          const hasBusinessContent = !!work.businessContent;
+          const hasEstablished = !!work.established;
+          const hasCapital = !!work.capital;
+          const hasEmployees = !!work.employees;
+
+          const secondLineItems: string[] = [];
+          if (hasEstablished) secondLineItems.push(`設立：${work.established}`);
+          if (hasCapital) secondLineItems.push(`資本金：${work.capital}`);
+          if (hasEmployees) secondLineItems.push(`従業員数：${work.employees}`);
+          const secondLine = secondLineItems.join("　");
+
+          return (
+          <View key={`cv-free-work-${i}`} style={cvStyles.companySection}>
+            {/* 会社名と在籍期間を横並び */}
+            <View style={cvStyles.companyNameContainer}>
+              <Text style={cvStyles.companyName}>○{work.companyName || ""}</Text>
+              {companyPeriod && (
+                <Text style={cvStyles.companyPeriod}>{companyPeriod}</Text>
+              )}
+            </View>
+
+            {/* 会社情報（空でない項目のみ表示） */}
             <View style={cvStyles.companyInfoContainer}>
-              <Text style={cvStyles.companyInfo}>
-                ◆事業内容：{work.businessContent || ""}
-              </Text>
-              <Text style={cvStyles.companyInfo}>
-                ◆設立：{work.established || ""}　資本金：{work.capital || ""}　従業員数：{work.employees || ""}
-              </Text>
+              {hasBusinessContent && (
+                <Text style={cvStyles.companyInfo}>
+                  ◆事業内容：{work.businessContent}
+                </Text>
+              )}
+              {secondLine && (
+                <Text style={cvStyles.companyInfo}>
+                  ◆{secondLine}
+                </Text>
+              )}
             </View>
 
             {/* 期間・業務内容テーブル */}
@@ -116,7 +150,8 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
               </View>
             </View>
           </View>
-        ))}
+          );
+        })}
 
         {/* 活かせる経験・知識・技術（自由記述） */}
         {(data.freeformSkills || (data.skills || []).length > 0) && (
