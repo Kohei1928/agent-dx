@@ -1,9 +1,6 @@
 # Cloud Build設定ファイル
 # エージェントDX（Resume Generator）のビルド・デプロイ
 
-substitutions:
-  _TAG: ${SHORT_SHA}
-
 steps:
   # Step 1: Dockerイメージをビルド
   - name: 'gcr.io/cloud-builders/docker'
@@ -11,7 +8,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:${_TAG}'
+      - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:$SHORT_SHA'
       - '-t'
       - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:latest'
       - '.'
@@ -30,7 +27,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'agent-dx'
-      - '--image=asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:${_TAG}'
+      - '--image=asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:$SHORT_SHA'
       - '--region=asia-northeast1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -53,7 +50,7 @@ steps:
 
 # イメージをArtifact Registryに保存
 images:
-  - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:${_TAG}'
+  - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:$SHORT_SHA'
   - 'asia-northeast1-docker.pkg.dev/${PROJECT_ID}/agent-dx/app:latest'
 
 # タイムアウト設定（20分）
