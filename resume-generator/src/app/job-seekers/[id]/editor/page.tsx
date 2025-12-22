@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { pdf } from "@react-pdf/renderer";
@@ -117,6 +117,12 @@ export default function EditorPage() {
   const [syncing, setSyncing] = useState(false);
   const [jobSeekerName, setJobSeekerName] = useState("");
   const [hasHubspot, setHasHubspot] = useState(false);
+  
+  // 自動保存用のstate
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving" | "unsaved" | "error">("saved");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
 
   // 履歴書データ
   const [resumeData, setResumeData] = useState<ResumeData>({
@@ -254,6 +260,70 @@ export default function EditorPage() {
     }
   }, [session, id]);
 
+  // 自動保存の実行関数
+  const performAutoSave = useCallback(async () => {
+    if (loading || isInitialLoadRef.current) return;
+    
+    setAutoSaveStatus("saving");
+    try {
+      const [resumeRes, cvRes] = await Promise.all([
+        fetch(`/api/job-seekers/${id}/resume`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(resumeData),
+        }),
+        fetch(`/api/job-seekers/${id}/cv`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cvData),
+        }),
+      ]);
+
+      if (resumeRes.ok && cvRes.ok) {
+        setAutoSaveStatus("saved");
+        setLastSavedAt(new Date());
+      } else {
+        setAutoSaveStatus("error");
+      }
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+      setAutoSaveStatus("error");
+    }
+  }, [id, resumeData, cvData, loading]);
+
+  // 自動保存のトリガー（データ変更時に2秒後に保存）
+  useEffect(() => {
+    // 初回ロード時はスキップ
+    if (loading) return;
+    
+    // 初回データセット完了後にフラグをリセット
+    if (isInitialLoadRef.current) {
+      const timer = setTimeout(() => {
+        isInitialLoadRef.current = false;
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    
+    // 未保存状態にする
+    setAutoSaveStatus("unsaved");
+    
+    // 既存のタイマーをクリア
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    
+    // 2秒後に自動保存
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 2000);
+    
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [resumeData, cvData, loading, performAutoSave]);
+
   // HubSpot同期
   const handleSyncHubSpot = async () => {
     if (!hasHubspot) return;
@@ -306,6 +376,7 @@ export default function EditorPage() {
   // 保存
   const handleSave = async () => {
     setSaving(true);
+    setAutoSaveStatus("saving");
     try {
       const [resumeRes, cvRes] = await Promise.all([
         fetch(`/api/job-seekers/${id}/resume`, {
@@ -321,12 +392,16 @@ export default function EditorPage() {
       ]);
 
       if (resumeRes.ok && cvRes.ok) {
-        alert("保存しました！");
+        setAutoSaveStatus("saved");
+        setLastSavedAt(new Date());
+        // 手動保存成功のフィードバック（控えめに）
       } else {
+        setAutoSaveStatus("error");
         alert("保存に失敗しました");
       }
     } catch (error) {
       console.error("Failed to save:", error);
+      setAutoSaveStatus("error");
       alert("保存に失敗しました");
     } finally {
       setSaving(false);
@@ -522,21 +597,60 @@ export default function EditorPage() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
+            {/* 自動保存ステータス */}
+            <div className="flex items-center gap-2 text-sm">
+              {autoSaveStatus === "saving" && (
+                <span className="text-orange-500 flex items-center gap-1">
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  保存中...
+                </span>
+              )}
+              {autoSaveStatus === "saved" && lastSavedAt && (
+                <span className="text-emerald-600 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  保存済み
+                </span>
+              )}
+              {autoSaveStatus === "unsaved" && (
+                <span className="text-amber-500 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
+                  </svg>
+                  未保存
+                </span>
+              )}
+              {autoSaveStatus === "error" && (
+                <span className="text-red-500 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  保存エラー
+                </span>
+              )}
+            </div>
+
+            {/* HubSpot連携ボタン */}
             {hasHubspot && (
               <button
                 onClick={handleSyncHubSpot}
                 disabled={syncing}
-                className="bg-slate-100 hover:bg-slate-200 disabled:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center gap-2 shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                {syncing ? "同期中..." : "HubSpot同期"}
+                {syncing ? "HubSpot同期中..." : "HubSpotから取得"}
               </button>
             )}
+
+            {/* 手動保存ボタン */}
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || autoSaveStatus === "saving"}
               className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
