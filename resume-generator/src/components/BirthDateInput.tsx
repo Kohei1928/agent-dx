@@ -17,38 +17,40 @@ export default function BirthDateInput({
   const [error, setError] = useState<string | null>(null);
   const [age, setAge] = useState<number | null>(null);
 
-  // 初期値をセット
-  useEffect(() => {
-    if (value) {
-      // ISO日付形式をYYYY/MM/DD形式に変換
-      // タイムゾーン問題を避けるため、日付文字列から直接パース
-      let formatted = "";
-      
-      // "YYYY-MM-DD" 形式の場合
-      if (value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = value.split("-");
-        formatted = `${year}/${month}/${day}`;
-      }
-      // ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" の場合
-      else if (value.includes("T")) {
-        const datePart = value.split("T")[0];
-        const [year, month, day] = datePart.split("-");
-        formatted = `${year}/${month}/${day}`;
-      }
-      // その他の形式はDateオブジェクトを使用（ローカルタイムで解釈）
-      else {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-          formatted = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
-        }
-      }
-      
-      if (formatted) {
-        setDisplayValue(formatted);
-        calculateAge(formatted);
-      }
+  // 値の変換関数
+  const formatValueToDisplay = useCallback((val: string): string => {
+    if (!val) return "";
+    
+    // "YYYY-MM-DD" 形式の場合
+    if (val.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = val.split("-");
+      return `${year}/${month}/${day}`;
     }
+    // ISO形式 "YYYY-MM-DDTHH:mm:ss.sssZ" の場合
+    if (val.includes("T")) {
+      const datePart = val.split("T")[0];
+      const [year, month, day] = datePart.split("-");
+      return `${year}/${month}/${day}`;
+    }
+    // その他の形式はDateオブジェクトを使用（ローカルタイムで解釈）
+    const date = new Date(val);
+    if (!isNaN(date.getTime())) {
+      return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
+    }
+    return "";
   }, []);
+
+  // valueが変更されたら表示を更新
+  useEffect(() => {
+    const formatted = formatValueToDisplay(value);
+    if (formatted) {
+      setDisplayValue(formatted);
+      calculateAge(formatted);
+    } else {
+      setDisplayValue("");
+      setAge(null);
+    }
+  }, [value, formatValueToDisplay, calculateAge]);
 
   // 年齢計算
   const calculateAge = useCallback((dateStr: string) => {

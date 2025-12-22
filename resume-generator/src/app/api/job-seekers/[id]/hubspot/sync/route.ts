@@ -90,7 +90,13 @@ export async function POST(
     });
     
     // 取得するプロパティのリストを作成（デフォルト + マッピングで使用するプロパティ）
-    const defaultProperties = ["firstname", "lastname", "email", "phone", "date_of_birth", "birthdate", "address", "city", "state", "zip"];
+    // 生年月日の一般的なプロパティ名を追加
+    const defaultProperties = [
+      "firstname", "lastname", "email", "phone", 
+      "date_of_birth", "birthdate", "birth_date", "dob", "birthday",
+      "dateofbirth", "date-of-birth", "生年月日",
+      "address", "city", "state", "zip"
+    ];
     const mappedProperties = activeMappings.map(m => m.hubspotProperty).filter(Boolean);
     const allProperties = [...new Set([...defaultProperties, ...mappedProperties])];
     
@@ -140,7 +146,10 @@ export async function POST(
     const resumeUpdateData: Record<string, any> = {};
     
     // 生年月日の自動検出（マッピングがなくても一般的なプロパティ名から検索）
-    const birthDatePropertyNames = ["date_of_birth", "birthdate", "birth_date", "dob", "birthday"];
+    const birthDatePropertyNames = [
+      "date_of_birth", "birthdate", "birth_date", "dob", "birthday",
+      "dateofbirth", "date-of-birth", "生年月日"
+    ];
     let birthDateFound = false;
     
     for (const mapping of mappings) {
