@@ -40,28 +40,16 @@ export default function BirthDateInput({
     return "";
   }, []);
 
-  // valueが変更されたら表示を更新
-  useEffect(() => {
-    const formatted = formatValueToDisplay(value);
-    if (formatted) {
-      setDisplayValue(formatted);
-      calculateAge(formatted);
-    } else {
-      setDisplayValue("");
-      setAge(null);
-    }
-  }, [value, formatValueToDisplay, calculateAge]);
-
-  // 年齢計算
-  const calculateAge = useCallback((dateStr: string) => {
+  // 年齢計算関数
+  const calculateAgeFromDate = useCallback((dateStr: string): number | null => {
     const parts = dateStr.split("/");
-    if (parts.length !== 3) return;
+    if (parts.length !== 3) return null;
 
     const year = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10);
     const day = parseInt(parts[2], 10);
 
-    if (isNaN(year) || isNaN(month) || isNaN(day)) return;
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
 
     const birthDate = new Date(year, month - 1, day);
     const today = new Date();
@@ -73,11 +61,23 @@ export default function BirthDateInput({
     }
 
     if (calculatedAge >= 0 && calculatedAge <= 150) {
+      return calculatedAge;
+    }
+    return null;
+  }, []);
+
+  // valueが変更されたら表示を更新
+  useEffect(() => {
+    const formatted = formatValueToDisplay(value);
+    if (formatted) {
+      setDisplayValue(formatted);
+      const calculatedAge = calculateAgeFromDate(formatted);
       setAge(calculatedAge);
     } else {
+      setDisplayValue("");
       setAge(null);
     }
-  }, []);
+  }, [value, formatValueToDisplay, calculateAgeFromDate]);
 
   // うるう年判定
   const isLeapYear = (year: number): boolean => {
@@ -167,7 +167,7 @@ export default function BirthDateInput({
       const day = parts[2].padStart(2, "0");
       const dateString = `${year}-${month}-${day}T00:00:00.000Z`;
       onChange(dateString);
-      calculateAge(formatted);
+      setAge(calculateAgeFromDate(formatted));
     } else {
       setAge(null);
     }
