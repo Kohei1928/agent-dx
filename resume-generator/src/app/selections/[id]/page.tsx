@@ -56,6 +56,33 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: [],
 };
 
+// 辞退理由の選択肢
+const WITHDRAW_REASONS = [
+  { value: "other_offer", label: "他社内定" },
+  { value: "salary", label: "条件（年収）" },
+  { value: "work_content", label: "仕事内容" },
+  { value: "location", label: "勤務地" },
+  { value: "work_style", label: "働き方（リモート等）" },
+  { value: "company_culture", label: "社風・雰囲気" },
+  { value: "personal", label: "個人的な事情" },
+  { value: "schedule", label: "選考スケジュール" },
+  { value: "other", label: "その他" },
+];
+
+// お見送り理由の選択肢
+const REJECT_REASONS = [
+  { value: "skill_mismatch", label: "スキルミスマッチ" },
+  { value: "experience_lack", label: "経験不足" },
+  { value: "culture_fit", label: "カルチャーフィット" },
+  { value: "communication", label: "コミュニケーション" },
+  { value: "motivation", label: "志望度・熱意" },
+  { value: "age", label: "年齢" },
+  { value: "salary_expectation", label: "希望年収" },
+  { value: "other_candidate", label: "他候補者採用" },
+  { value: "position_closed", label: "ポジションクローズ" },
+  { value: "other", label: "その他" },
+];
+
 type Message = {
   id: string;
   direction: "inbound" | "outbound";
@@ -123,6 +150,13 @@ export default function SelectionDetailPage() {
   const [newMessageSubject, setNewMessageSubject] = useState("");
   const [newMessageBody, setNewMessageBody] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
+  
+  // 辞退・お見送りモーダル
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedReason, setSelectedReason] = useState("");
+  const [reasonComment, setReasonComment] = useState("");
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -156,12 +190,33 @@ export default function SelectionDetailPage() {
   const handleStatusChange = async (newStatus: string) => {
     if (!selection) return;
     
+    // 辞退の場合はモーダルを表示
+    if (["withdrawn", "offer_rejected"].includes(newStatus)) {
+      setPendingStatus(newStatus);
+      setShowWithdrawModal(true);
+      return;
+    }
+    
+    // お見送りの場合はモーダルを表示
+    if (["rejected", "document_rejected"].includes(newStatus)) {
+      setPendingStatus(newStatus);
+      setShowRejectModal(true);
+      return;
+    }
+    
+    // 通常のステータス変更
+    await updateStatus(newStatus);
+  };
+
+  const updateStatus = async (newStatus: string, additionalData: Record<string, unknown> = {}) => {
+    if (!selection) return;
+    
     setUpdating(true);
     try {
       const res = await fetch(`/api/selections/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, ...additionalData }),
       });
       
       if (res.ok) {
@@ -173,6 +228,44 @@ export default function SelectionDetailPage() {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleWithdrawConfirm = async () => {
+    if (!pendingStatus || !selectedReason) return;
+    
+    await updateStatus(pendingStatus, {
+      withdrawReason: selectedReason,
+      withdrawComment: reasonComment,
+      note: `辞退理由: ${WITHDRAW_REASONS.find(r => r.value === selectedReason)?.label}${reasonComment ? ` - ${reasonComment}` : ""}`,
+    });
+    
+    setShowWithdrawModal(false);
+    setSelectedReason("");
+    setReasonComment("");
+    setPendingStatus(null);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!pendingStatus || !selectedReason) return;
+    
+    await updateStatus(pendingStatus, {
+      rejectReason: selectedReason,
+      rejectComment: reasonComment,
+      note: `お見送り理由: ${REJECT_REASONS.find(r => r.value === selectedReason)?.label}${reasonComment ? ` - ${reasonComment}` : ""}`,
+    });
+    
+    setShowRejectModal(false);
+    setSelectedReason("");
+    setReasonComment("");
+    setPendingStatus(null);
+  };
+
+  const handleModalClose = () => {
+    setShowWithdrawModal(false);
+    setShowRejectModal(false);
+    setSelectedReason("");
+    setReasonComment("");
+    setPendingStatus(null);
   };
 
   const handleSendMessage = async () => {
@@ -631,6 +724,138 @@ export default function SelectionDetailPage() {
             </div>
           )}
         </div>
+
+        {/* 辞退理由モーダル */}
+        {showWithdrawModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">辞退理由を選択</h3>
+              <p className="text-sm text-slate-500 mb-4">
+                求職者の辞退理由を選択してください。
+              </p>
+              
+              <div className="space-y-2 mb-4">
+                {WITHDRAW_REASONS.map((reason) => (
+                  <label
+                    key={reason.value}
+                    className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      selectedReason === reason.value
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="withdrawReason"
+                      value={reason.value}
+                      checked={selectedReason === reason.value}
+                      onChange={(e) => setSelectedReason(e.target.value)}
+                      className="sr-only"
+                    />
+                    <span className={`text-sm ${selectedReason === reason.value ? "text-orange-700 font-medium" : "text-slate-700"}`}>
+                      {reason.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  詳細コメント（任意）
+                </label>
+                <textarea
+                  value={reasonComment}
+                  onChange={(e) => setReasonComment(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  placeholder="具体的な理由があれば入力..."
+                />
+              </div>
+              
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleModalClose}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-800"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleWithdrawConfirm}
+                  disabled={!selectedReason || updating}
+                  className="btn-orange px-6 py-2 disabled:opacity-50"
+                >
+                  {updating ? "更新中..." : "確定"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* お見送り理由モーダル */}
+        {showRejectModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">お見送り理由を選択</h3>
+              <p className="text-sm text-slate-500 mb-4">
+                企業からのお見送り理由を選択してください。
+              </p>
+              
+              <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
+                {REJECT_REASONS.map((reason) => (
+                  <label
+                    key={reason.value}
+                    className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      selectedReason === reason.value
+                        ? "border-red-500 bg-red-50"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="rejectReason"
+                      value={reason.value}
+                      checked={selectedReason === reason.value}
+                      onChange={(e) => setSelectedReason(e.target.value)}
+                      className="sr-only"
+                    />
+                    <span className={`text-sm ${selectedReason === reason.value ? "text-red-700 font-medium" : "text-slate-700"}`}>
+                      {reason.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  詳細コメント（任意）
+                </label>
+                <textarea
+                  value={reasonComment}
+                  onChange={(e) => setReasonComment(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                  placeholder="具体的な理由があれば入力..."
+                />
+              </div>
+              
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleModalClose}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-800"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleRejectConfirm}
+                  disabled={!selectedReason || updating}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50"
+                >
+                  {updating ? "更新中..." : "確定"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
