@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y openssl libssl-dev ca-certificates && r
 
 # Install dependencies
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # ========================================
 # Stage 2: Build
