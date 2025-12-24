@@ -2,27 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import DashboardLayout from "@/components/DashboardLayout";
-
-// PDFViewerをクライアントサイドでのみ読み込み
-const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
-  { ssr: false, loading: () => <div className="spinner mx-auto"></div> }
-);
-
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false }
-);
-
-// JobSheetPDFもクライアントサイドで読み込み
-const JobSheetPDF = dynamic(
-  () => import("@/components/pdf/JobSheetPDF").then((mod) => mod.JobSheetPDF),
-  { ssr: false }
-);
 
 type JobData = {
   id: string;
@@ -65,6 +47,71 @@ type JobData = {
   };
 };
 
+// PDFコンポーネントを遅延読み込み
+const JobSheetPDFWrapper = ({ job, onReady }: { job: JobData; onReady: () => void }) => {
+  const [PDFDownloadLink, setPDFDownloadLink] = useState<React.ComponentType<any> | null>(null);
+  const [JobSheetPDF, setJobSheetPDF] = useState<React.ComponentType<{ data: JobData }> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadComponents = async () => {
+      try {
+        const [reactPdf, jobSheetModule] = await Promise.all([
+          import("@react-pdf/renderer"),
+          import("@/components/pdf/JobSheetPDF"),
+        ]);
+        setPDFDownloadLink(() => reactPdf.PDFDownloadLink);
+        setJobSheetPDF(() => jobSheetModule.JobSheetPDF);
+        setIsLoading(false);
+        onReady();
+      } catch (err) {
+        console.error("Failed to load PDF components:", err);
+        setError("PDFコンポーネントの読み込みに失敗しました");
+        setIsLoading(false);
+      }
+    };
+    loadComponents();
+  }, [onReady]);
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center py-4">
+        {error}
+      </div>
+    );
+  }
+
+  if (isLoading || !PDFDownloadLink || !JobSheetPDF) {
+    return (
+      <button className="btn-orange px-6 py-3 opacity-50 cursor-not-allowed" disabled>
+        PDF読み込み中...
+      </button>
+    );
+  }
+
+  return (
+    <PDFDownloadLink
+      document={<JobSheetPDF data={job} />}
+      fileName={`求人票_${job.company.name}_${job.title}.pdf`}
+      className="btn-orange px-6 py-3 flex items-center gap-2"
+    >
+      {({ loading: pdfLoading }: { loading: boolean }) =>
+        pdfLoading ? (
+          "準備中..."
+        ) : (
+          <>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            PDFダウンロード
+          </>
+        )
+      }
+    </PDFDownloadLink>
+  );
+};
+
 export default function JobPdfPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
@@ -74,6 +121,11 @@ export default function JobPdfPage() {
   const [job, setJob] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pdfReady, setPdfReady] = useState(false);
+
+  const handlePdfReady = useCallback(() => {
+    setPdfReady(true);
+  }, []);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -90,8 +142,8 @@ export default function JobPdfPage() {
         }
         const data = await res.json();
         setJob(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "エラーが発生しました");
       } finally {
         setLoading(false);
       }
@@ -133,6 +185,13 @@ export default function JobPdfPage() {
     );
   }
 
+  const formatSalary = (min: number | null, max: number | null) => {
+    if (!min && !max) return "-";
+    if (min && max) return `${min}〜${max}万円`;
+    if (min) return `${min}万円〜`;
+    return "-";
+  };
+
   return (
     <DashboardLayout>
       <div className="p-8">
@@ -154,43 +213,116 @@ export default function JobPdfPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              求人票プレビュー
+              求人票
             </h1>
             <p className="text-slate-500 mt-2">
               {job.company.name} - {job.title}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {job && (
-              <PDFDownloadLink
-                document={<JobSheetPDF data={job} />}
-                fileName={`求人票_${job.company.name}_${job.title}.pdf`}
-                className="btn-orange px-6 py-3 flex items-center gap-2"
-              >
-                {({ loading: pdfLoading }) =>
-                  pdfLoading ? (
-                    "準備中..."
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      PDFダウンロード
-                    </>
-                  )
-                }
-              </PDFDownloadLink>
-            )}
+            <JobSheetPDFWrapper job={job} onReady={handlePdfReady} />
           </div>
         </div>
 
-        {/* PDF Preview */}
-        <div className="card p-4">
-          <div className="bg-slate-100 rounded-lg overflow-hidden" style={{ height: "calc(100vh - 280px)" }}>
-            {job && (
-              <PDFViewer width="100%" height="100%" showToolbar={false}>
-                <JobSheetPDF data={job} />
-              </PDFViewer>
+        {/* Job Info Preview (HTML版) */}
+        <div className="card p-6 space-y-6">
+          <div className="text-center border-b border-slate-200 pb-4">
+            <p className="text-sm text-slate-500">{job.company.name}</p>
+            <h2 className="text-2xl font-bold text-slate-900 mt-2">{job.title}</h2>
+          </div>
+
+          {/* 基本情報 */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-orange-500 rounded"></span>
+              基本情報
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">職種カテゴリ</p>
+                <p className="font-medium text-slate-900">{job.category || "-"}</p>
+              </div>
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">雇用形態</p>
+                <p className="font-medium text-slate-900">{job.employmentType || "-"}</p>
+              </div>
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">年収</p>
+                <p className="font-medium text-slate-900">{formatSalary(job.salaryMin, job.salaryMax)}</p>
+              </div>
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">勤務時間</p>
+                <p className="font-medium text-slate-900">{job.workHours || "-"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 仕事内容 */}
+          {job.description && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-orange-500 rounded"></span>
+                仕事内容
+              </h3>
+              <p className="text-slate-700 whitespace-pre-wrap">{job.description}</p>
+            </div>
+          )}
+
+          {/* 必須要件 */}
+          {job.requirements && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-orange-500 rounded"></span>
+                必須要件
+              </h3>
+              <p className="text-slate-700 whitespace-pre-wrap">{job.requirements}</p>
+            </div>
+          )}
+
+          {/* 歓迎要件 */}
+          {job.preferences && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-orange-500 rounded"></span>
+                歓迎要件
+              </h3>
+              <p className="text-slate-700 whitespace-pre-wrap">{job.preferences}</p>
+            </div>
+          )}
+
+          {/* 企業情報 */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-blue-500 rounded"></span>
+              企業情報
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">企業名</p>
+                <p className="font-medium text-slate-900">{job.company.name}</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">業界</p>
+                <p className="font-medium text-slate-900">{job.company.industry || "-"}</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">本社所在地</p>
+                <p className="font-medium text-slate-900">{job.company.headquarters || "-"}</p>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-500">従業員数</p>
+                <p className="font-medium text-slate-900">{job.company.employeeCount || "-"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* PDFダウンロード案内 */}
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-lg text-center">
+            <p className="text-slate-600 mb-4">
+              上記の「PDFダウンロード」ボタンから、正式な求人票をダウンロードできます
+            </p>
+            {!pdfReady && (
+              <p className="text-sm text-slate-400">PDFを準備中...</p>
             )}
           </div>
         </div>
@@ -198,4 +330,3 @@ export default function JobPdfPage() {
     </DashboardLayout>
   );
 }
-
