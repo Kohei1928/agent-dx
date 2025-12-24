@@ -61,6 +61,8 @@ model User {
   sessions       Session[]
   jobSeekers     JobSeeker[]
   generationLogs GenerationLog[]
+  selections     Selection[]     // 担当選考
+  caProfile      CAProfile?      // CA権限情報
 }
 
 // 求職者情報
@@ -103,6 +105,7 @@ model JobSeeker {
   schedules            Schedule[]
   scheduleBookings     ScheduleBooking[]
   recommendationLetter RecommendationLetter?
+  selections           Selection[]           // この求職者の選考一覧
 
   @@index([userId])
   @@index([email])
@@ -255,7 +258,8 @@ model Company {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  bookings ScheduleBooking[]
+  bookings   ScheduleBooking[]
+  selections Selection[]       // この企業の選考一覧
 
   @@index([name])
 }
@@ -379,4 +383,209 @@ model RecommendationLetter {
 
   @@index([jobSeekerId])
   @@index([templateId])
+}
+
+// ========================================
+// 選考管理機能用モデル
+// ========================================
+
+// 選考ステータス
+enum SelectionStatus {
+  // 応募前
+  proposal              // 提案中
+  
+  // 書類選考
+  entry_preparing       // エントリー準備中
+  entry_requested       // エントリー依頼済み（RA事務へ）
+  entry_completed       // エントリー完了
+  document_screening    // 書類選考中
+  document_passed       // 書類通過
+  document_rejected     // 書類不通過
+  
+  // 日程調整
+  scheduling            // 日程調整中
+  schedule_confirmed    // 日程確定
+  
+  // 面接
+  first_interview       // 一次面接予定
+  first_interview_done  // 一次面接完了
+  second_interview      // 二次面接予定
+  second_interview_done // 二次面接完了
+  final_interview       // 最終面接予定
+  final_interview_done  // 最終面接完了
+  
+  // 内定
+  offer                 // 内定
+  offer_accepted        // 内定承諾
+  offer_rejected        // 内定辞退
+  
+  // 終了
+  withdrawn             // 辞退（求職者）
+  rejected              // 不採用（企業）
+  cancelled             // キャンセル
+}
+
+// 選考
+model Selection {
+  id              String          @id @default(cuid())
+  jobSeekerId     String
+  jobSeekerName   String          // 求職者名（表示用）
+  companyId       String?         // 企業マスタID（任意）
+  companyName     String          // 企業名
+  companyEmail    String?         // 企業連絡先メール
+  jobTitle        String?         // 求人タイトル
+  status          SelectionStatus @default(proposal)
+  
+  // 担当CA
+  assignedCAId    String          // 担当CAのUser ID
+  assignedCAName  String          // 担当CA名（表示用）
+  
+  // 選考IDタグ（メール紐づけ用）
+  selectionTag    String          @unique @default(cuid())
+  
+  // 日程調整URL
+  scheduleUrl     String?
+  
+  // 辞退・不採用理由
+  withdrawReason  String?         @db.VarChar(50)   // 辞退理由カテゴリ
+  withdrawComment String?         @db.Text          // 辞退理由詳細
+  rejectReason    String?         @db.VarChar(50)   // 不採用理由カテゴリ
+  rejectComment   String?         @db.Text          // 不採用理由詳細
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  jobSeeker       JobSeeker       @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  company         Company?        @relation(fields: [companyId], references: [id])
+  assignedCA      User            @relation(fields: [assignedCAId], references: [id])
+  messages        Message[]
+  statusHistory   SelectionStatusHistory[]
+
+  @@index([jobSeekerId])
+  @@index([companyId])
+  @@index([assignedCAId])
+  @@index([status])
+  @@index([selectionTag])
+}
+
+// 選考ステータス変更履歴
+model SelectionStatusHistory {
+  id          String          @id @default(cuid())
+  selectionId String
+  fromStatus  SelectionStatus?
+  toStatus    SelectionStatus
+  changedById String?         // 変更者のUser ID
+  changedBy   String?         // 変更者名
+  note        String?         @db.Text  // 変更理由・メモ
+  createdAt   DateTime        @default(now())
+
+  selection   Selection       @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+
+  @@index([selectionId])
+  @@index([createdAt])
+}
+
+// ========================================
+// メッセージ機能用モデル
+// ========================================
+
+// メッセージ方向
+enum MessageDirection {
+  inbound   // 受信（企業→RA）
+  outbound  // 送信（CA→企業）
+}
+
+// メッセージステータス
+enum MessageStatus {
+  received      // 受信済み
+  draft         // 下書き
+  pending_send  // 送信待ち（RA事務へ依頼中）
+  sent          // 送信済み
+  failed        // 送信失敗
+}
+
+// 送信方法
+enum SendMethod {
+  gmail   // Gmail経由
+  ats     // ATS経由
+}
+
+// メッセージ
+model Message {
+  id            String           @id @default(cuid())
+  selectionId   String
+  
+  // 方向
+  direction     MessageDirection
+  
+  // 受信の場合
+  fromEmail     String?          // 送信元メールアドレス
+  fromName      String?          // 送信者名
+  gmailMessageId String?         // Gmail Message ID（重複防止用）
+  gmailThreadId  String?         // Gmail Thread ID
+  
+  // 送信の場合
+  createdByCAId   String?        // 作成したCAのUser ID
+  createdByCAName String?        // 作成したCA名
+  
+  // 内容
+  subject       String
+  body          String           @db.Text
+  attachments   Json?            // 添付ファイル情報
+  
+  // ステータス
+  status        MessageStatus    @default(received)
+  
+  // 送信情報
+  sendMethod    SendMethod?      // 送信方法（gmail or ats）
+  sentByRAId    String?          // 送信したRA事務のUser ID
+  sentByRAName  String?          // 送信したRA事務名
+  sentAt        DateTime?        // 送信日時
+  
+  // 日時
+  receivedAt    DateTime?        // 受信日時（受信メールの場合）
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  selection     Selection        @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+
+  @@index([selectionId])
+  @@index([status])
+  @@index([gmailMessageId])
+  @@index([gmailThreadId])
+  @@index([createdAt])
+}
+
+// ========================================
+// CA権限管理用モデル
+// ========================================
+
+// CAロール
+enum CARole {
+  admin     // 管理者
+  manager   // マネージャー
+  member    // メンバー
+  ra_admin  // RA事務
+}
+
+// CAチーム情報（Userモデルを拡張）
+model CAProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  role        CARole   @default(member)
+  teamId      String?  // チームID
+  teamName    String?  // チーム名
+  managerId   String?  // マネージャーのUser ID
+  
+  // HubSpot連携
+  hubspotOwnerId    String?  // HubSpotオーナーID
+  hubspotOwnerEmail String?  // HubSpotオーナーメール
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([role])
 }
