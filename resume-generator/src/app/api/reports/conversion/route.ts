@@ -5,29 +5,36 @@ import { prisma } from "@/lib/prisma";
 
 // 選考ステータスのフェーズ定義
 const PHASE_ORDER = [
-  "proposal",           // 提案中
-  "document_screening", // 書類選考
-  "interview_1",        // 一次面接
-  "interview_2",        // 二次面接
-  "interview_final",    // 最終面接
-  "offer",              // 内定
-  "accepted",           // 内定承諾
+  "proposal",              // 提案中
+  "document_screening",    // 書類選考
+  "first_interview_done",  // 一次面接
+  "second_interview_done", // 二次面接
+  "final_interview_done",  // 最終面接
+  "offer",                 // 内定
+  "offer_accepted",        // 内定承諾
 ];
 
 const STATUS_LABELS: Record<string, string> = {
   proposal: "提案",
-  document_screening: "書類選考",
+  entry_preparing: "エントリー準備中",
+  entry_requested: "エントリー依頼済み",
+  entry_completed: "エントリー完了",
+  document_screening: "書類選考中",
   document_passed: "書類通過",
-  scheduling_interview: "日程調整中",
-  interview_1: "一次面接",
-  interview_2: "二次面接",
-  interview_final: "最終面接",
-  offer: "内定",
-  accepted: "内定承諾",
-  rejected: "不採用",
-  withdrawn: "辞退",
   document_rejected: "書類不通過",
+  scheduling: "日程調整中",
+  schedule_confirmed: "日程確定",
+  first_interview: "一次面接予定",
+  first_interview_done: "一次面接完了",
+  second_interview: "二次面接予定",
+  second_interview_done: "二次面接完了",
+  final_interview: "最終面接予定",
+  final_interview_done: "最終面接完了",
+  offer: "内定",
+  offer_accepted: "内定承諾",
   offer_rejected: "内定辞退",
+  withdrawn: "辞退",
+  rejected: "不採用",
   cancelled: "キャンセル",
 };
 
@@ -128,18 +135,18 @@ export async function GET(request: NextRequest) {
     // ファネル計算
     const total = selections.length;
     const documentPassed = selections.filter((s) => 
-      !["proposal", "document_screening", "document_rejected"].includes(s.status)
+      !["proposal", "entry_preparing", "entry_requested", "entry_completed", "document_screening", "document_rejected"].includes(s.status)
     ).length;
     const interview1 = selections.filter((s) =>
-      ["interview_1", "interview_2", "interview_final", "offer", "accepted"].includes(s.status)
+      ["first_interview", "first_interview_done", "second_interview", "second_interview_done", "final_interview", "final_interview_done", "offer", "offer_accepted"].includes(s.status)
     ).length;
     const interviewFinal = selections.filter((s) =>
-      ["interview_final", "offer", "accepted"].includes(s.status)
+      ["final_interview", "final_interview_done", "offer", "offer_accepted"].includes(s.status)
     ).length;
     const offered = selections.filter((s) =>
-      ["offer", "accepted", "offer_rejected"].includes(s.status)
+      ["offer", "offer_accepted", "offer_rejected"].includes(s.status)
     ).length;
-    const accepted = selections.filter((s) => s.status === "accepted").length;
+    const offerAccepted = selections.filter((s) => s.status === "offer_accepted").length;
 
     const funnel = [
       { stage: "エントリー", count: total, rate: 100 },
@@ -147,7 +154,7 @@ export async function GET(request: NextRequest) {
       { stage: "一次面接", count: interview1, rate: total > 0 ? Math.round((interview1 / total) * 100) : 0 },
       { stage: "最終面接", count: interviewFinal, rate: total > 0 ? Math.round((interviewFinal / total) * 100) : 0 },
       { stage: "内定", count: offered, rate: total > 0 ? Math.round((offered / total) * 100) : 0 },
-      { stage: "内定承諾", count: accepted, rate: total > 0 ? Math.round((accepted / total) * 100) : 0 },
+      { stage: "内定承諾", count: offerAccepted, rate: total > 0 ? Math.round((offerAccepted / total) * 100) : 0 },
     ];
 
     // 転換率（各フェーズ間）
@@ -156,39 +163,39 @@ export async function GET(request: NextRequest) {
       { from: "書類通過", to: "一次面接", rate: documentPassed > 0 ? Math.round((interview1 / documentPassed) * 100) : 0 },
       { from: "一次面接", to: "最終面接", rate: interview1 > 0 ? Math.round((interviewFinal / interview1) * 100) : 0 },
       { from: "最終面接", to: "内定", rate: interviewFinal > 0 ? Math.round((offered / interviewFinal) * 100) : 0 },
-      { from: "内定", to: "内定承諾", rate: offered > 0 ? Math.round((accepted / offered) * 100) : 0 },
+      { from: "内定", to: "内定承諾", rate: offered > 0 ? Math.round((offerAccepted / offered) * 100) : 0 },
     ];
 
     // CA別集計
-    const caStats: Record<string, { name: string; total: number; accepted: number }> = {};
+    const caStats: Record<string, { name: string; total: number; offerAccepted: number }> = {};
     selections.forEach((sel) => {
       if (!caStats[sel.assignedCAId]) {
         caStats[sel.assignedCAId] = {
           name: sel.assignedCAName,
           total: 0,
-          accepted: 0,
+          offerAccepted: 0,
         };
       }
       caStats[sel.assignedCAId].total++;
-      if (sel.status === "accepted") {
-        caStats[sel.assignedCAId].accepted++;
+      if (sel.status === "offer_accepted") {
+        caStats[sel.assignedCAId].offerAccepted++;
       }
     });
 
     // 企業別集計（上位10社）
-    const companyStats: Record<string, { name: string; total: number; accepted: number }> = {};
+    const companyStats: Record<string, { name: string; total: number; offerAccepted: number }> = {};
     selections.forEach((sel) => {
       const key = sel.companyId || sel.companyName;
       if (!companyStats[key]) {
         companyStats[key] = {
           name: sel.companyName,
           total: 0,
-          accepted: 0,
+          offerAccepted: 0,
         };
       }
       companyStats[key].total++;
-      if (sel.status === "accepted") {
-        companyStats[key].accepted++;
+      if (sel.status === "offer_accepted") {
+        companyStats[key].offerAccepted++;
       }
     });
 
@@ -198,7 +205,8 @@ export async function GET(request: NextRequest) {
       .map(([id, stats]) => ({
         id,
         ...stats,
-        acceptanceRate: stats.total > 0 ? Math.round((stats.accepted / stats.total) * 100) : 0,
+        accepted: stats.offerAccepted,
+        acceptanceRate: stats.total > 0 ? Math.round((stats.offerAccepted / stats.total) * 100) : 0,
       }));
 
     return NextResponse.json({
@@ -208,8 +216,8 @@ export async function GET(request: NextRequest) {
       },
       summary: {
         totalSelections: total,
-        accepted,
-        acceptanceRate: total > 0 ? Math.round((accepted / total) * 100) : 0,
+        accepted: offerAccepted,
+        acceptanceRate: total > 0 ? Math.round((offerAccepted / total) * 100) : 0,
         withdrawn: statusCounts["withdrawn"] || 0,
         rejected: statusCounts["rejected"] || 0,
       },
@@ -230,7 +238,8 @@ export async function GET(request: NextRequest) {
         .map(([id, stats]) => ({
           id,
           ...stats,
-          acceptanceRate: stats.total > 0 ? Math.round((stats.accepted / stats.total) * 100) : 0,
+          accepted: stats.offerAccepted,
+          acceptanceRate: stats.total > 0 ? Math.round((stats.offerAccepted / stats.total) * 100) : 0,
         }))
         .sort((a, b) => b.total - a.total),
       topCompanies,
