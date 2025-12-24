@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 
@@ -57,6 +57,7 @@ export default function JobPdfPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [pdfReady, setPdfReady] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -85,47 +86,55 @@ export default function JobPdfPage() {
     }
   }, [session, id]);
 
-  const handleDownload = async () => {
-    if (downloading) return;
-    
+  // クライアントサイドでPDF生成してダウンロード
+  const handleDownload = useCallback(async () => {
+    if (!job || downloading) return;
+
     setDownloading(true);
     try {
-      const response = await fetch(`/api/jobs/${id}/pdf`);
-      
-      if (!response.ok) {
-        throw new Error("PDFの生成に失敗しました");
-      }
+      // 動的にPDFモジュールをインポート
+      const [{ pdf }, { JobSheetPDF }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/pdf/JobSheetPDF"),
+      ]);
 
-      // レスポンスからblobを取得
-      const blob = await response.blob();
-      
+      // PDFを生成
+      const pdfDoc = pdf(<JobSheetPDF data={job} />);
+      const blob = await pdfDoc.toBlob();
+
+      // ダウンロード用のファイル名を生成
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `求人票_${job.company.name}_${job.title}_${timestamp}.pdf`;
+
       // ダウンロードリンクを作成
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      
-      // Content-Dispositionからファイル名を取得、なければデフォルト
-      const contentDisposition = response.headers.get("Content-Disposition");
-      let fileName = `job_sheet_${id}.pdf`;
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-        if (match) {
-          fileName = decodeURIComponent(match[1]);
-        }
-      }
-      
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Download failed:", err);
       alert("PDFのダウンロードに失敗しました。もう一度お試しください。");
     } finally {
       setDownloading(false);
     }
-  };
+  }, [job, downloading]);
+
+  // PDFモジュールの読み込みを開始
+  useEffect(() => {
+    if (job) {
+      // PDFモジュールをプリロード
+      Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/pdf/JobSheetPDF"),
+      ])
+        .then(() => setPdfReady(true))
+        .catch((err) => console.error("Failed to preload PDF modules:", err));
+    }
+  }, [job]);
 
   if (authStatus === "loading" || loading) {
     return (
@@ -195,13 +204,18 @@ export default function JobPdfPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleDownload}
-              disabled={downloading}
+              disabled={downloading || !pdfReady}
               className="btn-orange px-6 py-3 flex items-center gap-2 disabled:opacity-50"
             >
               {downloading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   生成中...
+                </>
+              ) : !pdfReady ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  準備中...
                 </>
               ) : (
                 <>
