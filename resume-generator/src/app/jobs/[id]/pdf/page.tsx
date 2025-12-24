@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 
@@ -47,75 +47,6 @@ type JobData = {
   };
 };
 
-// PDFコンポーネントを遅延読み込み
-const JobSheetPDFWrapper = ({ job, onReady }: { job: JobData; onReady: () => void }) => {
-  const [PDFDownloadLink, setPDFDownloadLink] = useState<React.ComponentType<any> | null>(null);
-  const [JobSheetPDF, setJobSheetPDF] = useState<React.ComponentType<{ data: JobData }> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadComponents = async () => {
-      try {
-        const [reactPdf, jobSheetModule] = await Promise.all([
-          import("@react-pdf/renderer"),
-          import("@/components/pdf/JobSheetPDF"),
-        ]);
-        setPDFDownloadLink(() => reactPdf.PDFDownloadLink);
-        setJobSheetPDF(() => jobSheetModule.JobSheetPDF);
-        setIsLoading(false);
-        onReady();
-      } catch (err) {
-        console.error("Failed to load PDF components:", err);
-        setError("PDFコンポーネントの読み込みに失敗しました");
-        setIsLoading(false);
-      }
-    };
-    loadComponents();
-  }, [onReady]);
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center py-4">
-        {error}
-      </div>
-    );
-  }
-
-  if (isLoading || !PDFDownloadLink || !JobSheetPDF) {
-    return (
-      <button className="btn-orange px-6 py-3 opacity-50 cursor-not-allowed" disabled>
-        PDF読み込み中...
-      </button>
-    );
-  }
-
-  // ファイル名を生成（日本語は使用しない）
-  const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const safeFileName = `job_sheet_${timestamp}_${job.id.slice(-8)}.pdf`;
-
-  return (
-    <PDFDownloadLink
-      document={<JobSheetPDF data={job} />}
-      fileName={safeFileName}
-      className="btn-orange px-6 py-3 flex items-center gap-2"
-    >
-      {({ loading: pdfLoading }: { loading: boolean }) =>
-        pdfLoading ? (
-          "準備中..."
-        ) : (
-          <>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            PDFダウンロード
-          </>
-        )
-      }
-    </PDFDownloadLink>
-  );
-};
-
 export default function JobPdfPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
@@ -125,11 +56,7 @@ export default function JobPdfPage() {
   const [job, setJob] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pdfReady, setPdfReady] = useState(false);
-
-  const handlePdfReady = useCallback(() => {
-    setPdfReady(true);
-  }, []);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -157,6 +84,48 @@ export default function JobPdfPage() {
       fetchJob();
     }
   }, [session, id]);
+
+  const handleDownload = async () => {
+    if (downloading) return;
+    
+    setDownloading(true);
+    try {
+      const response = await fetch(`/api/jobs/${id}/pdf`);
+      
+      if (!response.ok) {
+        throw new Error("PDFの生成に失敗しました");
+      }
+
+      // レスポンスからblobを取得
+      const blob = await response.blob();
+      
+      // ダウンロードリンクを作成
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      // Content-Dispositionからファイル名を取得、なければデフォルト
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let fileName = `job_sheet_${id}.pdf`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+        if (match) {
+          fileName = decodeURIComponent(match[1]);
+        }
+      }
+      
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("PDFのダウンロードに失敗しました。もう一度お試しください。");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (authStatus === "loading" || loading) {
     return (
@@ -224,7 +193,25 @@ export default function JobPdfPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <JobSheetPDFWrapper job={job} onReady={handlePdfReady} />
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="btn-orange px-6 py-3 flex items-center gap-2 disabled:opacity-50"
+            >
+              {downloading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  生成中...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  PDFダウンロード
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -325,9 +312,6 @@ export default function JobPdfPage() {
             <p className="text-slate-600 mb-4">
               上記の「PDFダウンロード」ボタンから、正式な求人票をダウンロードできます
             </p>
-            {!pdfReady && (
-              <p className="text-sm text-slate-400">PDFを準備中...</p>
-            )}
           </div>
         </div>
       </div>
