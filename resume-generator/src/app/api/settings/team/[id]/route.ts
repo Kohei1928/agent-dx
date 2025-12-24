@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { CARole } from "@prisma/client";
 
 export async function PATCH(
@@ -8,15 +9,22 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if current user is admin
-    const currentUserProfile = await prisma.cAProfile.findUnique({
-      where: { userId: session.user.id },
+    // Get current user with CAProfile
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { caProfile: true },
     });
+
+    if (!currentUser) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const currentUserProfile = currentUser.caProfile;
 
     if (currentUserProfile?.role !== "admin") {
       return NextResponse.json(
