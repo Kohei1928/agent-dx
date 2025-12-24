@@ -106,6 +106,7 @@ model JobSeeker {
   scheduleBookings     ScheduleBooking[]
   recommendationLetter RecommendationLetter?
   selections           Selection[]           // この求職者の選考一覧
+  proposals            Proposal[]            // この求職者への提案表
 
   @@index([userId])
   @@index([email])
@@ -251,17 +252,95 @@ model CvData {
 
 // 企業マスタ
 model Company {
-  id           String   @id @default(cuid())
-  name         String
-  contactName  String?
-  contactEmail String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  // 基本情報
+  headquarters    String?  // 本社住所
+  industry        String?  // 業界
+  employeeCount   String?  // 従業員数
+  foundedDate     String?  // 設立年月
+  website         String?  // 企業HP
+  // 連絡先
+  contactName     String?  // 担当者名
+  contactEmail    String?  // 連絡先メール
+  contactPhone    String?  // 連絡先電話
+  // 詳細情報
+  overview        String?  @db.Text  // 会社概要
+  business        String?  @db.Text  // 事業概要
+  // ステータス
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
+  jobs       Job[]             // この企業の求人一覧
   bookings   ScheduleBooking[]
   selections Selection[]       // この企業の選考一覧
 
   @@index([name])
+  @@index([industry])
+}
+
+// 求人マスタ
+model Job {
+  id              String   @id @default(cuid())
+  companyId       String
+  // 基本情報
+  title           String   // 求人タイトル
+  jobCode         String?  // 求人コード（ATS連携用）
+  category        String?  // 職種カテゴリ（事務・管理、営業、エンジニア等）
+  // 募集概要
+  salaryMin       Int?     // 年収下限（万円）
+  salaryMax       Int?     // 年収上限（万円）
+  salaryNote      String?  // 年収備考
+  // 勤務地
+  locations       Json?    // 勤務地リスト [{area: "東京都", detail: "渋谷区", note: "リモート可"}]
+  remoteWork      String?  // リモート可否（full/partial/none）
+  // 仕事内容
+  description     String?  @db.Text  // 仕事内容
+  highlights      String?  @db.Text  // 仕事の醍醐味
+  experience      String?  @db.Text  // 活躍できる経験
+  // 必須・歓迎要件
+  requirements    String?  @db.Text  // 必須要件
+  preferences     String?  @db.Text  // 歓迎要件
+  // 募集要項
+  department      String?  @db.Text  // 部署詳細
+  employmentType  String?  // 雇用形態（正社員、契約社員等）
+  workHours       String?  // 勤務時間
+  overtimeHours   String?  // 残業時間
+  shortTime       String?  // 時短勤務
+  selectionFlow   String?  @db.Text  // 選考フロー
+  selectionDetail String?  @db.Text  // 選考詳細
+  // 仕事環境
+  probation       String?  // 試用期間
+  probationDetail String?  @db.Text  // 試用期間詳細
+  benefits        String?  @db.Text  // 給与・待遇詳細
+  annualHolidays  Int?     // 年間休日
+  holidays        String?  @db.Text  // 休日・休暇
+  welfare         String?  @db.Text  // 福利厚生
+  smoking         String?  // 受動喫煙対策
+  smokingDetail   String?  // 受動喫煙対策詳細
+  // ステータス
+  status          JobStatus @default(active)
+  publishedAt     DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  selections    Selection[]
+  proposalItems ProposalItem[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
+}
+
+// 求人ステータス
+enum JobStatus {
+  draft      // 下書き
+  active     // 公開中
+  paused     // 一時停止
+  closed     // 募集終了
 }
 
 // 面接形式
@@ -433,6 +512,7 @@ model Selection {
   companyId       String?         // 企業マスタID（任意）
   companyName     String          // 企業名
   companyEmail    String?         // 企業連絡先メール
+  jobId           String?         // 求人マスタID（任意）
   jobTitle        String?         // 求人タイトル
   status          SelectionStatus @default(proposal)
   
@@ -457,6 +537,7 @@ model Selection {
 
   jobSeeker       JobSeeker       @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
   company         Company?        @relation(fields: [companyId], references: [id])
+  job             Job?            @relation(fields: [jobId], references: [id])
   assignedCA      User            @relation(fields: [assignedCAId], references: [id])
   messages        Message[]
   statusHistory   SelectionStatusHistory[]
@@ -588,4 +669,51 @@ model CAProfile {
 
   @@index([teamId])
   @@index([role])
+}
+
+// ========================================
+// 求人提案機能用モデル
+// ========================================
+
+// 提案表
+model Proposal {
+  id            String   @id @default(cuid())
+  jobSeekerId   String
+  createdById   String   // 作成したCAのUser ID
+  createdByName String   // 作成したCA名
+  title         String?  // 提案表タイトル
+  note          String?  @db.Text  // CAからのコメント
+  status        ProposalStatus @default(draft)
+  sentAt        DateTime?  // 送信日時
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  jobSeeker JobSeeker      @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  items     ProposalItem[]
+
+  @@index([jobSeekerId])
+  @@index([createdById])
+  @@index([status])
+}
+
+// 提案表アイテム（提案する求人）
+model ProposalItem {
+  id          String   @id @default(cuid())
+  proposalId  String
+  jobId       String
+  order       Int      @default(0)  // 表示順
+  recommend   String?  @db.Text     // おすすめポイント
+  createdAt   DateTime @default(now())
+
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([proposalId])
+  @@index([jobId])
+}
+
+// 提案表ステータス
+enum ProposalStatus {
+  draft   // 下書き
+  sent    // 送信済み
 }
