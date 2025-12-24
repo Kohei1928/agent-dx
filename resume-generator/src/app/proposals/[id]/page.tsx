@@ -272,12 +272,20 @@ export default function ProposalDetailPage() {
                         {item.job.company.name}
                       </Link>
                     </div>
-                    <Link
-                      href={`/jobs/${item.job.id}/pdf`}
-                      className="px-3 py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                    >
-                      求人票
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/selections/new?jobSeekerId=${proposal.jobSeeker.id}&companyId=${item.job.company.id}&jobId=${item.job.id}`}
+                        className="px-3 py-1.5 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      >
+                        選考作成
+                      </Link>
+                      <Link
+                        href={`/jobs/${item.job.id}/pdf`}
+                        className="px-3 py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                      >
+                        求人票
+                      </Link>
+                    </div>
                   </div>
                   <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
                     <span className="flex items-center gap-1">
