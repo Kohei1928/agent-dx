@@ -90,10 +90,14 @@ const JobSheetPDFWrapper = ({ job, onReady }: { job: JobData; onReady: () => voi
     );
   }
 
+  // ファイル名を生成（日本語は使用しない）
+  const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const safeFileName = `job_sheet_${timestamp}_${job.id.slice(-8)}.pdf`;
+
   return (
     <PDFDownloadLink
       document={<JobSheetPDF data={job} />}
-      fileName={`求人票_${job.company.name}_${job.title}.pdf`}
+      fileName={safeFileName}
       className="btn-orange px-6 py-3 flex items-center gap-2"
     >
       {({ loading: pdfLoading }: { loading: boolean }) =>
