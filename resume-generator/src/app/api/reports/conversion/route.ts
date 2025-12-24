@@ -2,9 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SelectionStatus } from "@prisma/client";
 
-// 歩留まり（コンバージョン）レポートAPI
+// 選考ステータスのフェーズ定義
+const PHASE_ORDER = [
+  "proposal",           // 提案中
+  "document_screening", // 書類選考
+  "interview_1",        // 一次面接
+  "interview_2",        // 二次面接
+  "interview_final",    // 最終面接
+  "offer",              // 内定
+  "accepted",           // 内定承諾
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  proposal: "提案",
+  document_screening: "書類選考",
+  document_passed: "書類通過",
+  scheduling_interview: "日程調整中",
+  interview_1: "一次面接",
+  interview_2: "二次面接",
+  interview_final: "最終面接",
+  offer: "内定",
+  accepted: "内定承諾",
+  rejected: "不採用",
+  withdrawn: "辞退",
+  document_rejected: "書類不通過",
+  offer_rejected: "内定辞退",
+  cancelled: "キャンセル",
+};
+
+// 転換率レポート取得
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,192 +40,206 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const companyId = searchParams.get("companyId");
+    const caId = searchParams.get("caId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const caId = searchParams.get("caId");
-    const companyId = searchParams.get("companyId");
+    const period = searchParams.get("period") || "month"; // week, month, quarter
 
-    // 期間フィルター
-    const dateFilter: any = {};
-    if (startDate) {
-      dateFilter.gte = new Date(startDate);
-    }
-    if (endDate) {
-      dateFilter.lte = new Date(endDate);
+    // 日付範囲の計算
+    let dateFrom: Date;
+    let dateTo = new Date();
+    
+    if (startDate && endDate) {
+      dateFrom = new Date(startDate);
+      dateTo = new Date(endDate);
+    } else {
+      switch (period) {
+        case "week":
+          dateFrom = new Date();
+          dateFrom.setDate(dateFrom.getDate() - 7);
+          break;
+        case "quarter":
+          dateFrom = new Date();
+          dateFrom.setMonth(dateFrom.getMonth() - 3);
+          break;
+        case "month":
+        default:
+          dateFrom = new Date();
+          dateFrom.setMonth(dateFrom.getMonth() - 1);
+          break;
+      }
     }
 
-    const where: any = {};
-    if (Object.keys(dateFilter).length > 0) {
-      where.createdAt = dateFilter;
-    }
-    if (caId && caId !== "all") {
-      where.assignedCAId = caId;
-    }
-    if (companyId && companyId !== "all") {
+    // フィルター条件
+    const where: Record<string, unknown> = {
+      createdAt: {
+        gte: dateFrom,
+        lte: dateTo,
+      },
+    };
+
+    if (companyId) {
       where.companyId = companyId;
     }
 
-    // ステータスごとの件数を取得
-    const statusCounts = await prisma.selection.groupBy({
-      by: ["status"],
+    if (caId) {
+      where.assignedCAId = caId;
+    }
+
+    // 全選考を取得
+    const selections = await prisma.selection.findMany({
       where,
-      _count: { status: true },
+      select: {
+        id: true,
+        status: true,
+        companyName: true,
+        companyId: true,
+        jobTitle: true,
+        assignedCAId: true,
+        assignedCAName: true,
+        withdrawReason: true,
+        rejectReason: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    // ステータスマッピング
-    const statusMap: Record<SelectionStatus, number> = {} as any;
-    for (const s of Object.values(SelectionStatus)) {
-      statusMap[s] = 0;
-    }
-    for (const sc of statusCounts) {
-      statusMap[sc.status] = sc._count.status;
-    }
+    // ステータス別集計
+    const statusCounts: Record<string, number> = {};
+    const withdrawReasons: Record<string, number> = {};
+    const rejectReasons: Record<string, number> = {};
 
-    // 合計
-    const totalSelections = Object.values(statusMap).reduce((a, b) => a + b, 0);
+    selections.forEach((sel) => {
+      // ステータス集計
+      statusCounts[sel.status] = (statusCounts[sel.status] || 0) + 1;
+
+      // 辞退理由集計
+      if (sel.withdrawReason) {
+        withdrawReasons[sel.withdrawReason] = (withdrawReasons[sel.withdrawReason] || 0) + 1;
+      }
+
+      // 不採用理由集計
+      if (sel.rejectReason) {
+        rejectReasons[sel.rejectReason] = (rejectReasons[sel.rejectReason] || 0) + 1;
+      }
+    });
 
     // ファネル計算
-    const funnelStages = [
-      { status: "proposal", label: "提案" },
-      { status: "entry_completed", label: "エントリー完了" },
-      { status: "document_passed", label: "書類通過" },
-      { status: "first_interview_done", label: "一次面接完了" },
-      { status: "second_interview_done", label: "二次面接完了" },
-      { status: "final_interview_done", label: "最終面接完了" },
-      { status: "offer", label: "内定" },
-      { status: "offer_accepted", label: "内定承諾" },
+    const total = selections.length;
+    const documentPassed = selections.filter((s) => 
+      !["proposal", "document_screening", "document_rejected"].includes(s.status)
+    ).length;
+    const interview1 = selections.filter((s) =>
+      ["interview_1", "interview_2", "interview_final", "offer", "accepted"].includes(s.status)
+    ).length;
+    const interviewFinal = selections.filter((s) =>
+      ["interview_final", "offer", "accepted"].includes(s.status)
+    ).length;
+    const offered = selections.filter((s) =>
+      ["offer", "accepted", "offer_rejected"].includes(s.status)
+    ).length;
+    const accepted = selections.filter((s) => s.status === "accepted").length;
+
+    const funnel = [
+      { stage: "エントリー", count: total, rate: 100 },
+      { stage: "書類通過", count: documentPassed, rate: total > 0 ? Math.round((documentPassed / total) * 100) : 0 },
+      { stage: "一次面接", count: interview1, rate: total > 0 ? Math.round((interview1 / total) * 100) : 0 },
+      { stage: "最終面接", count: interviewFinal, rate: total > 0 ? Math.round((interviewFinal / total) * 100) : 0 },
+      { stage: "内定", count: offered, rate: total > 0 ? Math.round((offered / total) * 100) : 0 },
+      { stage: "内定承諾", count: accepted, rate: total > 0 ? Math.round((accepted / total) * 100) : 0 },
     ];
 
-    // 各ステージ以上に進んだ件数を計算
-    const stageOrder = [
-      "proposal",
-      "entry_preparing",
-      "entry_requested",
-      "entry_completed",
-      "document_screening",
-      "document_passed",
-      "document_rejected",
-      "scheduling",
-      "schedule_confirmed",
-      "first_interview",
-      "first_interview_done",
-      "second_interview",
-      "second_interview_done",
-      "final_interview",
-      "final_interview_done",
-      "offer",
-      "offer_accepted",
-      "offer_rejected",
-      "withdrawn",
-      "rejected",
-      "cancelled",
+    // 転換率（各フェーズ間）
+    const conversionRates = [
+      { from: "エントリー", to: "書類通過", rate: total > 0 ? Math.round((documentPassed / total) * 100) : 0 },
+      { from: "書類通過", to: "一次面接", rate: documentPassed > 0 ? Math.round((interview1 / documentPassed) * 100) : 0 },
+      { from: "一次面接", to: "最終面接", rate: interview1 > 0 ? Math.round((interviewFinal / interview1) * 100) : 0 },
+      { from: "最終面接", to: "内定", rate: interviewFinal > 0 ? Math.round((offered / interviewFinal) * 100) : 0 },
+      { from: "内定", to: "内定承諾", rate: offered > 0 ? Math.round((accepted / offered) * 100) : 0 },
     ];
 
-    const getStageIndex = (status: string) => stageOrder.indexOf(status);
-
-    // 各ステージに到達した選考数を計算（終了ステータスを除く）
-    const reachedStages: Record<string, number> = {};
-    
-    for (const stage of funnelStages) {
-      const targetIndex = getStageIndex(stage.status);
-      let count = 0;
-      
-      for (const [status, cnt] of Object.entries(statusMap)) {
-        const statusIndex = getStageIndex(status);
-        // ステージ以上に進んでいる（終了ステータスの場合も含む）
-        if (statusIndex >= targetIndex) {
-          count += cnt;
-        }
+    // CA別集計
+    const caStats: Record<string, { name: string; total: number; accepted: number }> = {};
+    selections.forEach((sel) => {
+      if (!caStats[sel.assignedCAId]) {
+        caStats[sel.assignedCAId] = {
+          name: sel.assignedCAName,
+          total: 0,
+          accepted: 0,
+        };
       }
-      
-      reachedStages[stage.status] = count;
-    }
-
-    const conversionFunnel = funnelStages.map((stage) => ({
-      status: stage.status,
-      label: stage.label,
-      count: reachedStages[stage.status] || 0,
-      rate: totalSelections > 0 
-        ? ((reachedStages[stage.status] || 0) / totalSelections) * 100 
-        : 0,
-    }));
-
-    // 辞退理由の集計
-    const withdrawReasons = await prisma.selection.groupBy({
-      by: ["withdrawReason"],
-      where: {
-        ...where,
-        status: "withdrawn",
-        withdrawReason: { not: null },
-      },
-      _count: { withdrawReason: true },
+      caStats[sel.assignedCAId].total++;
+      if (sel.status === "accepted") {
+        caStats[sel.assignedCAId].accepted++;
+      }
     });
 
-    const totalWithdrawn = withdrawReasons.reduce((a, b) => a + b._count.withdrawReason, 0);
-    const withdrawReasonData = withdrawReasons
-      .filter((r) => r.withdrawReason)
-      .map((r) => ({
-        reason: r.withdrawReason!,
-        count: r._count.withdrawReason,
-        percentage: totalWithdrawn > 0 
-          ? (r._count.withdrawReason / totalWithdrawn) * 100 
-          : 0,
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    // 不採用理由の集計
-    const rejectReasons = await prisma.selection.groupBy({
-      by: ["rejectReason"],
-      where: {
-        ...where,
-        status: { in: ["rejected", "document_rejected"] },
-        rejectReason: { not: null },
-      },
-      _count: { rejectReason: true },
+    // 企業別集計（上位10社）
+    const companyStats: Record<string, { name: string; total: number; accepted: number }> = {};
+    selections.forEach((sel) => {
+      const key = sel.companyId || sel.companyName;
+      if (!companyStats[key]) {
+        companyStats[key] = {
+          name: sel.companyName,
+          total: 0,
+          accepted: 0,
+        };
+      }
+      companyStats[key].total++;
+      if (sel.status === "accepted") {
+        companyStats[key].accepted++;
+      }
     });
 
-    const totalRejected = rejectReasons.reduce((a, b) => a + b._count.rejectReason, 0);
-    const rejectReasonData = rejectReasons
-      .filter((r) => r.rejectReason)
-      .map((r) => ({
-        reason: r.rejectReason!,
-        count: r._count.rejectReason,
-        percentage: totalRejected > 0 
-          ? (r._count.rejectReason / totalRejected) * 100 
-          : 0,
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    // サマリー
-    const totalEntries = reachedStages["entry_completed"] || 0;
-    const totalOffers = statusMap["offer"] + statusMap["offer_accepted"] + statusMap["offer_rejected"];
-    const totalAccepted = statusMap["offer_accepted"];
-    const overallConversionRate = totalSelections > 0 
-      ? (totalAccepted / totalSelections) * 100 
-      : 0;
+    const topCompanies = Object.entries(companyStats)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 10)
+      .map(([id, stats]) => ({
+        id,
+        ...stats,
+        acceptanceRate: stats.total > 0 ? Math.round((stats.accepted / stats.total) * 100) : 0,
+      }));
 
     return NextResponse.json({
       period: {
-        start: startDate,
-        end: endDate,
+        from: dateFrom.toISOString(),
+        to: dateTo.toISOString(),
       },
       summary: {
-        totalSelections,
-        totalEntries,
-        totalOffers,
-        totalAccepted,
-        overallConversionRate: Math.round(overallConversionRate * 10) / 10,
+        totalSelections: total,
+        accepted,
+        acceptanceRate: total > 0 ? Math.round((accepted / total) * 100) : 0,
+        withdrawn: statusCounts["withdrawn"] || 0,
+        rejected: statusCounts["rejected"] || 0,
       },
-      conversionFunnel,
-      withdrawReasons: withdrawReasonData,
-      rejectReasons: rejectReasonData,
+      funnel,
+      conversionRates,
+      statusCounts: Object.entries(statusCounts).map(([status, count]) => ({
+        status,
+        label: STATUS_LABELS[status] || status,
+        count,
+      })),
+      withdrawReasons: Object.entries(withdrawReasons)
+        .sort((a, b) => b[1] - a[1])
+        .map(([reason, count]) => ({ reason, count })),
+      rejectReasons: Object.entries(rejectReasons)
+        .sort((a, b) => b[1] - a[1])
+        .map(([reason, count]) => ({ reason, count })),
+      caPerformance: Object.entries(caStats)
+        .map(([id, stats]) => ({
+          id,
+          ...stats,
+          acceptanceRate: stats.total > 0 ? Math.round((stats.accepted / stats.total) * 100) : 0,
+        }))
+        .sort((a, b) => b.total - a.total),
+      topCompanies,
     });
   } catch (error) {
-    console.error("Failed to generate conversion report:", error);
+    console.error("Failed to fetch conversion report:", error);
     return NextResponse.json(
-      { error: "Failed to generate report" },
+      { error: "Failed to fetch conversion report" },
       { status: 500 }
     );
   }
 }
-
