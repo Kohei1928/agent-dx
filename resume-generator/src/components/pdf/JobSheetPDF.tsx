@@ -1,117 +1,208 @@
 "use client";
 
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 // フォント登録
 import "./fonts";
 
+// カラーパレット
+const colors = {
+  primary: "#f97316", // オレンジ
+  primaryDark: "#ea580c",
+  dark: "#1e293b",
+  gray: "#64748b",
+  lightGray: "#f1f5f9",
+  border: "#e2e8f0",
+  white: "#ffffff",
+};
+
 // スタイル定義
 const styles = StyleSheet.create({
   page: {
-    padding: 30,
+    padding: 40,
     fontSize: 9,
     fontFamily: "NotoSansJP",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
   },
+  // ヘッダー
   header: {
+    marginBottom: 20,
+  },
+  headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: "#1a365d",
   },
-  headerLeft: {
-    flexDirection: "column",
+  logo: {
+    fontSize: 8,
+    color: colors.gray,
   },
   jobId: {
     fontSize: 8,
-    color: "#666666",
+    color: colors.gray,
+    textAlign: "right",
+  },
+  titleContainer: {
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+    paddingLeft: 12,
+    marginBottom: 15,
   },
   companyName: {
-    fontSize: 8,
-    color: "#666666",
-    marginTop: 2,
+    fontSize: 10,
+    color: colors.gray,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#1a365d",
-    marginBottom: 20,
-    textAlign: "center",
+    color: colors.dark,
+    lineHeight: 1.3,
   },
+  // ハイライトボックス
+  highlightBox: {
+    flexDirection: "row",
+    backgroundColor: colors.lightGray,
+    borderRadius: 6,
+    padding: 12,
+    marginBottom: 20,
+    gap: 20,
+  },
+  highlightItem: {
+    flex: 1,
+  },
+  highlightLabel: {
+    fontSize: 8,
+    color: colors.gray,
+    marginBottom: 3,
+  },
+  highlightValue: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: colors.dark,
+  },
+  highlightValueOrange: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: colors.primary,
+  },
+  // セクション
   section: {
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingBottom: 6,
+  },
+  sectionDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primary,
+    marginRight: 8,
   },
   sectionTitle: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "bold",
-    backgroundColor: "#1a365d",
-    color: "#ffffff",
-    padding: 5,
-    marginBottom: 5,
+    color: colors.dark,
   },
+  // コンテンツ
+  contentText: {
+    fontSize: 9,
+    lineHeight: 1.6,
+    color: colors.dark,
+    paddingLeft: 14,
+  },
+  // テーブル
   table: {
-    borderWidth: 1,
-    borderColor: "#cccccc",
+    marginLeft: 14,
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#cccccc",
+    borderBottomColor: colors.border,
+    paddingVertical: 6,
   },
   tableRowLast: {
     flexDirection: "row",
+    paddingVertical: 6,
   },
   labelCell: {
-    width: "25%",
-    backgroundColor: "#f0f4f8",
-    padding: 6,
-    borderRightWidth: 1,
-    borderRightColor: "#cccccc",
-    fontWeight: "bold",
+    width: "28%",
+    fontSize: 9,
+    color: colors.gray,
   },
   valueCell: {
-    width: "75%",
-    padding: 6,
-  },
-  labelCellHalf: {
-    width: "15%",
-    backgroundColor: "#f0f4f8",
-    padding: 6,
-    borderRightWidth: 1,
-    borderRightColor: "#cccccc",
-    fontWeight: "bold",
-  },
-  valueCellHalf: {
-    width: "35%",
-    padding: 6,
-    borderRightWidth: 1,
-    borderRightColor: "#cccccc",
-  },
-  valueCellHalfLast: {
-    width: "35%",
-    padding: 6,
-  },
-  contentText: {
+    width: "72%",
     fontSize: 9,
-    lineHeight: 1.5,
+    color: colors.dark,
   },
+  // 2カラムテーブル
+  twoColumnRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingVertical: 6,
+  },
+  twoColumnLabel: {
+    width: "14%",
+    fontSize: 9,
+    color: colors.gray,
+  },
+  twoColumnValue: {
+    width: "36%",
+    fontSize: 9,
+    color: colors.dark,
+  },
+  // 企業情報ボックス
+  companyBox: {
+    backgroundColor: colors.lightGray,
+    borderRadius: 6,
+    padding: 12,
+    marginLeft: 14,
+  },
+  companyRow: {
+    flexDirection: "row",
+    marginBottom: 6,
+  },
+  companyRowLast: {
+    flexDirection: "row",
+  },
+  companyLabel: {
+    width: "20%",
+    fontSize: 8,
+    color: colors.gray,
+  },
+  companyValue: {
+    width: "80%",
+    fontSize: 9,
+    color: colors.dark,
+  },
+  // フッター
   footer: {
     position: "absolute",
-    bottom: 20,
-    left: 30,
-    right: 30,
-    textAlign: "center",
-    fontSize: 8,
-    color: "#999999",
+    bottom: 25,
+    left: 40,
+    right: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 10,
+  },
+  footerText: {
+    fontSize: 7,
+    color: colors.gray,
   },
   pageNumber: {
-    position: "absolute",
-    bottom: 20,
-    right: 30,
     fontSize: 8,
-    color: "#999999",
+    color: colors.gray,
   },
 });
 
@@ -161,294 +252,264 @@ interface JobSheetPDFProps {
 }
 
 function formatSalary(min: number | null | undefined, max: number | null | undefined): string {
-  if (!min && !max) return "-";
+  if (!min && !max) return "";
   if (min && max) return `${min}～${max}万円`;
   if (min) return `${min}万円～`;
   if (max) return `～${max}万円`;
-  return "-";
+  return "";
 }
 
 function formatLocations(locations: { area: string; detail?: string; note?: string }[] | null | undefined): string {
-  if (!locations || locations.length === 0) return "-";
-  return locations.map((loc, i) => {
-    let text = `勤務地${i + 1}：${loc.area}`;
+  if (!locations || locations.length === 0) return "";
+  return locations.map((loc) => {
+    let text = loc.area;
     if (loc.detail) text += ` ${loc.detail}`;
     if (loc.note) text += `（${loc.note}）`;
     return text;
-  }).join("\n");
+  }).join(" / ");
+}
+
+// セクションコンポーネント
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionDot} />
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+// テーブル行コンポーネント（値がある場合のみ表示）
+function TableRow({ label, value, isLast = false }: { label: string; value: string | null | undefined; isLast?: boolean }) {
+  if (!value) return null;
+  return (
+    <View style={isLast ? styles.tableRowLast : styles.tableRow}>
+      <Text style={styles.labelCell}>{label}</Text>
+      <Text style={styles.valueCell}>{value}</Text>
+    </View>
+  );
 }
 
 export function JobSheetPDF({ data }: JobSheetPDFProps) {
   const jobIdDisplay = data.jobCode || data.id.slice(0, 8);
-  
+  const salary = formatSalary(data.salaryMin, data.salaryMax);
+  const location = formatLocations(data.locations as any);
+  const today = new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" });
+
+  // 募集要項のデータを収集（値があるもののみ）
+  const recruitmentItems = [
+    { label: "雇用形態", value: data.employmentType },
+    { label: "勤務時間", value: data.workHours },
+    { label: "残業時間", value: data.overtimeHours },
+    { label: "時短勤務", value: data.shortTime },
+    { label: "リモート", value: data.remoteWork },
+    { label: "選考フロー", value: data.selectionFlow },
+    { label: "選考詳細", value: data.selectionDetail },
+  ].filter(item => item.value);
+
+  // 待遇・環境のデータを収集（値があるもののみ）
+  const benefitItems = [
+    { label: "試用期間", value: data.probation },
+    { label: "給与・待遇", value: data.benefits },
+    { label: "年間休日", value: data.annualHolidays ? `${data.annualHolidays}日` : null },
+    { label: "休日・休暇", value: data.holidays },
+    { label: "福利厚生", value: data.welfare },
+    { label: "受動喫煙対策", value: data.smoking },
+  ].filter(item => item.value);
+
   return (
     <Document>
-      {/* Page 1: 会社概要 + 募集概要 */}
+      {/* Page 1: メイン情報 */}
       <Page size="A4" style={styles.page}>
         {/* ヘッダー */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.jobId}>求人情報 ID:{jobIdDisplay}</Text>
-            <Text style={styles.companyName}>株式会社ミギナナメウエ</Text>
+          <View style={styles.headerTop}>
+            <Text style={styles.logo}>株式会社ミギナナメウエ</Text>
+            <Text style={styles.jobId}>Job ID: {jobIdDisplay}</Text>
           </View>
-        </View>
-
-        {/* タイトル */}
-        <Text style={styles.title}>{data.title}</Text>
-
-        {/* 企業名 */}
-        <View style={styles.section}>
-          <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 10 }}>
-            {data.company.name}
-          </Text>
-        </View>
-
-        {/* 企業基本情報 */}
-        <View style={styles.section}>
-          <View style={styles.table}>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>本社住所</Text>
-              <Text style={styles.valueCell}>{data.company.headquarters || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCellHalf}>業界</Text>
-              <Text style={styles.valueCellHalf}>{data.company.industry || "-"}</Text>
-              <Text style={styles.labelCellHalf}>従業員数</Text>
-              <Text style={styles.valueCellHalfLast}>{data.company.employeeCount || "-"}</Text>
-            </View>
-            <View style={styles.tableRowLast}>
-              <Text style={styles.labelCell}>設立年月</Text>
-              <Text style={styles.valueCell}>{data.company.foundedDate || "-"}</Text>
-            </View>
+          
+          {/* タイトル */}
+          <View style={styles.titleContainer}>
+            <Text style={styles.companyName}>{data.company.name}</Text>
+            <Text style={styles.title}>{data.title}</Text>
           </View>
-        </View>
 
-        {/* 会社概要 */}
-        {data.company.overview && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>会社概要</Text>
-            <Text style={styles.contentText}>{data.company.overview}</Text>
-          </View>
-        )}
-
-        {/* 事業概要 */}
-        {data.company.business && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>事業概要</Text>
-            <Text style={styles.contentText}>{data.company.business}</Text>
-          </View>
-        )}
-
-        {/* 募集概要 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>募集概要</Text>
-          <View style={styles.table}>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>職種</Text>
-              <Text style={styles.valueCell}>{data.category || "-"}</Text>
-            </View>
-            <View style={styles.tableRowLast}>
-              <Text style={styles.labelCell}>年収</Text>
-              <Text style={styles.valueCell}>
-                {formatSalary(data.salaryMin, data.salaryMax)}
-                {data.salaryNote && ` （${data.salaryNote}）`}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 勤務地 */}
-        <View style={styles.section}>
-          <View style={styles.table}>
-            <View style={styles.tableRowLast}>
-              <Text style={styles.labelCell}>勤務地</Text>
-              <Text style={styles.valueCell}>{formatLocations(data.locations as any)}</Text>
-            </View>
-          </View>
-        </View>
-
-        <Text style={styles.pageNumber}>1/4</Text>
-      </Page>
-
-      {/* Page 2: 仕事内容 */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.jobId}>求人情報 ID:{jobIdDisplay}</Text>
-            <Text style={styles.companyName}>株式会社ミギナナメウエ</Text>
+          {/* ハイライト情報 */}
+          <View style={styles.highlightBox}>
+            {salary && (
+              <View style={styles.highlightItem}>
+                <Text style={styles.highlightLabel}>年収</Text>
+                <Text style={styles.highlightValueOrange}>{salary}</Text>
+              </View>
+            )}
+            {data.category && (
+              <View style={styles.highlightItem}>
+                <Text style={styles.highlightLabel}>職種</Text>
+                <Text style={styles.highlightValue}>{data.category}</Text>
+              </View>
+            )}
+            {data.employmentType && (
+              <View style={styles.highlightItem}>
+                <Text style={styles.highlightLabel}>雇用形態</Text>
+                <Text style={styles.highlightValue}>{data.employmentType}</Text>
+              </View>
+            )}
+            {location && (
+              <View style={styles.highlightItem}>
+                <Text style={styles.highlightLabel}>勤務地</Text>
+                <Text style={styles.highlightValue}>{location}</Text>
+              </View>
+            )}
           </View>
         </View>
 
         {/* 仕事内容 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>仕事内容</Text>
-          <View style={styles.table}>
-            <View style={styles.tableRowLast}>
-              <Text style={styles.labelCell}>仕事内容</Text>
-              <Text style={styles.valueCell}>{data.description || "-"}</Text>
-            </View>
-          </View>
-        </View>
+        {data.description && (
+          <Section title="仕事内容">
+            <Text style={styles.contentText}>{data.description}</Text>
+          </Section>
+        )}
 
         {/* 仕事の醍醐味 */}
         {data.highlights && (
-          <View style={styles.section}>
-            <View style={styles.table}>
-              <View style={styles.tableRowLast}>
-                <Text style={styles.labelCell}>仕事の醍醐味</Text>
-                <Text style={styles.valueCell}>{data.highlights}</Text>
-              </View>
-            </View>
-          </View>
+          <Section title="仕事の醍醐味">
+            <Text style={styles.contentText}>{data.highlights}</Text>
+          </Section>
+        )}
+
+        {/* 必須要件 */}
+        {data.requirements && (
+          <Section title="必須要件">
+            <Text style={styles.contentText}>{data.requirements}</Text>
+          </Section>
+        )}
+
+        {/* 歓迎要件 */}
+        {data.preferences && (
+          <Section title="歓迎要件">
+            <Text style={styles.contentText}>{data.preferences}</Text>
+          </Section>
         )}
 
         {/* 活躍できる経験 */}
         {data.experience && (
-          <View style={styles.section}>
-            <View style={styles.table}>
-              <View style={styles.tableRowLast}>
-                <Text style={styles.labelCell}>活躍できる経験</Text>
-                <Text style={styles.valueCell}>{data.experience}</Text>
-              </View>
-            </View>
-          </View>
+          <Section title="活躍できる経験">
+            <Text style={styles.contentText}>{data.experience}</Text>
+          </Section>
         )}
 
-        <Text style={styles.pageNumber}>2/4</Text>
-      </Page>
-
-      {/* Page 3: 必須要件 + 募集要項 */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.jobId}>求人情報 ID:{jobIdDisplay}</Text>
-            <Text style={styles.companyName}>株式会社ミギナナメウエ</Text>
-          </View>
-        </View>
-
-        {/* 必須要件 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>必須要件</Text>
-          <View style={styles.table}>
-            <View style={styles.tableRowLast}>
-              <Text style={styles.labelCell}>必須要件</Text>
-              <Text style={styles.valueCell}>{data.requirements || "-"}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 歓迎要件 */}
-        {data.preferences && (
-          <View style={styles.section}>
+        {/* 募集要項（データがある場合のみ） */}
+        {recruitmentItems.length > 0 && (
+          <Section title="募集要項">
             <View style={styles.table}>
-              <View style={styles.tableRowLast}>
-                <Text style={styles.labelCell}>歓迎要件</Text>
-                <Text style={styles.valueCell}>{data.preferences}</Text>
-              </View>
+              {recruitmentItems.map((item, index) => (
+                <TableRow
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  isLast={index === recruitmentItems.length - 1}
+                />
+              ))}
             </View>
-          </View>
+          </Section>
         )}
 
-        {/* 募集要項 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>募集要項</Text>
-          <View style={styles.table}>
-            {data.department && (
-              <View style={styles.tableRow}>
-                <Text style={styles.labelCell}>部署詳細</Text>
-                <Text style={styles.valueCell}>{data.department}</Text>
-              </View>
-            )}
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>雇用形態</Text>
-              <Text style={styles.valueCell}>{data.employmentType || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>勤務時間</Text>
-              <Text style={styles.valueCell}>{data.workHours || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>残業時間</Text>
-              <Text style={styles.valueCell}>{data.overtimeHours || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>時短勤務</Text>
-              <Text style={styles.valueCell}>{data.shortTime || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>選考フロー</Text>
-              <Text style={styles.valueCell}>{data.selectionFlow || "-"}</Text>
-            </View>
-            {data.selectionDetail && (
-              <View style={styles.tableRowLast}>
-                <Text style={styles.labelCell}>選考詳細</Text>
-                <Text style={styles.valueCell}>{data.selectionDetail}</Text>
-              </View>
-            )}
-          </View>
+        {/* フッター */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>作成日: {today}</Text>
+          <Text style={styles.pageNumber}>1 / 2</Text>
         </View>
-
-        <Text style={styles.pageNumber}>3/4</Text>
       </Page>
 
-      {/* Page 4: 仕事環境 */}
+      {/* Page 2: 待遇・企業情報 */}
       <Page size="A4" style={styles.page}>
+        {/* ヘッダー */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.jobId}>求人情報 ID:{jobIdDisplay}</Text>
-            <Text style={styles.companyName}>株式会社ミギナナメウエ</Text>
+          <View style={styles.headerTop}>
+            <Text style={styles.logo}>株式会社ミギナナメウエ</Text>
+            <Text style={styles.jobId}>Job ID: {jobIdDisplay}</Text>
+          </View>
+          
+          {/* タイトル（小さめ） */}
+          <View style={{ ...styles.titleContainer, marginBottom: 10 }}>
+            <Text style={styles.companyName}>{data.company.name}</Text>
+            <Text style={{ ...styles.title, fontSize: 12 }}>{data.title}</Text>
           </View>
         </View>
 
-        {/* 仕事環境 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>仕事環境</Text>
-          <View style={styles.table}>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>試用期間</Text>
-              <Text style={styles.valueCell}>{data.probation || "-"}</Text>
+        {/* 待遇・環境（データがある場合のみ） */}
+        {benefitItems.length > 0 && (
+          <Section title="待遇・環境">
+            <View style={styles.table}>
+              {benefitItems.map((item, index) => (
+                <TableRow
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  isLast={index === benefitItems.length - 1}
+                />
+              ))}
             </View>
-            {data.probationDetail && (
-              <View style={styles.tableRow}>
-                <Text style={styles.labelCell}>試用期間詳細</Text>
-                <Text style={styles.valueCell}>{data.probationDetail}</Text>
+          </Section>
+        )}
+
+        {/* 企業情報 */}
+        <Section title="企業情報">
+          <View style={styles.companyBox}>
+            <View style={styles.companyRow}>
+              <Text style={styles.companyLabel}>企業名</Text>
+              <Text style={styles.companyValue}>{data.company.name}</Text>
+            </View>
+            {data.company.industry && (
+              <View style={styles.companyRow}>
+                <Text style={styles.companyLabel}>業界</Text>
+                <Text style={styles.companyValue}>{data.company.industry}</Text>
               </View>
             )}
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>給与・待遇</Text>
-              <Text style={styles.valueCell}>{data.benefits || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>年間休日</Text>
-              <Text style={styles.valueCell}>
-                {data.annualHolidays ? `${data.annualHolidays}日` : "-"}
-              </Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>休日・休暇</Text>
-              <Text style={styles.valueCell}>{data.holidays || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>福利厚生</Text>
-              <Text style={styles.valueCell}>{data.welfare || "-"}</Text>
-            </View>
-            <View style={styles.tableRow}>
-              <Text style={styles.labelCell}>受動喫煙対策</Text>
-              <Text style={styles.valueCell}>{data.smoking || "-"}</Text>
-            </View>
-            {data.smokingDetail && (
-              <View style={styles.tableRowLast}>
-                <Text style={styles.labelCell}>受動喫煙対策（詳細）</Text>
-                <Text style={styles.valueCell}>{data.smokingDetail}</Text>
+            {data.company.headquarters && (
+              <View style={styles.companyRow}>
+                <Text style={styles.companyLabel}>本社所在地</Text>
+                <Text style={styles.companyValue}>{data.company.headquarters}</Text>
+              </View>
+            )}
+            {data.company.employeeCount && (
+              <View style={styles.companyRow}>
+                <Text style={styles.companyLabel}>従業員数</Text>
+                <Text style={styles.companyValue}>{data.company.employeeCount}</Text>
+              </View>
+            )}
+            {data.company.foundedDate && (
+              <View style={styles.companyRowLast}>
+                <Text style={styles.companyLabel}>設立</Text>
+                <Text style={styles.companyValue}>{data.company.foundedDate}</Text>
               </View>
             )}
           </View>
-        </View>
+        </Section>
 
-        <Text style={styles.pageNumber}>4/4</Text>
+        {/* 会社概要 */}
+        {data.company.overview && (
+          <Section title="会社概要">
+            <Text style={styles.contentText}>{data.company.overview}</Text>
+          </Section>
+        )}
+
+        {/* 事業内容 */}
+        {data.company.business && (
+          <Section title="事業内容">
+            <Text style={styles.contentText}>{data.company.business}</Text>
+          </Section>
+        )}
+
+        {/* フッター */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>作成日: {today}</Text>
+          <Text style={styles.pageNumber}>2 / 2</Text>
+        </View>
       </Page>
     </Document>
   );
 }
-
-
