@@ -2,8 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import DashboardLayout from "@/components/DashboardLayout";
 
 type JobData = {
@@ -47,6 +48,20 @@ type JobData = {
   };
 };
 
+// PDFDownloadLinkを動的にインポート（SSR無効化）
+const PDFDownloadButton = dynamic(
+  () => import("@/components/pdf/PDFDownloadButton").then((mod) => mod.PDFDownloadButton),
+  {
+    ssr: false,
+    loading: () => (
+      <button className="btn-orange px-6 py-3 flex items-center gap-2 opacity-50" disabled>
+        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        準備中...
+      </button>
+    ),
+  }
+);
+
 export default function JobPdfPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
@@ -56,8 +71,6 @@ export default function JobPdfPage() {
   const [job, setJob] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
-  const [pdfReady, setPdfReady] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -85,56 +98,6 @@ export default function JobPdfPage() {
       fetchJob();
     }
   }, [session, id]);
-
-  // クライアントサイドでPDF生成してダウンロード
-  const handleDownload = useCallback(async () => {
-    if (!job || downloading) return;
-
-    setDownloading(true);
-    try {
-      // 動的にPDFモジュールをインポート
-      const [{ pdf }, { JobSheetPDF }] = await Promise.all([
-        import("@react-pdf/renderer"),
-        import("@/components/pdf/JobSheetPDF"),
-      ]);
-
-      // PDFを生成
-      const pdfDoc = pdf(<JobSheetPDF data={job} />);
-      const blob = await pdfDoc.toBlob();
-
-      // ダウンロード用のファイル名を生成
-      const timestamp = new Date().toISOString().slice(0, 10);
-      const fileName = `求人票_${job.company.name}_${job.title}_${timestamp}.pdf`;
-
-      // ダウンロードリンクを作成
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Download failed:", err);
-      alert("PDFのダウンロードに失敗しました。もう一度お試しください。");
-    } finally {
-      setDownloading(false);
-    }
-  }, [job, downloading]);
-
-  // PDFモジュールの読み込みを開始
-  useEffect(() => {
-    if (job) {
-      // PDFモジュールをプリロード
-      Promise.all([
-        import("@react-pdf/renderer"),
-        import("@/components/pdf/JobSheetPDF"),
-      ])
-        .then(() => setPdfReady(true))
-        .catch((err) => console.error("Failed to preload PDF modules:", err));
-    }
-  }, [job]);
 
   if (authStatus === "loading" || loading) {
     return (
@@ -174,6 +137,10 @@ export default function JobPdfPage() {
     return "-";
   };
 
+  // ファイル名を生成（日本語OK）
+  const timestamp = new Date().toISOString().slice(0, 10);
+  const fileName = `求人票_${job.company.name}_${job.title}_${timestamp}.pdf`;
+
   return (
     <DashboardLayout>
       <div className="p-8">
@@ -202,30 +169,7 @@ export default function JobPdfPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleDownload}
-              disabled={downloading || !pdfReady}
-              className="btn-orange px-6 py-3 flex items-center gap-2 disabled:opacity-50"
-            >
-              {downloading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  生成中...
-                </>
-              ) : !pdfReady ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  準備中...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  PDFダウンロード
-                </>
-              )}
-            </button>
+            <PDFDownloadButton job={job} fileName={fileName} />
           </div>
         </div>
 
