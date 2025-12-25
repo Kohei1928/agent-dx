@@ -55,36 +55,22 @@ export function PDFDownloadButton({ job, fileName }: PDFDownloadButtonProps) {
 
   const handleDownload = async () => {
     setIsGenerating(true);
-    console.log("PDF生成開始...");
     try {
       // PDFを生成
-      console.log("1. PDFコンポーネント作成中...");
       const blob = await pdf(<JobSheetPDF data={job} />).toBlob();
-      console.log("2. PDF Blob生成完了:", blob.size, "bytes");
 
-      // ダウンロードをトリガー
+      // Blob URLを作成
       const url = URL.createObjectURL(blob);
-      console.log("3. Blob URL作成:", url);
       
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
-      document.body.appendChild(link);
-      console.log("4. リンク作成完了。クリック実行...");
-      link.click();
-      console.log("5. リンククリック完了");
+      // 新しいタブでPDFを開く（ダウンロードよりも確実）
+      window.open(url, "_blank");
       
-      // クリーンアップ
+      // 少し待ってからURLを解放
       setTimeout(() => {
-        document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        console.log("6. クリーンアップ完了");
-      }, 100);
-      
-      console.log("✅ PDFダウンロード完了！ファイル名:", fileName);
+      }, 1000);
     } catch (error) {
-      console.error("❌ PDF生成エラー:", error);
+      console.error("PDF生成エラー:", error);
       alert("PDFの生成に失敗しました。もう一度お試しください。");
     } finally {
       setIsGenerating(false);
