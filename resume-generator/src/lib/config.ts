@@ -42,7 +42,7 @@ export const NOTIFICATION_CONFIG = {
   /** 通知クールダウン時間（ミリ秒） */
   cooldownMs: 5 * 60 * 1000, // 5分
   /** メール送信元名 */
-  emailFromName: "エージェントDX",
+  emailFromName: "より転-DX",
 } as const;
 
 // ========================================

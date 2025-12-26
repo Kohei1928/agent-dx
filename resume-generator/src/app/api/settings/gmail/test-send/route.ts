@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
 
     const success = await sendEmail({
       to,
-      subject: "[テスト] エージェントDX メール送信テスト",
-      body: `これはエージェントDXからのテストメールです。
+      subject: "[テスト] より転-DX メール送信テスト",
+      body: `これはより転-DXからのテストメールです。
 
 このメールが届いていれば、Gmail連携は正常に動作しています。
 

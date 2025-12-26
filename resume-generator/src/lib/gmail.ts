@@ -262,7 +262,7 @@ export async function sendEmail(options: {
 
   try {
     await transporter.sendMail({
-      from: `"エージェントDX" <${process.env.GMAIL_USER}>`,
+      from: `"より転-DX" <${process.env.GMAIL_USER}>`,
       to: options.to,
       subject: options.subject,
       text: options.body,

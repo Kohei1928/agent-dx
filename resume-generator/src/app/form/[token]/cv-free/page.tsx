@@ -846,7 +846,7 @@ export default function CvFreeFormPage() {
 
         {/* フッター */}
         <div className="text-center mt-8 text-[#7c98b6] text-sm">
-          © 2025 株式会社ミギナナメウエ - エージェントDX
+          © 2025 株式会社ミギナナメウエ - より転-DX
         </div>
       </div>
     </div>

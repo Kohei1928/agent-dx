@@ -44,7 +44,7 @@ export default function Home() {
                 <span className="text-white font-bold text-xl">DX</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">エージェントDX</h1>
+                <h1 className="text-3xl font-bold text-slate-900">より転-DX</h1>
                 <p className="text-slate-500 text-sm">人材紹介業務効率化プラットフォーム</p>
               </div>
             </div>

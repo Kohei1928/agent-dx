@@ -16,7 +16,7 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "エージェントDX - 人材紹介業務効率化プラットフォーム",
+  title: "より転-DX - 人材紹介業務効率化プラットフォーム",
   description: "履歴書・職務経歴書自動生成、日程調整を効率化する人材エージェント向けDXツール",
 };
 

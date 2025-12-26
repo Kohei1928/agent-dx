@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# より転-DX
 
-## Getting Started
+人材紹介業務効率化プラットフォーム
 
-First, run the development server:
+## 概要
+
+「より転-DX」は、人材紹介業務のすべてを一元化し、コピペ作業をゼロにするための統合システムです。
+
+## 主要機能
+
+### 🏢 企業・求人管理
+- 企業マスタの管理
+- 求人マスタの管理
+- 求人票PDF出力
+- CSVインポート
+- HubSpot連携
+
+### 👤 求職者管理
+- 求職者情報の管理
+- HubSpot連携
+
+### 📄 書類生成（AI）
+- 履歴書の自動生成
+- 職務経歴書の自動生成
+- 推薦文の自動生成
+
+### 📅 日程調整
+- 面接日程の調整
+- 求職者への日程調整URL発行
+- カレンダー連携
+
+### 📊 選考管理
+- 選考ステータスの管理
+- CA/RA切り替え機能
+- メール管理
+
+### 📋 求人提案
+- 提案表の作成
+- PDF出力
+
+## 技術スタック
+
+- **フロントエンド**: Next.js 15, React 19, Tailwind CSS
+- **バックエンド**: Next.js API Routes
+- **データベース**: PostgreSQL, Prisma
+- **認証**: NextAuth.js (Google OAuth)
+- **AI**: OpenAI API
+- **外部連携**: HubSpot API, Gmail API
+
+## 開発環境
 
 ```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバー起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 環境変数
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+HUBSPOT_ACCESS_TOKEN=
+OPENAI_API_KEY=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## デプロイ
 
-## Learn More
+本番環境はRailwayにデプロイされています。
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# ビルド
+npm run build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 本番起動
+npm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ライセンス
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private - All rights reserved.

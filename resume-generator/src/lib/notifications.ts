@@ -86,14 +86,14 @@ export async function sendEmailNotification(notification: BookingNotification): 
         </table>
       </div>
       <p style="color: #6c757d; font-size: 12px; margin-top: 20px; text-align: center;">
-        ※ このメールはエージェントDXから自動送信されています。
+        ※ このメールはより転-DXから自動送信されています。
       </p>
     </div>
   `;
 
   try {
     await transporter.sendMail({
-      from: `"エージェントDX" <${process.env.GMAIL_USER}>`,
+      from: `"より転-DX" <${process.env.GMAIL_USER}>`,
       to: notification.userEmail,
       subject: `【日程確定】${notification.candidateName}様 - ${notification.companyName}`,
       html: htmlBody,
@@ -150,14 +150,14 @@ export async function sendFormSubmissionEmail(notification: FormSubmissionNotifi
         ` : ""}
       </div>
       <p style="color: #6c757d; font-size: 12px; margin-top: 20px; text-align: center;">
-        ※ このメールはエージェントDXから自動送信されています。
+        ※ このメールはより転-DXから自動送信されています。
       </p>
     </div>
   `;
 
   try {
     await transporter.sendMail({
-      from: `"エージェントDX" <${process.env.GMAIL_USER}>`,
+      from: `"より転-DX" <${process.env.GMAIL_USER}>`,
       to: notification.userEmail,
       subject: `【フォーム回答】${notification.candidateName}様が履歴書情報を入力しました`,
       html: htmlBody,

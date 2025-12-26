@@ -421,7 +421,7 @@ export default function PublicSchedulePage() {
             </div>
             <div className="text-left">
               <span className="font-bold text-slate-900 text-lg block">スマート面接調整</span>
-              <span className="text-slate-400 text-xs">by エージェントDX</span>
+              <span className="text-slate-400 text-xs">by より転-DX</span>
             </div>
           </div>
         </div>
@@ -685,7 +685,7 @@ export default function PublicSchedulePage() {
 
         {/* フッター */}
         <div className="text-center mt-8 text-slate-400 text-sm">
-          © 2025 株式会社ミギナナメウエ - エージェントDX
+          © 2025 株式会社ミギナナメウエ - より転-DX
         </div>
       </div>
     </div>

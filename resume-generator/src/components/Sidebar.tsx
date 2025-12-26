@@ -208,7 +208,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <h1 className="text-slate-900 font-bold text-lg whitespace-nowrap">エージェントDX</h1>
+              <h1 className="text-slate-900 font-bold text-lg whitespace-nowrap">より転-DX</h1>
               <p className="text-slate-400 text-xs whitespace-nowrap">人材紹介業務効率化</p>
             </div>
           )}
