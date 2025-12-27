@@ -1251,12 +1251,12 @@ export default function PublicFormPage() {
               <button
                 type="submit"
                 disabled={submitting || !formData.name}
-                className="w-full bg-[orange-500] hover:bg-[orange-600] disabled:bg-[slate-300] text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 text-white py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-orange-200"
               >
                 {submitting ? "送信中..." : "内容を確定する"}
               </button>
               
-              <p className="text-center text-xs text-[slate-400] mt-2">
+              <p className="text-center text-xs text-slate-400 mt-2">
                 ※ 入力内容は自動で保存されています。このボタンを押すと入力完了となります。
               </p>
             </div>
