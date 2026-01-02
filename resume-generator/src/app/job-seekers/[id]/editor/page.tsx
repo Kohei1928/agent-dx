@@ -427,15 +427,24 @@ export default function EditorPage() {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const blob = await pdf(PDFComponent as any).toBlob();
-      const url = URL.createObjectURL(blob);
+      const originalBlob = await pdf(PDFComponent as any).toBlob();
+      
+      // MIMEタイプを明示的に設定したBlobを作成
+      const pdfBlob = new Blob([originalBlob], { type: "application/pdf" });
+      
+      const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
       link.download = fileName;
+      link.style.display = "none";
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      
+      // クリーンアップを少し遅延させる
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert("PDFのダウンロードに失敗しました");
