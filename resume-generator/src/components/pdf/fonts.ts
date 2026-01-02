@@ -25,6 +25,13 @@ Font.register({
   src: "/fonts/NotoSansJP-Medium.otf",
 });
 
+// NotoSansJPBold を単独のフォントファミリーとして登録
+// スタイルファイルで fontFamily: "NotoSansJPBold" として使用される
+Font.register({
+  family: "NotoSansJPBold",
+  src: "/fonts/NotoSansJP-Bold.otf",
+});
+
 export {};
 
 
