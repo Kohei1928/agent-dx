@@ -18,6 +18,13 @@ Font.register({
   ],
 });
 
+// NotoSansJPMedium を単独のフォントファミリーとして登録
+// スタイルファイルで fontFamily: "NotoSansJPMedium" として使用される
+Font.register({
+  family: "NotoSansJPMedium",
+  src: "/fonts/NotoSansJP-Medium.otf",
+});
+
 export {};
 
 
