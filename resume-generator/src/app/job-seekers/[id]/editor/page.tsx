@@ -408,33 +408,47 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（新しいタブで開く方式 - 確実に動作する）
+  // PDFダウンロード（ダウンロード + 新しいタブ表示の両方を実行）
   const handleDownload = async () => {
     setDownloading(true);
     try {
+      let fileName: string;
       let PDFComponent: React.ReactElement;
 
       if (activeTab === "resume") {
+        fileName = `履歴書_${resumeData.name || "名前未設定"}.pdf`;
         PDFComponent = <ResumePDF data={resumeData} />;
       } else if (activeTab === "cv") {
+        fileName = `職務経歴書_${cvData.name || "名前未設定"}.pdf`;
         PDFComponent = <CvPDF data={cvData} />;
       } else {
+        fileName = `職務経歴書_自由記述_${cvData.name || "名前未設定"}.pdf`;
         PDFComponent = <CvFreePDF data={cvData} />;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const blob = await pdf(PDFComponent as any).toBlob();
+      const originalBlob = await pdf(PDFComponent as any).toBlob();
       
-      // Blob URLを作成
-      const url = URL.createObjectURL(blob);
+      // MIMEタイプを明示的に設定したBlobを作成
+      const pdfBlob = new Blob([originalBlob], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
       
-      // 新しいタブでPDFを開く（ダウンロードよりも確実）
+      // 1. ダウンロードを実行
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // 2. 新しいタブでも開く（確認用）
       window.open(url, "_blank");
       
       // 少し待ってからURLを解放
       setTimeout(() => {
         URL.revokeObjectURL(url);
-      }, 1000);
+      }, 3000);
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert("PDFのダウンロードに失敗しました");
