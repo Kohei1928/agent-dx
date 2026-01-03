@@ -6,7 +6,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { pdf } from "@react-pdf/renderer";
-import { saveAs } from "file-saver";
 import DashboardLayout from "@/components/DashboardLayout";
 import BirthDateInput from "@/components/BirthDateInput";
 import PhotoUpload from "@/components/PhotoUpload";
@@ -409,7 +408,7 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（file-saverで確実にダウンロード）
+  // PDFダウンロード（Data URL方式 - 最も確実）
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -428,18 +427,34 @@ export default function EditorPage() {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const originalBlob = await pdf(PDFComponent as any).toBlob();
+      const blob = await pdf(PDFComponent as any).toBlob();
       
-      // MIMEタイプを明示的に設定したBlobを作成
-      const pdfBlob = new Blob([originalBlob], { type: "application/pdf" });
-      
-      // file-saverでダウンロード（ブラウザ互換性対応）
-      saveAs(pdfBlob, fileName);
+      // BlobをBase64 Data URLに変換（最も確実なダウンロード方法）
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        
+        // ダウンロードリンクを作成
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = fileName;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setDownloading(false);
+      };
+      reader.onerror = () => {
+        console.error("Failed to read blob as data URL");
+        alert("PDFの生成に失敗しました");
+        setDownloading(false);
+      };
+      reader.readAsDataURL(blob);
       
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert("PDFのダウンロードに失敗しました");
-    } finally {
       setDownloading(false);
     }
   };
