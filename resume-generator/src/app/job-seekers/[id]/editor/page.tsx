@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { pdf } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
 import DashboardLayout from "@/components/DashboardLayout";
 import BirthDateInput from "@/components/BirthDateInput";
 import PhotoUpload from "@/components/PhotoUpload";
@@ -408,7 +409,7 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（ダウンロード + 新しいタブ表示の両方を実行）
+  // PDFダウンロード（file-saverで確実にダウンロード）
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -431,24 +432,10 @@ export default function EditorPage() {
       
       // MIMEタイプを明示的に設定したBlobを作成
       const pdfBlob = new Blob([originalBlob], { type: "application/pdf" });
-      const url = URL.createObjectURL(pdfBlob);
       
-      // 1. ダウンロードを実行
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // file-saverでダウンロード（ブラウザ互換性対応）
+      saveAs(pdfBlob, fileName);
       
-      // 2. 新しいタブでも開く（確認用）
-      window.open(url, "_blank");
-      
-      // 少し待ってからURLを解放
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 3000);
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert("PDFのダウンロードに失敗しました");

@@ -221,3 +221,4 @@ GET  /api/ats/:provider/companies       # 企業取得
 4. [ ] ATS連携設定画面の実装
 5. [ ] 同期履歴・ログ機能の実装
 
+

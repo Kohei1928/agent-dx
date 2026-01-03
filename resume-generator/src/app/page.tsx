@@ -133,6 +133,40 @@ export default function Home() {
                 Googleでログイン
               </button>
 
+              {/* 開発環境用ログイン（localhost:3003で動作時のみ表示） */}
+              {typeof window !== "undefined" && window.location.hostname === "localhost" && (
+                <div className="mt-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-slate-400">または</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const result = await signIn("dev-login", { 
+                        email: "dev@example.com",
+                        redirect: false,
+                      });
+                      if (result?.ok) {
+                        window.location.href = "/job-seekers";
+                      } else {
+                        console.error("Login failed:", result?.error);
+                        alert("ログインに失敗しました: " + result?.error);
+                      }
+                    }}
+                    className="mt-4 w-full flex items-center justify-center gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-4 rounded-xl font-medium transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    開発用ログイン（テスト）
+                  </button>
+                </div>
+              )}
+
               <div className="mt-6 text-center">
                 <p className="text-sm text-slate-400">
                   ※ @migi-nanameue.co.jp ドメインのみ
