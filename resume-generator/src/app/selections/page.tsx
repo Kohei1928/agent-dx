@@ -115,6 +115,12 @@ type TeamMember = {
   name: string;
 };
 
+type JobSeekerInfo = {
+  id: string;
+  name: string;
+  email: string | null;
+};
+
 function SelectionsContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -134,8 +140,10 @@ function SelectionsContent() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [jobSeekerInfo, setJobSeekerInfo] = useState<JobSeekerInfo | null>(null);
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const jobSeekerIdParam = searchParams.get("jobSeekerId");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -159,6 +167,26 @@ function SelectionsContent() {
     fetchTeamMembers();
   }, []);
 
+  // 求職者情報取得（フィルタリング時）
+  useEffect(() => {
+    const fetchJobSeekerInfo = async () => {
+      if (!jobSeekerIdParam) {
+        setJobSeekerInfo(null);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/job-seekers/${jobSeekerIdParam}`);
+        if (res.ok) {
+          const data = await res.json();
+          setJobSeekerInfo({ id: data.id, name: data.name, email: data.email });
+        }
+      } catch (error) {
+        console.error("Failed to fetch job seeker info:", error);
+      }
+    };
+    fetchJobSeekerInfo();
+  }, [jobSeekerIdParam]);
+
   // カテゴリ別件数を取得
   const fetchCategoryCounts = useCallback(async () => {
     try {
@@ -176,7 +204,7 @@ function SelectionsContent() {
     fetchCategoryCounts();
   }, [fetchCategoryCounts]);
 
-  const fetchSelections = useCallback(async (page: number, search: string, statusCat: string, caId: string) => {
+  const fetchSelections = useCallback(async (page: number, search: string, statusCat: string, caId: string, jobSeekerId?: string | null) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -184,6 +212,7 @@ function SelectionsContent() {
         limit: "25",
         ...(search && { search }),
         ...(caId && caId !== "all" && { caId }),
+        ...(jobSeekerId && { jobSeekerId }),
       });
 
       // ステータスカテゴリでフィルター
@@ -212,25 +241,29 @@ function SelectionsContent() {
 
   useEffect(() => {
     if (session) {
-      fetchSelections(currentPage, searchQuery, statusFilter, caFilter);
+      fetchSelections(currentPage, searchQuery, statusFilter, caFilter, jobSeekerIdParam);
     }
-  }, [session, currentPage, statusFilter, caFilter, fetchSelections]);
+  }, [session, currentPage, statusFilter, caFilter, jobSeekerIdParam, fetchSelections]);
 
   // 検索実行（デバウンス）
   useEffect(() => {
     const timer = setTimeout(() => {
       if (session) {
-        fetchSelections(1, searchQuery, statusFilter, caFilter);
+        fetchSelections(1, searchQuery, statusFilter, caFilter, jobSeekerIdParam);
         if (searchQuery && currentPage !== 1) {
-          router.push("/selections?page=1");
+          const params = new URLSearchParams({ page: "1" });
+          if (jobSeekerIdParam) params.set("jobSeekerId", jobSeekerIdParam);
+          router.push(`/selections?${params}`);
         }
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, session]);
+  }, [searchQuery, session, jobSeekerIdParam]);
 
   const handlePageChange = (page: number) => {
-    router.push(`/selections?page=${page}`);
+    const params = new URLSearchParams({ page: String(page) });
+    if (jobSeekerIdParam) params.set("jobSeekerId", jobSeekerIdParam);
+    router.push(`/selections?${params}`);
   };
 
   const getStatusConfig = (status: string) => {
@@ -310,10 +343,39 @@ function SelectionsContent() {
   return (
     <DashboardLayout>
       <div className="p-6 bg-slate-50 min-h-screen">
+        {/* パンくずリスト（求職者フィルター時） */}
+        {jobSeekerInfo && (
+          <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+            <Link href="/job-seekers" className="hover:text-green-600">求職者一覧</Link>
+            <span>/</span>
+            <Link href={`/job-seekers/${jobSeekerInfo.id}`} className="hover:text-green-600">{jobSeekerInfo.name}</Link>
+            <span>/</span>
+            <span className="text-slate-700">選考管理</span>
+          </div>
+        )}
+
         {/* Header - CIRCUS風 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">選考一覧</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {jobSeekerInfo ? `${jobSeekerInfo.name}さんの選考一覧` : "選考一覧"}
+            </h1>
+            {jobSeekerInfo?.email && (
+              <p className="text-sm text-slate-500 mt-1">{jobSeekerInfo.email}</p>
+            )}
+          </div>
           <div className="flex items-center gap-4">
+            {jobSeekerInfo && (
+              <Link
+                href="/jobs/search"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                求人を検索して提案
+              </Link>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-sm text-slate-600">担当者:</span>
               <select

@@ -499,7 +499,7 @@ function JobSeekersContent() {
                         </Link>
                         
                         <Link
-                          href={`/job-seekers/${jobSeeker.id}/selections`}
+                          href={`/selections?jobSeekerId=${jobSeeker.id}`}
                           onClick={(e) => e.stopPropagation()}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
                         >
