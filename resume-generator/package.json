@@ -12,7 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed-jobs": "npx tsx prisma/seed-jobs.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.1",
