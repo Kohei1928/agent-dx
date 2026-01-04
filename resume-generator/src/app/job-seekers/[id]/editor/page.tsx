@@ -408,7 +408,7 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（File System Access API + フォールバック）
+  // PDFダウンロード（サーバーAPI経由で正しいファイル名でダウンロード）
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -429,48 +429,45 @@ export default function EditorPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const blob = await pdf(PDFComponent as any).toBlob();
       
-      // MIMEタイプを明示的に設定
-      const pdfBlob = new Blob([blob], { type: "application/pdf" });
-      
-      // File System Access API（新しいブラウザ向け）
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ("showSaveFilePicker" in window) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const handle = await (window as any).showSaveFilePicker({
-            suggestedName: fileName,
-            types: [
-              {
-                description: "PDF Document",
-                accept: { "application/pdf": [".pdf"] },
-              },
-            ],
-          });
-          const writable = await handle.createWritable();
-          await writable.write(pdfBlob);
-          await writable.close();
-          setDownloading(false);
-          return;
-        } catch (err) {
-          // ユーザーがキャンセルした場合は何もしない
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((err as any).name === "AbortError") {
-            setDownloading(false);
-            return;
-          }
-          // その他のエラーはフォールバックを試す
-          console.warn("showSaveFilePicker failed, falling back:", err);
-        }
+      // BlobをBase64に変換
+      const arrayBuffer = await blob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binary = "";
+      for (let i = 0; i < uint8Array.length; i++) {
+        binary += String.fromCharCode(uint8Array[i]);
       }
+      const pdfBase64 = btoa(binary);
       
-      // フォールバック：Blob URLで新しいタブを開く
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, "_blank");
+      // サーバーAPIを呼び出してContent-Disposition付きでダウンロード
+      const response = await fetch("/api/pdf-download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pdfBase64, fileName }),
+      });
+
+      if (!response.ok) {
+        throw new Error("PDF download failed");
+      }
+
+      // レスポンスをBlobとして取得
+      const downloadBlob = await response.blob();
       
-      // URLを少し遅れて解放
+      // ダウンロードリンクを作成
+      const url = URL.createObjectURL(downloadBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // URLを解放
       setTimeout(() => {
         URL.revokeObjectURL(url);
-      }, 5000);
+      }, 100);
       
     } catch (error) {
       console.error("Failed to download PDF:", error);
