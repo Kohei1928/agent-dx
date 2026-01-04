@@ -414,15 +414,17 @@ export default function EditorPage() {
     try {
       let PDFComponent: React.ReactElement;
       let fileName: string;
-      const name = resumeData.name || cvData.name || "名前未設定";
 
       if (activeTab === "resume") {
+        const name = resumeData.name || "名前未設定";
         PDFComponent = <ResumePDF data={resumeData} />;
         fileName = `${name}_履歴書.pdf`;
       } else if (activeTab === "cv") {
+        const name = cvData.name || "名前未設定";
         PDFComponent = <CvPDF data={cvData} />;
         fileName = `${name}_職務経歴書.pdf`;
       } else {
+        const name = cvData.name || "名前未設定";
         PDFComponent = <CvFreePDF data={cvData} />;
         fileName = `${name}_職務経歴書_自由記述.pdf`;
       }
