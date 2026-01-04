@@ -408,7 +408,7 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（Data URL方式 - 最も確実）
+  // PDFダウンロード（File System Access API + フォールバック）
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -429,32 +429,53 @@ export default function EditorPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const blob = await pdf(PDFComponent as any).toBlob();
       
-      // BlobをBase64 Data URLに変換（最も確実なダウンロード方法）
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        
-        // ダウンロードリンクを作成
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = fileName;
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        setDownloading(false);
-      };
-      reader.onerror = () => {
-        console.error("Failed to read blob as data URL");
-        alert("PDFの生成に失敗しました");
-        setDownloading(false);
-      };
-      reader.readAsDataURL(blob);
+      // MIMEタイプを明示的に設定
+      const pdfBlob = new Blob([blob], { type: "application/pdf" });
+      
+      // File System Access API（新しいブラウザ向け）
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ("showSaveFilePicker" in window) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const handle = await (window as any).showSaveFilePicker({
+            suggestedName: fileName,
+            types: [
+              {
+                description: "PDF Document",
+                accept: { "application/pdf": [".pdf"] },
+              },
+            ],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(pdfBlob);
+          await writable.close();
+          setDownloading(false);
+          return;
+        } catch (err) {
+          // ユーザーがキャンセルした場合は何もしない
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((err as any).name === "AbortError") {
+            setDownloading(false);
+            return;
+          }
+          // その他のエラーはフォールバックを試す
+          console.warn("showSaveFilePicker failed, falling back:", err);
+        }
+      }
+      
+      // フォールバック：Blob URLで新しいタブを開く
+      const url = URL.createObjectURL(pdfBlob);
+      window.open(url, "_blank");
+      
+      // URLを少し遅れて解放
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 5000);
       
     } catch (error) {
       console.error("Failed to download PDF:", error);
       alert("PDFのダウンロードに失敗しました");
+    } finally {
       setDownloading(false);
     }
   };
