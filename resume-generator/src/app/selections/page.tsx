@@ -10,48 +10,49 @@ import DashboardLayout from "@/components/DashboardLayout";
 // 選考ステータスのラベルと色
 const STATUS_CONFIG: Record<string, { label: string; color: string; category: string }> = {
   // 応募前
-  proposal: { label: "提案中", color: "bg-slate-100 text-slate-600", category: "応募前" },
+  proposal: { label: "候補リスト", color: "bg-slate-100 text-slate-600", category: "候補リスト" },
+  not_applying: { label: "応募しない", color: "bg-gray-100 text-gray-500", category: "応募しない" },
   
   // 書類選考
-  entry_preparing: { label: "エントリー準備中", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  entry_requested: { label: "エントリー依頼済", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  entry_completed: { label: "エントリー完了", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  document_screening: { label: "書類選考中", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  document_passed: { label: "書類通過", color: "bg-green-100 text-green-600", category: "書類選考" },
-  document_rejected: { label: "書類不通過", color: "bg-red-100 text-red-600", category: "書類選考" },
+  entry_preparing: { label: "エントリー準備中", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  entry_requested: { label: "エントリー依頼済", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  entry_completed: { label: "エントリー完了", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_submitted: { label: "書類提出済み", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_screening: { label: "書類選考中", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_passed: { label: "書類通過", color: "bg-green-100 text-green-600", category: "選考中" },
+  document_rejected: { label: "書類不通過", color: "bg-red-100 text-red-600", category: "選考終了" },
   
   // 日程調整
-  scheduling: { label: "日程調整中", color: "bg-yellow-100 text-yellow-600", category: "日程調整" },
-  schedule_confirmed: { label: "日程確定", color: "bg-green-100 text-green-600", category: "日程調整" },
+  scheduling: { label: "日程調整中", color: "bg-yellow-100 text-yellow-600", category: "選考中" },
+  schedule_confirmed: { label: "日程確定", color: "bg-green-100 text-green-600", category: "選考中" },
   
   // 面接
-  first_interview: { label: "一次面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  first_interview_done: { label: "一次面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
-  second_interview: { label: "二次面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  second_interview_done: { label: "二次面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
-  final_interview: { label: "最終面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  final_interview_done: { label: "最終面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
+  first_interview: { label: "一次面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  first_interview_done: { label: "一次面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  second_interview: { label: "二次面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  second_interview_done: { label: "二次面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  final_interview: { label: "最終面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  final_interview_done: { label: "最終面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
   
   // 内定
   offer: { label: "内定", color: "bg-orange-100 text-orange-600", category: "内定" },
   offer_accepted: { label: "内定承諾", color: "bg-green-100 text-green-600", category: "内定" },
-  offer_rejected: { label: "内定辞退", color: "bg-red-100 text-red-600", category: "内定" },
+  offer_rejected: { label: "内定辞退", color: "bg-red-100 text-red-600", category: "選考終了" },
   
   // 終了
-  withdrawn: { label: "辞退", color: "bg-gray-100 text-gray-600", category: "終了" },
-  rejected: { label: "不採用", color: "bg-red-100 text-red-600", category: "終了" },
-  cancelled: { label: "キャンセル", color: "bg-gray-100 text-gray-600", category: "終了" },
+  withdrawn: { label: "辞退", color: "bg-gray-100 text-gray-600", category: "選考終了" },
+  rejected: { label: "不採用", color: "bg-red-100 text-red-600", category: "選考終了" },
+  cancelled: { label: "キャンセル", color: "bg-gray-100 text-gray-600", category: "選考終了" },
 };
 
-// カテゴリ別のステータス
+// カテゴリ別のステータス（CIRCUS風タブ）
 const STATUS_CATEGORIES = [
-  { key: "all", label: "全て" },
-  { key: "応募前", label: "応募前" },
-  { key: "書類選考", label: "書類選考" },
-  { key: "日程調整", label: "日程調整" },
-  { key: "面接", label: "面接" },
+  { key: "all", label: "すべて" },
+  { key: "候補リスト", label: "候補リスト" },
+  { key: "選考中", label: "選考中" },
   { key: "内定", label: "内定" },
-  { key: "終了", label: "終了" },
+  { key: "選考終了", label: "選考終了" },
+  { key: "応募しない", label: "応募しない" },
 ];
 
 type Selection = {

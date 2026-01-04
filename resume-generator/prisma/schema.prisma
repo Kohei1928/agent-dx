@@ -295,6 +295,9 @@ model Job {
   // 勤務地
   locations       Json?    // 勤務地リスト [{area: "東京都", detail: "渋谷区", note: "リモート可"}]
   remoteWork      String?  // リモート可否（full/partial/none）
+  // 検索用タグ・特徴
+  features        Json?    // 特徴タグ ["未経験OK", "学歴不問", "フルリモート", "フレックス", "土日祝休み"]
+  searchKeywords  String?  @db.Text  // 検索用キーワード（全文検索用）
   // 仕事内容
   description     String?  @db.Text  // 仕事内容
   highlights      String?  @db.Text  // 仕事の醍醐味
@@ -471,12 +474,14 @@ model RecommendationLetter {
 // 選考ステータス
 enum SelectionStatus {
   // 応募前
-  proposal              // 提案中
+  proposal              // 提案中（候補リスト）
+  not_applying          // 応募しない
   
   // 書類選考
   entry_preparing       // エントリー準備中
   entry_requested       // エントリー依頼済み（RA事務へ）
   entry_completed       // エントリー完了
+  document_submitted    // 書類提出済み
   document_screening    // 書類選考中
   document_passed       // 書類通過
   document_rejected     // 書類不通過
@@ -535,12 +540,13 @@ model Selection {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  jobSeeker       JobSeeker       @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
-  company         Company?        @relation(fields: [companyId], references: [id])
-  job             Job?            @relation(fields: [jobId], references: [id])
-  assignedCA      User            @relation(fields: [assignedCAId], references: [id])
-  messages        Message[]
-  statusHistory   SelectionStatusHistory[]
+  jobSeeker         JobSeeker       @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  company           Company?        @relation(fields: [companyId], references: [id])
+  job               Job?            @relation(fields: [jobId], references: [id])
+  assignedCA        User            @relation(fields: [assignedCAId], references: [id])
+  messages          Message[]
+  statusHistory     SelectionStatusHistory[]
+  interviewDetails  InterviewDetail[]  // 面接詳細（複数回対応）
 
   @@index([jobSeekerId])
   @@index([companyId])
@@ -564,6 +570,46 @@ model SelectionStatusHistory {
 
   @@index([selectionId])
   @@index([createdAt])
+}
+
+// 面接形式（面接詳細用）
+enum InterviewFormat {
+  online    // オンライン
+  onsite    // 対面
+}
+
+// 面接詳細
+model InterviewDetail {
+  id              String          @id @default(cuid())
+  selectionId     String
+  interviewRound  Int             @default(1)  // 面接回数（1: 一次, 2: 二次, 3: 最終）
+  
+  // 日程（日程調整から自動入力可能）
+  scheduledAt     DateTime?       // 面接日時
+  duration        Int?            // 面接時間（分）
+  
+  // 形式
+  format          InterviewFormat @default(online)
+  location        String?         // 対面の場合の場所
+  onlineUrl       String?         // オンラインの場合のURL（Zoom等）
+  
+  // 詳細情報
+  interviewers    String?         // 面接官（名前・役職）
+  preparation     String?         @db.Text  // 準備事項
+  dressCode       String?         // 服装
+  notes           String?         @db.Text  // 注意事項・備考
+  
+  // リマインダー設定
+  reminderSent    Boolean         @default(false)  // リマインダー送信済みフラグ
+  reminderAt      DateTime?       // リマインダー送信日時
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  selection       Selection       @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+
+  @@index([selectionId])
+  @@index([scheduledAt])
 }
 
 // ========================================

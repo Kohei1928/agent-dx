@@ -8,35 +8,39 @@ import DashboardLayout from "@/components/DashboardLayout";
 
 // 選考ステータスのラベルと色
 const STATUS_CONFIG: Record<string, { label: string; color: string; category: string }> = {
-  proposal: { label: "提案中", color: "bg-slate-100 text-slate-600", category: "応募前" },
-  entry_preparing: { label: "エントリー準備中", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  entry_requested: { label: "エントリー依頼済", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  entry_completed: { label: "エントリー完了", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  document_screening: { label: "書類選考中", color: "bg-blue-100 text-blue-600", category: "書類選考" },
-  document_passed: { label: "書類通過", color: "bg-green-100 text-green-600", category: "書類選考" },
-  document_rejected: { label: "書類不通過", color: "bg-red-100 text-red-600", category: "書類選考" },
-  scheduling: { label: "日程調整中", color: "bg-yellow-100 text-yellow-600", category: "日程調整" },
-  schedule_confirmed: { label: "日程確定", color: "bg-green-100 text-green-600", category: "日程調整" },
-  first_interview: { label: "一次面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  first_interview_done: { label: "一次面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
-  second_interview: { label: "二次面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  second_interview_done: { label: "二次面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
-  final_interview: { label: "最終面接予定", color: "bg-purple-100 text-purple-600", category: "面接" },
-  final_interview_done: { label: "最終面接完了", color: "bg-purple-100 text-purple-600", category: "面接" },
+  proposal: { label: "候補リスト", color: "bg-slate-100 text-slate-600", category: "候補リスト" },
+  not_applying: { label: "応募しない", color: "bg-gray-100 text-gray-500", category: "応募しない" },
+  entry_preparing: { label: "エントリー準備中", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  entry_requested: { label: "エントリー依頼済", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  entry_completed: { label: "エントリー完了", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_submitted: { label: "書類提出済み", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_screening: { label: "書類選考中", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  document_passed: { label: "書類通過", color: "bg-green-100 text-green-600", category: "選考中" },
+  document_rejected: { label: "書類不通過", color: "bg-red-100 text-red-600", category: "選考終了" },
+  scheduling: { label: "日程調整中", color: "bg-yellow-100 text-yellow-600", category: "選考中" },
+  schedule_confirmed: { label: "日程確定", color: "bg-green-100 text-green-600", category: "選考中" },
+  first_interview: { label: "一次面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  first_interview_done: { label: "一次面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  second_interview: { label: "二次面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  second_interview_done: { label: "二次面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  final_interview: { label: "最終面接予定", color: "bg-purple-100 text-purple-600", category: "選考中" },
+  final_interview_done: { label: "最終面接完了", color: "bg-purple-100 text-purple-600", category: "選考中" },
   offer: { label: "内定", color: "bg-orange-100 text-orange-600", category: "内定" },
   offer_accepted: { label: "内定承諾", color: "bg-green-100 text-green-600", category: "内定" },
-  offer_rejected: { label: "内定辞退", color: "bg-red-100 text-red-600", category: "内定" },
-  withdrawn: { label: "辞退", color: "bg-gray-100 text-gray-600", category: "終了" },
-  rejected: { label: "不採用", color: "bg-red-100 text-red-600", category: "終了" },
-  cancelled: { label: "キャンセル", color: "bg-gray-100 text-gray-600", category: "終了" },
+  offer_rejected: { label: "内定辞退", color: "bg-red-100 text-red-600", category: "選考終了" },
+  withdrawn: { label: "辞退", color: "bg-gray-100 text-gray-600", category: "選考終了" },
+  rejected: { label: "不採用", color: "bg-red-100 text-red-600", category: "選考終了" },
+  cancelled: { label: "キャンセル", color: "bg-gray-100 text-gray-600", category: "選考終了" },
 };
 
 // ステータス遷移の選択肢
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-  proposal: ["entry_preparing", "withdrawn", "cancelled"],
+  proposal: ["entry_preparing", "not_applying", "withdrawn", "cancelled"],
+  not_applying: ["proposal"],  // 再検討可能
   entry_preparing: ["entry_requested", "withdrawn", "cancelled"],
   entry_requested: ["entry_completed", "withdrawn", "cancelled"],
-  entry_completed: ["document_screening", "withdrawn", "cancelled"],
+  entry_completed: ["document_submitted", "document_screening", "withdrawn", "cancelled"],
+  document_submitted: ["document_screening", "withdrawn", "cancelled"],
   document_screening: ["document_passed", "document_rejected"],
   document_passed: ["scheduling", "withdrawn"],
   document_rejected: [],
@@ -106,6 +110,22 @@ type StatusHistory = {
   createdAt: string;
 };
 
+type InterviewDetail = {
+  id: string;
+  interviewRound: number;
+  scheduledAt: string | null;
+  duration: number | null;
+  format: "online" | "onsite";
+  location: string | null;
+  onlineUrl: string | null;
+  interviewers: string | null;
+  preparation: string | null;
+  dressCode: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type Selection = {
   id: string;
   jobSeekerId: string;
@@ -133,6 +153,7 @@ type Selection = {
   };
   messages: Message[];
   statusHistory: StatusHistory[];
+  interviewDetails: InterviewDetail[];
 };
 
 export default function SelectionDetailPage() {
@@ -143,7 +164,8 @@ export default function SelectionDetailPage() {
   
   const [selection, setSelection] = useState<Selection | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "messages" | "schedule" | "documents" | "history">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "interview" | "messages" | "schedule" | "documents" | "history">("overview");
+  const [copiedGuidance, setCopiedGuidance] = useState(false);
   const [updating, setUpdating] = useState(false);
   
   // メッセージ作成
@@ -400,9 +422,10 @@ export default function SelectionDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 mb-6 border-b border-slate-200">
+        <div className="flex items-center gap-1 mb-6 border-b border-slate-200 overflow-x-auto">
           {[
             { key: "overview", label: "概要", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+            { key: "interview", label: "🎤 面接詳細", icon: "" },
             { key: "messages", label: "💬 メッセージ", icon: "" },
             { key: "schedule", label: "📅 日程", icon: "" },
             { key: "documents", label: "📄 書類", icon: "" },
@@ -492,6 +515,216 @@ export default function SelectionDetailPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Interview Details Tab */}
+          {activeTab === "interview" && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-slate-900">面接詳細</h3>
+                <button
+                  className="btn-orange px-4 py-2 text-sm flex items-center gap-2"
+                  onClick={() => {
+                    // TODO: 面接詳細追加モーダルを開く
+                    alert("面接詳細追加機能は準備中です");
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  面接を追加
+                </button>
+              </div>
+
+              {(!selection.interviewDetails || selection.interviewDetails.length === 0) ? (
+                <div className="text-center py-12 bg-slate-50 rounded-xl">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🎤</span>
+                  </div>
+                  <p className="text-slate-600 font-medium mb-2">面接詳細がありません</p>
+                  <p className="text-slate-400 text-sm">面接が設定されたら、詳細情報を追加してください</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {selection.interviewDetails.map((interview, idx) => {
+                    const roundLabel = interview.interviewRound === 1 ? "一次面接" :
+                                       interview.interviewRound === 2 ? "二次面接" :
+                                       interview.interviewRound === 3 ? "最終面接" :
+                                       `${interview.interviewRound}次面接`;
+                    
+                    // 面接案内テキストを生成
+                    const generateGuidanceText = () => {
+                      const lines = [
+                        `【${selection.companyName} ${roundLabel}のご案内】`,
+                        "",
+                        `求職者様: ${selection.jobSeekerName} 様`,
+                        "",
+                      ];
+
+                      if (interview.scheduledAt) {
+                        const dt = new Date(interview.scheduledAt);
+                        lines.push(`■ 日時: ${dt.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "long" })} ${dt.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}〜`);
+                        if (interview.duration) {
+                          lines.push(`  所要時間: 約${interview.duration}分`);
+                        }
+                      }
+                      
+                      lines.push("");
+                      lines.push(`■ 形式: ${interview.format === "online" ? "オンライン" : "対面"}`);
+                      
+                      if (interview.format === "online" && interview.onlineUrl) {
+                        lines.push(`■ URL: ${interview.onlineUrl}`);
+                      }
+                      if (interview.format === "onsite" && interview.location) {
+                        lines.push(`■ 場所: ${interview.location}`);
+                      }
+                      
+                      if (interview.interviewers) {
+                        lines.push(`■ 面接官: ${interview.interviewers}`);
+                      }
+                      
+                      if (interview.preparation) {
+                        lines.push("");
+                        lines.push(`■ 準備事項:`);
+                        lines.push(interview.preparation);
+                      }
+                      
+                      if (interview.dressCode) {
+                        lines.push("");
+                        lines.push(`■ 服装: ${interview.dressCode}`);
+                      }
+                      
+                      if (interview.notes) {
+                        lines.push("");
+                        lines.push(`■ 注意事項:`);
+                        lines.push(interview.notes);
+                      }
+                      
+                      lines.push("");
+                      lines.push("ご不明点がございましたら、お気軽にご連絡ください。");
+                      lines.push(`担当: ${selection.assignedCAName}`);
+                      
+                      return lines.join("\n");
+                    };
+
+                    const handleCopyGuidance = () => {
+                      navigator.clipboard.writeText(generateGuidanceText());
+                      setCopiedGuidance(true);
+                      setTimeout(() => setCopiedGuidance(false), 2000);
+                    };
+                    
+                    return (
+                      <div key={interview.id} className="bg-slate-50 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                            <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">
+                              {interview.interviewRound}
+                            </span>
+                            {roundLabel}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleCopyGuidance}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition-all ${
+                                copiedGuidance
+                                  ? "bg-green-100 text-green-600"
+                                  : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                              }`}
+                            >
+                              {copiedGuidance ? (
+                                <>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  コピー完了
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                  </svg>
+                                  案内をコピー
+                                </>
+                              )}
+                            </button>
+                            <button
+                              className="px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-300 transition-colors"
+                            >
+                              編集
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-slate-500 mb-1">日時</p>
+                            <p className="font-medium text-slate-900">
+                              {interview.scheduledAt 
+                                ? new Date(interview.scheduledAt).toLocaleDateString("ja-JP", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    weekday: "short",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : "未設定"
+                              }
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-500 mb-1">形式</p>
+                            <p className="font-medium text-slate-900">
+                              {interview.format === "online" ? "🖥 オンライン" : "🏢 対面"}
+                            </p>
+                          </div>
+                          {interview.format === "online" && interview.onlineUrl && (
+                            <div className="col-span-2">
+                              <p className="text-sm text-slate-500 mb-1">URL</p>
+                              <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                {interview.onlineUrl}
+                              </a>
+                            </div>
+                          )}
+                          {interview.format === "onsite" && interview.location && (
+                            <div className="col-span-2">
+                              <p className="text-sm text-slate-500 mb-1">場所</p>
+                              <p className="font-medium text-slate-900">{interview.location}</p>
+                            </div>
+                          )}
+                          {interview.interviewers && (
+                            <div>
+                              <p className="text-sm text-slate-500 mb-1">面接官</p>
+                              <p className="font-medium text-slate-900">{interview.interviewers}</p>
+                            </div>
+                          )}
+                          {interview.dressCode && (
+                            <div>
+                              <p className="text-sm text-slate-500 mb-1">服装</p>
+                              <p className="font-medium text-slate-900">{interview.dressCode}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {interview.preparation && (
+                          <div className="mt-4 pt-4 border-t border-slate-200">
+                            <p className="text-sm text-slate-500 mb-1">準備事項</p>
+                            <p className="text-slate-700 whitespace-pre-wrap">{interview.preparation}</p>
+                          </div>
+                        )}
+                        
+                        {interview.notes && (
+                          <div className="mt-4 pt-4 border-t border-slate-200">
+                            <p className="text-sm text-slate-500 mb-1">注意事項・備考</p>
+                            <p className="text-slate-700 whitespace-pre-wrap">{interview.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
