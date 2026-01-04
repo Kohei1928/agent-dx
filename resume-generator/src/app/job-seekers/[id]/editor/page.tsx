@@ -2,31 +2,15 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { pdf } from "@react-pdf/renderer";
 import DashboardLayout from "@/components/DashboardLayout";
 import BirthDateInput from "@/components/BirthDateInput";
 import PhotoUpload from "@/components/PhotoUpload";
 import { ResumePDF, CvPDF, CvFreePDF } from "@/components/PDFViewer";
 import { SortableList } from "@/components/SortableList";
-
-// PDFDownloadLinkをクライアントサイドでのみ読み込み（正しいファイル名でダウンロード可能）
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { 
-    ssr: false,
-    loading: () => (
-      <span className="bg-slate-400 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-1">
-        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        読込中...
-      </span>
-    ),
-  }
-);
 
 // TipTap Editor（SSR無効）
 const TipTapEditor = dynamic(() => import("@/components/TipTapEditor"), {
@@ -129,6 +113,7 @@ export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<"resume" | "cv" | "cv-free">("resume");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [jobSeekerName, setJobSeekerName] = useState("");
   const [hasHubspot, setHasHubspot] = useState(false);
@@ -423,25 +408,38 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード用のドキュメントとファイル名を取得（メモ化して安定させる）
-  const pdfInfo = useMemo(() => {
-    if (activeTab === "resume") {
-      return {
-        document: <ResumePDF data={resumeData} />,
-        fileName: `履歴書_${resumeData.name || "名前未設定"}.pdf`,
-      };
-    } else if (activeTab === "cv") {
-      return {
-        document: <CvPDF data={cvData} />,
-        fileName: `職務経歴書_${cvData.name || "名前未設定"}.pdf`,
-      };
-    } else {
-      return {
-        document: <CvFreePDF data={cvData} />,
-        fileName: `職務経歴書_自由記述_${cvData.name || "名前未設定"}.pdf`,
-      };
+  // PDFダウンロード（新しいタブで開く - 最も確実な方法）
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      let PDFComponent: React.ReactElement;
+
+      if (activeTab === "resume") {
+        PDFComponent = <ResumePDF data={resumeData} />;
+      } else if (activeTab === "cv") {
+        PDFComponent = <CvPDF data={cvData} />;
+      } else {
+        PDFComponent = <CvFreePDF data={cvData} />;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = await pdf(PDFComponent as any).toBlob();
+      const url = URL.createObjectURL(blob);
+      
+      // 新しいタブでPDFを開く（これが最も確実な方法）
+      window.open(url, "_blank");
+      
+      // 少し待ってからURLを解放
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error) {
+      console.error("PDF生成エラー:", error);
+      alert("PDFの生成に失敗しました。もう一度お試しください。");
+    } finally {
+      setDownloading(false);
     }
-  }, [activeTab, resumeData, cvData]);
+  };
 
   // 学歴追加
   const addEducation = () => {
@@ -657,20 +655,16 @@ export default function EditorPage() {
               </svg>
               {saving ? "保存中..." : "保存"}
             </button>
-            <PDFDownloadLink
-              document={pdfInfo.document}
-              fileName={pdfInfo.fileName}
-              className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
             >
-              {({ loading: pdfLoading }) => (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  {pdfLoading ? "生成中..." : "PDFダウンロード"}
-                </>
-              )}
-            </PDFDownloadLink>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {downloading ? "生成中..." : "PDFダウンロード"}
+            </button>
           </div>
         </div>
       </header>
