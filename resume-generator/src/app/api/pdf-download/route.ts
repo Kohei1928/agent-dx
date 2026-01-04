@@ -31,13 +31,17 @@ export async function POST(request: NextRequest) {
 
     // Content-Dispositionヘッダーでファイル名を指定
     // RFC 5987に従ってUTF-8ファイル名をエンコード
+    // 日本語ファイル名はHTTPヘッダーで直接使用できないため、エンコードが必要
     const encodedFileName = encodeURIComponent(fileName).replace(/'/g, "%27");
+    // ASCIIフォールバック用のファイル名（日本語を含まない）
+    const asciiFileName = "document.pdf";
 
     return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${fileName}"; filename*=UTF-8''${encodedFileName}`,
+        // filename は ASCII のみ、filename* は UTF-8 エンコード済みファイル名
+        "Content-Disposition": `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`,
         "Content-Length": pdfBuffer.length.toString(),
       },
     });
