@@ -7,9 +7,18 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { pdfBase64, fileName } = await request.json();
+    // リクエストボディのサイズを確認
+    const contentLength = request.headers.get("content-length");
+    console.log("PDF Download API - Content-Length:", contentLength);
+
+    const body = await request.json();
+    const { pdfBase64, fileName } = body;
+
+    console.log("PDF Download API - fileName:", fileName);
+    console.log("PDF Download API - pdfBase64 length:", pdfBase64?.length);
 
     if (!pdfBase64 || !fileName) {
+      console.error("PDF Download API - Missing required fields");
       return NextResponse.json(
         { error: "pdfBase64 and fileName are required" },
         { status: 400 }
@@ -18,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Base64をバイナリに変換
     const pdfBuffer = Buffer.from(pdfBase64, "base64");
+    console.log("PDF Download API - PDF buffer size:", pdfBuffer.length);
 
     // Content-Dispositionヘッダーでファイル名を指定
     // RFC 5987に従ってUTF-8ファイル名をエンコード
@@ -33,8 +43,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("PDF download error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "PDFのダウンロードに失敗しました" },
+      { error: `PDFのダウンロードに失敗しました: ${errorMessage}` },
       { status: 500 }
     );
   }
