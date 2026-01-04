@@ -12,18 +12,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // CAロールのユーザーを取得
+    // CAプロファイルを持つユーザーを取得
     const teamMembers = await prisma.user.findMany({
       where: {
-        role: {
-          in: ["CA", "ADMIN"],
-        },
+        OR: [
+          { caProfile: { isNot: null } }, // CAプロファイルがあるユーザー
+          { selections: { some: {} } },    // 選考を担当しているユーザー
+        ],
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
       },
       orderBy: {
         name: "asc",
@@ -39,4 +39,3 @@ export async function GET() {
     );
   }
 }
-
