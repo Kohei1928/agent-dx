@@ -5,12 +5,17 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { pdf } from "@react-pdf/renderer";
 import DashboardLayout from "@/components/DashboardLayout";
 import BirthDateInput from "@/components/BirthDateInput";
 import PhotoUpload from "@/components/PhotoUpload";
 import { ResumePDF, CvPDF, CvFreePDF } from "@/components/PDFViewer";
 import { SortableList } from "@/components/SortableList";
+
+// PDFDownloadLinkをクライアントサイドでのみ読み込み（正しいファイル名でダウンロード可能）
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 // TipTap Editor（SSR無効）
 const TipTapEditor = dynamic(() => import("@/components/TipTapEditor"), {
@@ -113,7 +118,6 @@ export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<"resume" | "cv" | "cv-free">("resume");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [jobSeekerName, setJobSeekerName] = useState("");
   const [hasHubspot, setHasHubspot] = useState(false);
@@ -408,74 +412,27 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（サーバーAPI経由で正しいファイル名でダウンロード）
-  const handleDownload = async () => {
-    setDownloading(true);
-    try {
-      let fileName: string;
-      let PDFComponent: React.ReactElement;
-
-      if (activeTab === "resume") {
-        fileName = `履歴書_${resumeData.name || "名前未設定"}.pdf`;
-        PDFComponent = <ResumePDF data={resumeData} />;
-      } else if (activeTab === "cv") {
-        fileName = `職務経歴書_${cvData.name || "名前未設定"}.pdf`;
-        PDFComponent = <CvPDF data={cvData} />;
-      } else {
-        fileName = `職務経歴書_自由記述_${cvData.name || "名前未設定"}.pdf`;
-        PDFComponent = <CvFreePDF data={cvData} />;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const blob = await pdf(PDFComponent as any).toBlob();
-      
-      // BlobをBase64に変換
-      const arrayBuffer = await blob.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      let binary = "";
-      for (let i = 0; i < uint8Array.length; i++) {
-        binary += String.fromCharCode(uint8Array[i]);
-      }
-      const pdfBase64 = btoa(binary);
-      
-      // サーバーAPIを呼び出してContent-Disposition付きでダウンロード
-      const response = await fetch("/api/pdf-download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ pdfBase64, fileName }),
-      });
-
-      if (!response.ok) {
-        throw new Error("PDF download failed");
-      }
-
-      // レスポンスをBlobとして取得
-      const downloadBlob = await response.blob();
-      
-      // ダウンロードリンクを作成
-      const url = URL.createObjectURL(downloadBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // URLを解放
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 100);
-      
-    } catch (error) {
-      console.error("Failed to download PDF:", error);
-      alert("PDFのダウンロードに失敗しました");
-    } finally {
-      setDownloading(false);
+  // PDFダウンロード用のドキュメントとファイル名を取得
+  const getPDFDocument = () => {
+    if (activeTab === "resume") {
+      return {
+        document: <ResumePDF data={resumeData} />,
+        fileName: `履歴書_${resumeData.name || "名前未設定"}.pdf`,
+      };
+    } else if (activeTab === "cv") {
+      return {
+        document: <CvPDF data={cvData} />,
+        fileName: `職務経歴書_${cvData.name || "名前未設定"}.pdf`,
+      };
+    } else {
+      return {
+        document: <CvFreePDF data={cvData} />,
+        fileName: `職務経歴書_自由記述_${cvData.name || "名前未設定"}.pdf`,
+      };
     }
   };
+
+  const pdfInfo = getPDFDocument();
 
   // 学歴追加
   const addEducation = () => {
@@ -691,16 +648,20 @@ export default function EditorPage() {
               </svg>
               {saving ? "保存中..." : "保存"}
             </button>
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-300 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
+            <PDFDownloadLink
+              document={pdfInfo.document}
+              fileName={pdfInfo.fileName}
+              className="bg-slate-700 hover:bg-slate-800 text-white px-5 py-2 rounded-lg font-medium transition-colors flex items-center gap-1"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              {downloading ? "生成中..." : "PDFダウンロード"}
-            </button>
+              {({ loading: pdfLoading }) => (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {pdfLoading ? "生成中..." : "PDFダウンロード"}
+                </>
+              )}
+            </PDFDownloadLink>
           </div>
         </div>
       </header>
