@@ -23,6 +23,43 @@ interface FormSubmissionNotification {
   formUrl?: string;
 }
 
+interface SelectionStatusChangeNotification {
+  jobSeekerName: string;
+  companyName: string;
+  jobTitle?: string;
+  fromStatus: string;
+  toStatus: string;
+  changedBy: string;
+  selectionUrl?: string;
+}
+
+// ステータスラベルマッピング
+const STATUS_LABELS: Record<string, string> = {
+  proposal: "候補リスト",
+  entry_preparing: "エントリー準備中",
+  entry_requested: "エントリー依頼済",
+  entry_completed: "エントリー完了",
+  document_submitted: "書類提出済み",
+  document_screening: "書類選考中",
+  document_passed: "書類通過",
+  document_rejected: "書類不通過",
+  scheduling: "日程調整中",
+  schedule_confirmed: "日程確定",
+  first_interview: "1次面接予定",
+  first_interview_done: "1次面接完了",
+  second_interview: "2次面接予定",
+  second_interview_done: "2次面接完了",
+  final_interview: "最終面接予定",
+  final_interview_done: "最終面接完了",
+  offer: "内定",
+  offer_accepted: "内定承諾",
+  offer_rejected: "内定辞退",
+  withdrawn: "辞退",
+  rejected: "不採用",
+  not_applying: "応募しない",
+  cancelled: "キャンセル",
+};
+
 // ========================================
 // メール送信（Gmail SMTP）
 // ========================================
@@ -205,6 +242,125 @@ export async function sendSlackWebhookNotification(notification: BookingNotifica
     return true;
   } catch (error) {
     console.error("Slack webhook error:", error);
+    return false;
+  }
+}
+
+// 選考ステータス変更Slack通知
+export async function sendSelectionStatusChangeSlack(notification: SelectionStatusChangeNotification): Promise<boolean> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    console.log("⚠️ Selection status change Slack notification skipped: SLACK_WEBHOOK_URL not set");
+    return false;
+  }
+
+  const fromLabel = STATUS_LABELS[notification.fromStatus] || notification.fromStatus;
+  const toLabel = STATUS_LABELS[notification.toStatus] || notification.toStatus;
+
+  // ステータスに応じた絵文字を選択
+  const getStatusEmoji = (status: string): string => {
+    if (status.includes("offer_accepted")) return "🎊";
+    if (status.includes("offer")) return "🎉";
+    if (status.includes("interview")) return "📅";
+    if (status.includes("document_passed")) return "✅";
+    if (status.includes("rejected") || status.includes("withdrawn") || status === "not_applying") return "❌";
+    if (status.includes("scheduling") || status.includes("schedule_confirmed")) return "📆";
+    return "📋";
+  };
+
+  const emoji = getStatusEmoji(notification.toStatus);
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: `${emoji} 選考ステータス更新: ${notification.jobSeekerName}様 - ${notification.companyName} | ${fromLabel} → ${toLabel}`,
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: `${emoji} 選考ステータスが更新されました`,
+              emoji: true,
+            },
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*求職者*\n${notification.jobSeekerName}様`,
+              },
+              {
+                type: "mrkdwn",
+                text: `*企業名*\n${notification.companyName}`,
+              },
+            ],
+          },
+          ...(notification.jobTitle ? [{
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*求人*\n${notification.jobTitle}`,
+            },
+          }] : []),
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*変更前*\n${fromLabel}`,
+              },
+              {
+                type: "mrkdwn",
+                text: `*変更後*\n${toLabel}`,
+              },
+            ],
+          },
+          {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: `更新者: ${notification.changedBy}`,
+              },
+            ],
+          },
+          ...(notification.selectionUrl ? [{
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "選考詳細を見る",
+                  emoji: true,
+                },
+                url: notification.selectionUrl,
+                action_id: "view_selection",
+              },
+            ],
+          }] : []),
+          {
+            type: "divider",
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to send selection status change Slack notification:", await response.text());
+      return false;
+    }
+
+    console.log("✅ Selection status change Slack notification sent");
+    return true;
+  } catch (error) {
+    console.error("Selection status change Slack error:", error);
     return false;
   }
 }
@@ -416,6 +572,123 @@ function formatSlackBlocks(notification: BookingNotification) {
       type: "divider",
     },
   ];
+}
+
+// ========================================
+// 面接リマインダー通知
+// ========================================
+
+interface InterviewReminderNotification {
+  jobSeekerName: string;
+  companyName: string;
+  jobTitle?: string;
+  interviewDate: Date;
+  interviewTime?: string;
+  interviewFormat?: string;
+  selectionUrl?: string;
+}
+
+export async function sendInterviewReminderSlack(notification: InterviewReminderNotification): Promise<boolean> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    return false;
+  }
+
+  const date = notification.interviewDate;
+  const days = ["日", "月", "火", "水", "木", "金", "土"];
+  const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${days[date.getDay()]})`;
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: `⏰ 面接リマインダー: ${notification.jobSeekerName}様 - ${notification.companyName} | 明日 ${dateStr}`,
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "⏰ 明日の面接リマインダー",
+              emoji: true,
+            },
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*求職者*\n${notification.jobSeekerName}様`,
+              },
+              {
+                type: "mrkdwn",
+                text: `*企業名*\n${notification.companyName}`,
+              },
+            ],
+          },
+          ...(notification.jobTitle ? [{
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*求人*\n${notification.jobTitle}`,
+            },
+          }] : []),
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*面接日*\n${dateStr}`,
+              },
+              ...(notification.interviewTime ? [{
+                type: "mrkdwn",
+                text: `*時間*\n${notification.interviewTime}`,
+              }] : []),
+            ],
+          },
+          ...(notification.interviewFormat ? [{
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*形式*\n${notification.interviewFormat === "online" ? "📹 オンライン" : notification.interviewFormat === "onsite" ? "🏢 対面" : notification.interviewFormat}`,
+            },
+          }] : []),
+          ...(notification.selectionUrl ? [{
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "選考詳細を見る",
+                  emoji: true,
+                },
+                url: notification.selectionUrl,
+                action_id: "view_selection_reminder",
+              },
+            ],
+          }] : []),
+          {
+            type: "divider",
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to send interview reminder Slack notification:", await response.text());
+      return false;
+    }
+
+    console.log("✅ Interview reminder Slack notification sent for:", notification.jobSeekerName);
+    return true;
+  } catch (error) {
+    console.error("Interview reminder Slack error:", error);
+    return false;
+  }
 }
 
 // ========================================

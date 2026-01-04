@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SelectionStatus } from "@prisma/client";
+import { sendSelectionStatusChangeSlack } from "@/lib/notifications";
 
 // 選考詳細取得
 export async function GET(
@@ -122,6 +123,20 @@ export async function PATCH(
           changedBy: user.name || user.email,
           note: note || undefined,
         },
+      });
+
+      // Slack通知を非同期で送信（レスポンスをブロックしない）
+      const baseUrl = process.env.NEXTAUTH_URL || "https://agent-dx-production.up.railway.app";
+      sendSelectionStatusChangeSlack({
+        jobSeekerName: currentSelection.jobSeekerName,
+        companyName: currentSelection.companyName,
+        jobTitle: currentSelection.jobTitle || undefined,
+        fromStatus: currentSelection.status,
+        toStatus: status,
+        changedBy: user.name || user.email,
+        selectionUrl: `${baseUrl}/selections/${id}`,
+      }).catch((err) => {
+        console.error("Failed to send Slack notification:", err);
       });
     }
 
