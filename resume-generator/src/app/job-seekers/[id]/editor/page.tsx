@@ -408,26 +408,36 @@ export default function EditorPage() {
     }
   };
 
-  // PDFダウンロード（新しいタブで開く - 最も確実な方法）
+  // PDFダウンロード（ファイル名を指定してダウンロード）
   const handleDownload = async () => {
     setDownloading(true);
     try {
       let PDFComponent: React.ReactElement;
+      let fileName: string;
+      const name = resumeData.name || cvData.name || "名前未設定";
 
       if (activeTab === "resume") {
         PDFComponent = <ResumePDF data={resumeData} />;
+        fileName = `${name}_履歴書.pdf`;
       } else if (activeTab === "cv") {
         PDFComponent = <CvPDF data={cvData} />;
+        fileName = `${name}_職務経歴書.pdf`;
       } else {
         PDFComponent = <CvFreePDF data={cvData} />;
+        fileName = `${name}_職務経歴書_自由記述.pdf`;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const blob = await pdf(PDFComponent as any).toBlob();
       const url = URL.createObjectURL(blob);
       
-      // 新しいタブでPDFを開く（これが最も確実な方法）
-      window.open(url, "_blank");
+      // ダウンロードリンクを作成してクリック
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       // 少し待ってからURLを解放
       setTimeout(() => {
