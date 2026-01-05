@@ -565,92 +565,203 @@ export default function SelectionDetailPage() {
 
   const messageGroups = groupMessagesByDate(selection?.messages || []);
 
+  // 次回面接予定日を取得
+  const getNextInterviewDate = () => {
+    if (!selection.interviewDetails || selection.interviewDetails.length === 0) return null;
+    const futureInterviews = selection.interviewDetails
+      .filter(i => i.scheduledAt && new Date(i.scheduledAt) > new Date())
+      .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime());
+    return futureInterviews[0]?.scheduledAt || null;
+  };
+
+  const nextInterviewDate = getNextInterviewDate();
+
   return (
     <DashboardLayout>
       <div className="flex h-[calc(100vh-64px)]">
         {/* 左側：選考情報 */}
         <div className="flex-1 overflow-y-auto p-8">
-          {/* Header */}
+          {/* CIRCUS風ヘッダー */}
           <div className="mb-6">
-            <Link
-              href="/selections"
-              className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              選考一覧に戻る
-            </Link>
+            {/* ナビゲーション */}
+            <div className="flex items-center gap-4 mb-4">
+              <Link
+                href="/selections"
+                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                選考一覧を見る
+              </Link>
+              <Link
+                href="/jobs/search"
+                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                別の求人を探す
+              </Link>
+            </div>
             
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
-                    <span className="text-orange-600 font-bold text-lg">
-                      {selection.jobSeekerName.charAt(0)}
-                    </span>
+            {/* タイトル */}
+            <h1 className="text-xl font-semibold text-slate-700 mb-4">
+              {selection.jobSeekerName}さんの選考 
+              <span className="text-slate-400 text-sm ml-2">(選考ID: {selection.selectionTag})</span>
+            </h1>
+            
+            {/* CIRCUS風ステータスエリア */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+              <div className="flex items-start justify-between">
+                {/* 左側：ステータス表示 */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <span className="text-3xl font-bold text-slate-900">{statusConfig.label}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-slate-500">次回面接予定日</span>
+                        <span className="text-sm font-semibold text-slate-700">
+                          {nextInterviewDate 
+                            ? new Date(nextInterviewDate).toLocaleDateString("ja-JP", { month: "long", day: "numeric" })
+                            : "未定"
+                          }
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span>{selection.jobSeekerName}</span>
-                    <span className="text-slate-400 mx-2">×</span>
-                    <span>{selection.companyName}</span>
+                  
+                  {/* CIRCUS風アクションボタン */}
+                  <div className="flex items-center gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        // TODO: 結果催促機能
+                        alert("結果催促機能は今後実装予定です");
+                      }}
+                      className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      結果を催促する
+                    </button>
+                    <Link
+                      href="/jobs/search"
+                      className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      別の求人を探す
+                    </Link>
+                    {availableTransitions.includes("withdrawn") && (
+                      <button
+                        onClick={() => handleStatusChange("withdrawn")}
+                        disabled={updating}
+                        className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                      >
+                        辞退する
+                      </button>
+                    )}
                   </div>
-                </h1>
-                <div className="flex items-center gap-3 mt-2">
-                  {selection.jobTitle && (
-                    <span className="text-sm text-slate-500">{selection.jobTitle}</span>
-                  )}
-                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
-                    ID: [S-{selection.selectionTag}]
-                  </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusConfig.color}`}>
-                    {statusConfig.label}
-                  </span>
                 </div>
+                
+                {/* 右側：クイックアクション */}
+                {availableTransitions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 max-w-xs">
+                    {availableTransitions.slice(0, 4).map((nextStatus) => {
+                      const nextConfig = getStatusConfig(nextStatus);
+                      const isNegative = ["withdrawn", "rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
+                      if (nextStatus === "withdrawn") return null; // 辞退は左側に表示
+                      return (
+                        <button
+                          key={nextStatus}
+                          onClick={() => handleStatusChange(nextStatus)}
+                          disabled={updating}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            isNegative
+                              ? "bg-red-100 hover:bg-red-200 text-red-600"
+                              : "bg-green-100 hover:bg-green-200 text-green-600"
+                          } disabled:opacity-50`}
+                        >
+                          {nextConfig.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               
-              {/* Quick Actions */}
-              {availableTransitions.length > 0 && (
-                <div className="flex items-center gap-2">
-                  {availableTransitions.slice(0, 3).map((nextStatus) => {
-                    const nextConfig = getStatusConfig(nextStatus);
-                    const isNegative = ["withdrawn", "rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
-                    return (
-                      <button
-                        key={nextStatus}
-                        onClick={() => handleStatusChange(nextStatus)}
-                        disabled={updating}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                          isNegative
-                            ? "bg-red-100 hover:bg-red-200 text-red-600"
-                            : "bg-green-100 hover:bg-green-200 text-green-600"
-                        } disabled:opacity-50`}
-                      >
-                        {nextConfig.label}
-                      </button>
-                    );
-                  })}
+              {/* 選考履歴タイムライン（横並び） */}
+              {selection.statusHistory && selection.statusHistory.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-slate-100">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                    {selection.statusHistory.slice(-5).reverse().map((history, idx, arr) => {
+                      const historyConfig = getStatusConfig(history.toStatus);
+                      const date = new Date(history.createdAt);
+                      return (
+                        <div key={history.id} className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-600">
+                              {date.toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}日
+                            </span>
+                            <span className="text-sm text-slate-700">{historyConfig.label}</span>
+                          </div>
+                          {idx < arr.length - 1 && (
+                            <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
+            
+            {/* 社内管理用セクション */}
+            <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+              <p className="text-xs text-slate-500 mb-3">社内管理用</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-slate-500 block mb-1">選考ラベル</label>
+                  <select
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm"
+                    defaultValue=""
+                  >
+                    <option value="">未選択</option>
+                    <option value="hot">注目案件</option>
+                    <option value="follow">要フォロー</option>
+                    <option value="priority">優先対応</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 block mb-1">選考メモ</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="メモを入力..."
+                      className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm"
+                    />
+                    <button className="p-1.5 hover:bg-slate-100 rounded">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Tabs */}
+          {/* CIRCUS風タブ */}
           <div className="flex items-center gap-1 mb-4 border-b border-slate-200 overflow-x-auto">
             {[
-              { key: "overview", label: "概要", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-              { key: "interview", label: "🎤 面接詳細", icon: "" },
-              { key: "schedule", label: "📅 日程", icon: "" },
-              { key: "documents", label: "📄 書類", icon: "" },
-              { key: "history", label: "履歴", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { key: "overview", label: "候補者情報" },
+              { key: "job", label: "求人情報" },
             ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                   activeTab === tab.key
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-slate-500 hover:text-slate-700"
+                    ? "border-orange-500 text-orange-600 bg-orange-50"
+                    : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                 }`}
               >
                 {tab.label}
@@ -659,74 +770,223 @@ export default function SelectionDetailPage() {
           </div>
 
         {/* Tab Content */}
-        <div className="card p-6">
-          {/* Overview Tab */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          {/* 候補者情報タブ（CIRCUS風） */}
           {activeTab === "overview" && (
-            <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-8">
+              {/* 基本情報セクション */}
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">求職者情報</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500">氏名</span>
-                    <span className="font-medium">{selection.jobSeeker.name}</span>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">基本情報</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">求職者ID</span>
+                    <span className="text-sm text-slate-900">{selection.jobSeekerId.slice(-8)}</span>
+                  </div>
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">求職者名</span>
+                    <span className="text-sm text-slate-900 font-medium">{selection.jobSeeker.name}</span>
                   </div>
                   {selection.jobSeeker.nameKana && (
-                    <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-500">ふりがな</span>
-                      <span>{selection.jobSeeker.nameKana}</span>
+                    <div className="flex py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-500 w-32 shrink-0">ふりがな</span>
+                      <span className="text-sm text-slate-900">{selection.jobSeeker.nameKana}</span>
                     </div>
                   )}
                   {selection.jobSeeker.email && (
-                    <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-500">メール</span>
-                      <span>{selection.jobSeeker.email}</span>
+                    <div className="flex py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-500 w-32 shrink-0">メールアドレス</span>
+                      <span className="text-sm text-slate-900">{selection.jobSeeker.email}</span>
                     </div>
                   )}
                   {selection.jobSeeker.phone && (
-                    <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-500">電話番号</span>
-                      <span>{selection.jobSeeker.phone}</span>
+                    <div className="flex py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-500 w-32 shrink-0">電話番号</span>
+                      <span className="text-sm text-slate-900">{selection.jobSeeker.phone}</span>
                     </div>
                   )}
-                  <div className="pt-2">
-                    <Link
-                      href={`/job-seekers/${selection.jobSeekerId}`}
-                      className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">担当CA</span>
+                    <span className="text-sm text-slate-900">{selection.assignedCAName}</span>
+                  </div>
+                </div>
+                
+                {/* 履歴書・経歴書ダウンロード */}
+                <div className="mt-4 flex items-center gap-4">
+                  <Link
+                    href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    履歴書を見る
+                  </Link>
+                  <Link
+                    href={`/job-seekers/${selection.jobSeekerId}/editor?doc=career`}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    職務経歴書を見る
+                  </Link>
+                  <Link
+                    href={`/job-seekers/${selection.jobSeekerId}`}
+                    className="text-orange-600 hover:text-orange-700 text-sm font-medium ml-auto"
+                  >
+                    求職者詳細ページ →
+                  </Link>
+                </div>
+              </div>
+              
+              {/* 面接詳細セクション */}
+              {selection.interviewDetails && selection.interviewDetails.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900">面接詳細</h3>
+                    <button
+                      className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                      onClick={openAddInterviewModal}
                     >
-                      求職者詳細を見る →
-                    </Link>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      追加
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {selection.interviewDetails.map((interview) => {
+                      const roundLabel = interview.interviewRound === 1 ? "一次面接" :
+                                         interview.interviewRound === 2 ? "二次面接" :
+                                         interview.interviewRound === 3 ? "最終面接" :
+                                         `${interview.interviewRound}次面接`;
+                      return (
+                        <div key={interview.id} className="bg-slate-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-slate-900">{roundLabel}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => copyInterviewGuidance(interview)}
+                                className="text-xs text-slate-500 hover:text-orange-600 flex items-center gap-1"
+                              >
+                                {copiedGuidance ? "✓ コピー済" : "📋 案内をコピー"}
+                              </button>
+                              <button
+                                onClick={() => openEditInterviewModal(interview)}
+                                className="text-xs text-slate-500 hover:text-orange-600"
+                              >
+                                編集
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-slate-500">日時: </span>
+                              <span className="text-slate-900">
+                                {interview.scheduledAt 
+                                  ? new Date(interview.scheduledAt).toLocaleDateString("ja-JP", {
+                                      month: "long", day: "numeric", weekday: "short",
+                                      hour: "2-digit", minute: "2-digit"
+                                    })
+                                  : "未定"
+                                }
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500">形式: </span>
+                              <span className="text-slate-900">{interview.format === "online" ? "オンライン" : "対面"}</span>
+                            </div>
+                            {interview.onlineUrl && (
+                              <div className="col-span-2">
+                                <span className="text-slate-500">URL: </span>
+                                <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:underline">
+                                  {interview.onlineUrl}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* 担当エージェント */}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">担当エージェント</h3>
+                <div className="flex py-2">
+                  <span className="text-sm text-slate-500 w-32 shrink-0">エージェント社名</span>
+                  <span className="text-sm text-slate-900">株式会社ミギナナメウエ</span>
+                </div>
+                <div className="flex py-2">
+                  <span className="text-sm text-slate-500 w-32 shrink-0">担当者名</span>
+                  <span className="text-sm text-slate-900">{selection.assignedCAName}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 求人情報タブ */}
+          {activeTab === "job" && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">求人情報</h3>
+                <div className="space-y-4">
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">企業名</span>
+                    <span className="text-sm text-slate-900 font-medium">{selection.companyName}</span>
+                  </div>
+                  {selection.jobTitle && (
+                    <div className="flex py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-500 w-32 shrink-0">求人タイトル</span>
+                      <span className="text-sm text-slate-900">{selection.jobTitle}</span>
+                    </div>
+                  )}
+                  {selection.companyEmail && (
+                    <div className="flex py-2 border-b border-slate-100">
+                      <span className="text-sm text-slate-500 w-32 shrink-0">企業メール</span>
+                      <span className="text-sm text-slate-900">{selection.companyEmail}</span>
+                    </div>
+                  )}
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">選考作成日</span>
+                    <span className="text-sm text-slate-900">{formatDate(selection.createdAt)}</span>
+                  </div>
+                  <div className="flex py-2 border-b border-slate-100">
+                    <span className="text-sm text-slate-500 w-32 shrink-0">最終更新</span>
+                    <span className="text-sm text-slate-900">{formatDate(selection.updatedAt)}</span>
                   </div>
                 </div>
               </div>
               
+              {/* 選考履歴 */}
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">選考情報</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500">企業名</span>
-                    <span className="font-medium">{selection.companyName}</span>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-200">選考履歴</h3>
+                {selection.statusHistory && selection.statusHistory.length > 0 ? (
+                  <div className="space-y-3">
+                    {selection.statusHistory.map((history) => {
+                      const historyConfig = getStatusConfig(history.toStatus);
+                      return (
+                        <div key={history.id} className="flex items-start gap-3 py-2 border-b border-slate-100">
+                          <span className="text-xs text-slate-400 w-24 shrink-0">
+                            {new Date(history.createdAt).toLocaleDateString("ja-JP", {
+                              month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"
+                            })}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-xs ${historyConfig.color}`}>
+                            {historyConfig.label}
+                          </span>
+                          {history.note && (
+                            <span className="text-sm text-slate-600">{history.note}</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  {selection.companyEmail && (
-                    <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-500">企業メール</span>
-                      <span>{selection.companyEmail}</span>
-                    </div>
-                  )}
-                  {selection.jobTitle && (
-                    <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-500">求人</span>
-                      <span>{selection.jobTitle}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500">担当CA</span>
-                    <span>{selection.assignedCAName}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500">作成日</span>
-                    <span>{formatDate(selection.createdAt)}</span>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-slate-500">履歴がありません</p>
+                )}
               </div>
             </div>
           )}
