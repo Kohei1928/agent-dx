@@ -164,7 +164,7 @@ export default function SelectionDetailPage() {
   
   const [selection, setSelection] = useState<Selection | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "interview" | "messages" | "schedule" | "documents" | "history">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "job" | "interview" | "messages" | "schedule" | "documents" | "history">("overview");
   const [copiedGuidance, setCopiedGuidance] = useState(false);
   const [updating, setUpdating] = useState(false);
   
