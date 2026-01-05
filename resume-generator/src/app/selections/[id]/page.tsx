@@ -546,97 +546,117 @@ export default function SelectionDetailPage() {
   const statusConfig = getStatusConfig(selection.status);
   const availableTransitions = STATUS_TRANSITIONS[selection.status] || [];
 
+  // 日付でメッセージをグループ化
+  const groupMessagesByDate = (messages: Message[]) => {
+    const groups: { [date: string]: Message[] } = {};
+    messages.forEach((msg) => {
+      const date = new Date(msg.receivedAt || msg.createdAt).toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(msg);
+    });
+    return groups;
+  };
+
+  const messageGroups = groupMessagesByDate(selection?.messages || []);
+
   return (
     <DashboardLayout>
-      <div className="p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/selections"
-            className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            選考一覧に戻る
-          </Link>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
-                  <span className="text-orange-600 font-bold text-xl">
-                    {selection.jobSeekerName.charAt(0)}
+      <div className="flex h-[calc(100vh-64px)]">
+        {/* 左側：選考情報 */}
+        <div className="flex-1 overflow-y-auto p-8">
+          {/* Header */}
+          <div className="mb-6">
+            <Link
+              href="/selections"
+              className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              選考一覧に戻る
+            </Link>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+                    <span className="text-orange-600 font-bold text-lg">
+                      {selection.jobSeekerName.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <span>{selection.jobSeekerName}</span>
+                    <span className="text-slate-400 mx-2">×</span>
+                    <span>{selection.companyName}</span>
+                  </div>
+                </h1>
+                <div className="flex items-center gap-3 mt-2">
+                  {selection.jobTitle && (
+                    <span className="text-sm text-slate-500">{selection.jobTitle}</span>
+                  )}
+                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
+                    ID: [S-{selection.selectionTag}]
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusConfig.color}`}>
+                    {statusConfig.label}
                   </span>
                 </div>
-                <div>
-                  <span>{selection.jobSeekerName}</span>
-                  <span className="text-slate-400 mx-2">×</span>
-                  <span>{selection.companyName}</span>
+              </div>
+              
+              {/* Quick Actions */}
+              {availableTransitions.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {availableTransitions.slice(0, 3).map((nextStatus) => {
+                    const nextConfig = getStatusConfig(nextStatus);
+                    const isNegative = ["withdrawn", "rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
+                    return (
+                      <button
+                        key={nextStatus}
+                        onClick={() => handleStatusChange(nextStatus)}
+                        disabled={updating}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          isNegative
+                            ? "bg-red-100 hover:bg-red-200 text-red-600"
+                            : "bg-green-100 hover:bg-green-200 text-green-600"
+                        } disabled:opacity-50`}
+                      >
+                        {nextConfig.label}
+                      </button>
+                    );
+                  })}
                 </div>
-              </h1>
-              <div className="flex items-center gap-4 mt-2">
-                {selection.jobTitle && (
-                  <span className="text-slate-500">{selection.jobTitle}</span>
-                )}
-                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
-                  ID: [S-{selection.selectionTag}]
-                </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusConfig.color}`}>
-                  {statusConfig.label}
-                </span>
-              </div>
+              )}
             </div>
-            
-            {/* Quick Actions */}
-            {availableTransitions.length > 0 && (
-              <div className="flex items-center gap-2">
-                {availableTransitions.slice(0, 3).map((nextStatus) => {
-                  const nextConfig = getStatusConfig(nextStatus);
-                  const isNegative = ["withdrawn", "rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
-                  return (
-                    <button
-                      key={nextStatus}
-                      onClick={() => handleStatusChange(nextStatus)}
-                      disabled={updating}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isNegative
-                          ? "bg-red-100 hover:bg-red-200 text-red-600"
-                          : "bg-green-100 hover:bg-green-200 text-green-600"
-                      } disabled:opacity-50`}
-                    >
-                      {nextConfig.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-1 mb-6 border-b border-slate-200 overflow-x-auto">
-          {[
-            { key: "overview", label: "概要", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-            { key: "interview", label: "🎤 面接詳細", icon: "" },
-            { key: "messages", label: "💬 メッセージ", icon: "" },
-            { key: "schedule", label: "📅 日程", icon: "" },
-            { key: "documents", label: "📄 書類", icon: "" },
-            { key: "history", label: "履歴", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as typeof activeTab)}
-              className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === tab.key
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+          {/* Tabs */}
+          <div className="flex items-center gap-1 mb-4 border-b border-slate-200 overflow-x-auto">
+            {[
+              { key: "overview", label: "概要", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { key: "interview", label: "🎤 面接詳細", icon: "" },
+              { key: "schedule", label: "📅 日程", icon: "" },
+              { key: "documents", label: "📄 書類", icon: "" },
+              { key: "history", label: "履歴", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeTab === tab.key
+                    ? "border-orange-500 text-orange-600"
+                    : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
         {/* Tab Content */}
         <div className="card p-6">
@@ -928,213 +948,6 @@ export default function SelectionDetailPage() {
             </div>
           )}
 
-          {/* Messages Tab */}
-          {activeTab === "messages" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">メッセージ・メール</h3>
-                  <p className="text-sm text-slate-500 mt-1">
-                    ra@migi-nanameue.co.jp 経由でのメールやり取り
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {syncResult && (
-                    <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                      ✓ {syncResult.imported}件インポート
-                    </span>
-                  )}
-                  <button
-                    onClick={handleSyncEmails}
-                    disabled={syncingEmails}
-                    className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
-                  >
-                    {syncingEmails ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                        同期中...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Gmailから同期
-                      </>
-                    )}
-                  </button>
-                  <span className="text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
-                    {selection.messages.length}件
-                  </span>
-                </div>
-              </div>
-              
-              {/* Message List */}
-              <div className="space-y-4 mb-8">
-                {selection.messages.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    まだメッセージがありません
-                  </div>
-                ) : (
-                  selection.messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`p-4 rounded-xl ${
-                        message.direction === "inbound"
-                          ? "bg-slate-50 border border-slate-200"
-                          : "bg-orange-50 border border-orange-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {message.direction === "inbound" ? (
-                            <>
-                              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">受信</span>
-                              <span className="text-sm font-medium text-slate-700">
-                                {message.fromName || message.fromEmail}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span className={`text-xs px-2 py-0.5 rounded ${
-                                message.status === "sent"
-                                  ? "bg-green-100 text-green-600"
-                                  : message.status === "pending_send"
-                                    ? "bg-yellow-100 text-yellow-600"
-                                    : "bg-slate-100 text-slate-600"
-                              }`}>
-                                {message.status === "sent" ? "送信済" : message.status === "pending_send" ? "送信待ち" : "下書き"}
-                              </span>
-                              <span className="text-sm font-medium text-slate-700">
-                                {message.createdByCAName}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-400">
-                          {formatDate(message.receivedAt || message.createdAt)}
-                        </span>
-                      </div>
-                      <h4 className="font-medium text-slate-900 mb-1">{message.subject}</h4>
-                      <p className="text-sm text-slate-600 whitespace-pre-wrap">{message.body}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-              
-              {/* New Message Form */}
-              <div className="border-t border-slate-200 pt-6">
-                <h4 className="font-semibold text-slate-900 mb-4">📧 メールを送信</h4>
-                
-                {/* 送信方法の選択 */}
-                <div className="flex items-center gap-4 mb-4 p-4 bg-slate-50 rounded-xl">
-                  <span className="text-sm font-medium text-slate-700">送信方法:</span>
-                  <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all ${
-                    sendDirectly ? "bg-blue-100 text-blue-700 ring-2 ring-blue-500" : "bg-white text-slate-600"
-                  }`}>
-                    <input
-                      type="radio"
-                      checked={sendDirectly}
-                      onChange={() => setSendDirectly(true)}
-                      className="sr-only"
-                    />
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    ra@から直接送信
-                  </label>
-                  <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all ${
-                    !sendDirectly ? "bg-orange-100 text-orange-700 ring-2 ring-orange-500" : "bg-white text-slate-600"
-                  }`}>
-                    <input
-                      type="radio"
-                      checked={!sendDirectly}
-                      onChange={() => setSendDirectly(false)}
-                      className="sr-only"
-                    />
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v1" />
-                    </svg>
-                    RA事務へ依頼
-                  </label>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">送信先</label>
-                    <input
-                      type="email"
-                      value={newMessageTo}
-                      onChange={(e) => setNewMessageTo(e.target.value)}
-                      placeholder={selection.companyEmail || "企業のメールアドレス"}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    {selection.companyEmail && !newMessageTo && (
-                      <p className="text-xs text-slate-500 mt-1">
-                        空欄の場合、企業メール ({selection.companyEmail}) に送信されます
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">件名</label>
-                    <input
-                      type="text"
-                      value={newMessageSubject}
-                      onChange={(e) => setNewMessageSubject(e.target.value)}
-                      placeholder={`[S-${selection.selectionTag}] 件名を入力...`}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      ※ 選考タグ [S-{selection.selectionTag}] が自動で付与されます
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">本文</label>
-                    <textarea
-                      value={newMessageBody}
-                      onChange={(e) => setNewMessageBody(e.target.value)}
-                      rows={6}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-                      placeholder="メッセージを入力..."
-                    />
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={() => {
-                        setNewMessageSubject("");
-                        setNewMessageBody("");
-                        setNewMessageTo("");
-                      }}
-                      className="px-4 py-2 text-slate-600 hover:text-slate-800"
-                    >
-                      クリア
-                    </button>
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
-                      className={`px-6 py-2 rounded-lg font-medium disabled:opacity-50 transition-colors ${
-                        sendDirectly 
-                          ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                          : "bg-orange-500 hover:bg-orange-600 text-white"
-                      }`}
-                    >
-                      {sendingMessage ? (
-                        <span className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          送信中...
-                        </span>
-                      ) : sendDirectly ? (
-                        "📧 ra@から送信"
-                      ) : (
-                        "📤 RA事務へ依頼"
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Schedule Tab */}
           {activeTab === "schedule" && (
             <div>
@@ -1263,6 +1076,202 @@ export default function SelectionDetailPage() {
             </div>
           )}
         </div>
+        </div>
+
+        {/* 右側：チャットエリア（CIRCUS風） */}
+        <div className="w-[420px] border-l border-slate-200 flex flex-col bg-white">
+          {/* チャットヘッダー */}
+          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-slate-900">{selection.companyName}</h3>
+              <p className="text-xs text-slate-500">ra@migi-nanameue.co.jp 経由</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {syncResult && (
+                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                  ✓ {syncResult.imported}件
+                </span>
+              )}
+              <button
+                onClick={handleSyncEmails}
+                disabled={syncingEmails}
+                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors disabled:opacity-50"
+                title="Gmailから同期"
+              >
+                {syncingEmails ? (
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* メッセージエリア */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+            {selection.messages.length === 0 ? (
+              <div className="text-center py-12 text-slate-400">
+                <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium">メッセージがありません</p>
+                <p className="text-xs mt-1">「同期」ボタンでGmailからメールを取得</p>
+              </div>
+            ) : (
+              Object.entries(messageGroups).map(([date, msgs]) => (
+                <div key={date}>
+                  {/* 日付区切り */}
+                  <div className="flex items-center justify-center my-4">
+                    <span className="px-3 py-1 bg-white text-xs text-slate-500 rounded-full shadow-sm">
+                      {date}
+                    </span>
+                  </div>
+                  
+                  {/* メッセージ */}
+                  {msgs.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex mb-3 ${message.direction === "outbound" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div className={`max-w-[85%] ${message.direction === "outbound" ? "order-2" : ""}`}>
+                        {/* 送信者名 */}
+                        <div className={`flex items-center gap-2 mb-1 ${message.direction === "outbound" ? "justify-end" : ""}`}>
+                          {message.direction === "inbound" ? (
+                            <>
+                              <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
+                                <span className="text-xs text-orange-600 font-semibold">
+                                  {(message.fromName || message.fromEmail || "企").charAt(0)}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-600 font-medium">
+                                {message.fromName || message.fromEmail || "企業"}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-xs text-slate-600 font-medium">
+                                {message.createdByCAName || "CA"}
+                              </span>
+                              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-xs text-blue-600 font-semibold">
+                                  {(message.createdByCAName || "C").charAt(0)}
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        
+                        {/* メッセージ吹き出し */}
+                        <div className={`rounded-2xl px-4 py-3 shadow-sm ${
+                          message.direction === "inbound"
+                            ? "bg-white border border-slate-200 rounded-tl-sm"
+                            : "bg-blue-500 text-white rounded-tr-sm"
+                        }`}>
+                          {message.subject && (
+                            <p className={`text-xs font-semibold mb-1 ${
+                              message.direction === "inbound" ? "text-slate-700" : "text-blue-100"
+                            }`}>
+                              {message.subject}
+                            </p>
+                          )}
+                          <p className={`text-sm whitespace-pre-wrap ${
+                            message.direction === "inbound" ? "text-slate-700" : "text-white"
+                          }`}>
+                            {message.body.length > 200 ? message.body.substring(0, 200) + "..." : message.body}
+                          </p>
+                        </div>
+                        
+                        {/* 時刻 */}
+                        <div className={`mt-1 text-xs text-slate-400 ${message.direction === "outbound" ? "text-right" : ""}`}>
+                          {new Date(message.receivedAt || message.createdAt).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {message.direction === "outbound" && (
+                            <span className={`ml-2 ${
+                              message.status === "sent" ? "text-green-500" : "text-yellow-500"
+                            }`}>
+                              {message.status === "sent" ? "✓送信済" : "送信待ち"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* メッセージ入力エリア */}
+          <div className="border-t border-slate-200 p-4 bg-white">
+            {/* 送信方法選択 */}
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={() => setSendDirectly(true)}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                  sendDirectly
+                    ? "bg-blue-100 text-blue-700 ring-1 ring-blue-500"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                📧 ra@から送信
+              </button>
+              <button
+                onClick={() => setSendDirectly(false)}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                  !sendDirectly
+                    ? "bg-orange-100 text-orange-700 ring-1 ring-orange-500"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                📤 RA事務へ依頼
+              </button>
+            </div>
+            
+            {/* 件名入力 */}
+            <input
+              type="text"
+              value={newMessageSubject}
+              onChange={(e) => setNewMessageSubject(e.target.value)}
+              placeholder={`件名 [S-${selection.selectionTag}]`}
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+            />
+            
+            {/* 本文入力 */}
+            <div className="flex items-end gap-2">
+              <textarea
+                value={newMessageBody}
+                onChange={(e) => setNewMessageBody(e.target.value)}
+                placeholder="メッセージを入力..."
+                rows={2}
+                className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
+                className={`p-3 rounded-lg transition-colors disabled:opacity-50 ${
+                  sendDirectly
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "bg-orange-500 hover:bg-orange-600 text-white"
+                }`}
+              >
+                {sendingMessage ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
         {/* 辞退理由モーダル */}
         {showWithdrawModal && (
