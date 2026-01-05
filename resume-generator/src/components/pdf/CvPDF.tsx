@@ -144,14 +144,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.content).map((item, j) => (
                               <View key={`content-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`content-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`content-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -164,14 +166,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.achievements).map((item, j) => (
                               <View key={`achievement-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`achievement-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`achievement-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -184,14 +188,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.initiatives).map((item, j) => (
                               <View key={`initiative-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`initiative-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`initiative-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -226,14 +232,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.content).map((item, j) => (
                           <View key={`content-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`content-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`content-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>
@@ -246,14 +254,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.achievements).map((item, j) => (
                           <View key={`achievement-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`achievement-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`achievement-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>
@@ -266,14 +276,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.initiatives).map((item, j) => (
                           <View key={`initiative-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`initiative-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`initiative-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>

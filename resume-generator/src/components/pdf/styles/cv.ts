@@ -215,20 +215,29 @@ export const cvStyles = StyleSheet.create({
     lineHeight: 1.5,
   },
 
-  // 太字対応の箇条書き行
+  // 太字対応の箇条書き行（・と本文を正しく整列）
   workBulletLine: {
     flexDirection: "row",
-    flexWrap: "wrap",
     marginLeft: 6,
     marginBottom: 2,
-    lineHeight: 1.5,
   },
 
-  // 箇条書きのプレフィックス（・）
+  // 箇条書きのプレフィックス（・）- 固定幅
   workBulletPrefix: {
     fontFamily: "NotoSansJPMedium",
     fontSize: 9,
     color: "#000",
+    width: 10,
+    flexShrink: 0,
+    lineHeight: 1.5,
+  },
+
+  // 箇条書き本文コンテナ（折り返し対応）
+  workBulletTextContainer: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    lineHeight: 1.5,
   },
 
   // 箇条書き内の通常テキスト
@@ -236,6 +245,7 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPMedium",
     fontSize: 9,
     color: "#000",
+    lineHeight: 1.5,
   },
 
   // 箇条書き内の太字テキスト
@@ -243,6 +253,7 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPBold",
     fontSize: 9,
     color: "#000",
+    lineHeight: 1.5,
   },
 
   // スキルセクション
