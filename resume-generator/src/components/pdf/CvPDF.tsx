@@ -122,18 +122,18 @@ export function CvPDF({ data }: CvPDFProps) {
                     {pIdx > 0 && <View style={cvStyles.projectDivider} />}
                     <View style={cvStyles.workTableRow}>
                       <View style={cvStyles.workPeriodCell}>
-                        {project.startYear && project.startMonth ? (
-                          <>
-                            <Text style={cvStyles.workPeriodText}>
-                              {`${project.startYear}年${project.startMonth}月`}
-                            </Text>
-                            <Text style={cvStyles.workPeriodTilde}>〜</Text>
-                            <Text style={cvStyles.workPeriodText}>
-                              {project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}
-                            </Text>
-                          </>
-                        ) : (
-                          <Text style={cvStyles.workPeriodText}></Text>
+                        {project.startYear && project.startMonth && (
+                          <Text style={cvStyles.workPeriodText}>
+                            {`${project.startYear}年${project.startMonth}月`}
+                          </Text>
+                        )}
+                        {project.startYear && project.startMonth && (
+                          <Text style={cvStyles.workPeriodTilde}>〜</Text>
+                        )}
+                        {project.startYear && project.startMonth && (
+                          <Text style={cvStyles.workPeriodText}>
+                            {project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}
+                          </Text>
                         )}
                       </View>
                       <View style={cvStyles.workContentCell}>
@@ -220,9 +220,9 @@ export function CvPDF({ data }: CvPDFProps) {
                           {work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}
                         </Text>
                       </>
-                    ) : (
-                      <Text style={cvStyles.workPeriodText}>{work.period || ""}</Text>
-                    )}
+                    ) : work.period ? (
+                      <Text style={cvStyles.workPeriodText}>{work.period}</Text>
+                    ) : null}
                   </View>
                   <View style={cvStyles.workContentCell}>
                     {/* 業務内容（太字対応） */}

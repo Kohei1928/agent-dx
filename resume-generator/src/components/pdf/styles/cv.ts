@@ -165,6 +165,7 @@ export const cvStyles = StyleSheet.create({
     borderRightWidth: BORDER_THIN,
     borderRightColor: "#000",
     padding: 8,
+    flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "center",
   },
@@ -174,6 +175,7 @@ export const cvStyles = StyleSheet.create({
     fontSize: 9,
     color: "#000",
     textAlign: "center",
+    lineHeight: 1.4,
   },
 
   workPeriodTilde: {
@@ -181,7 +183,8 @@ export const cvStyles = StyleSheet.create({
     fontSize: 9,
     color: "#000",
     textAlign: "center",
-    marginVertical: 3,
+    marginVertical: 2,
+    lineHeight: 1.4,
   },
 
   workContentCell: {
