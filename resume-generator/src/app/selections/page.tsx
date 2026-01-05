@@ -141,6 +141,8 @@ function SelectionsContent() {
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [jobSeekerInfo, setJobSeekerInfo] = useState<JobSeekerInfo | null>(null);
+  const [jobSeekersList, setJobSeekersList] = useState<{ id: string; name: string }[]>([]);
+  const [jobSeekerFilter, setJobSeekerFilter] = useState<string>("all");
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const jobSeekerIdParam = searchParams.get("jobSeekerId");
@@ -167,6 +169,26 @@ function SelectionsContent() {
     fetchTeamMembers();
   }, []);
 
+  // 求職者一覧取得（フィルター用）
+  useEffect(() => {
+    const fetchJobSeekers = async () => {
+      try {
+        const res = await fetch("/api/job-seekers?limit=100");
+        if (res.ok) {
+          const data = await res.json();
+          const list = (data.data || data).map((js: { id: string; name: string }) => ({
+            id: js.id,
+            name: js.name,
+          }));
+          setJobSeekersList(list);
+        }
+      } catch (error) {
+        console.error("Failed to fetch job seekers:", error);
+      }
+    };
+    fetchJobSeekers();
+  }, []);
+
   // 求職者情報取得（フィルタリング時）
   useEffect(() => {
     const fetchJobSeekerInfo = async () => {
@@ -179,6 +201,7 @@ function SelectionsContent() {
         if (res.ok) {
           const data = await res.json();
           setJobSeekerInfo({ id: data.id, name: data.name, email: data.email });
+          setJobSeekerFilter(data.id); // フィルターも同期
         }
       } catch (error) {
         console.error("Failed to fetch job seeker info:", error);
@@ -239,26 +262,29 @@ function SelectionsContent() {
     }
   }, []);
 
+  // jobSeekerFilterまたはURLパラメータを使用
+  const effectiveJobSeekerId = jobSeekerFilter !== "all" ? jobSeekerFilter : jobSeekerIdParam;
+
   useEffect(() => {
     if (session) {
-      fetchSelections(currentPage, searchQuery, statusFilter, caFilter, jobSeekerIdParam);
+      fetchSelections(currentPage, searchQuery, statusFilter, caFilter, effectiveJobSeekerId);
     }
-  }, [session, currentPage, statusFilter, caFilter, jobSeekerIdParam, fetchSelections]);
+  }, [session, currentPage, statusFilter, caFilter, effectiveJobSeekerId, fetchSelections]);
 
   // 検索実行（デバウンス）
   useEffect(() => {
     const timer = setTimeout(() => {
       if (session) {
-        fetchSelections(1, searchQuery, statusFilter, caFilter, jobSeekerIdParam);
+        fetchSelections(1, searchQuery, statusFilter, caFilter, effectiveJobSeekerId);
         if (searchQuery && currentPage !== 1) {
           const params = new URLSearchParams({ page: "1" });
-          if (jobSeekerIdParam) params.set("jobSeekerId", jobSeekerIdParam);
+          if (effectiveJobSeekerId) params.set("jobSeekerId", effectiveJobSeekerId);
           router.push(`/selections?${params}`);
         }
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, session, jobSeekerIdParam]);
+  }, [searchQuery, session, effectiveJobSeekerId]);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams({ page: String(page) });
@@ -376,6 +402,31 @@ function SelectionsContent() {
                 求人を検索して提案
               </Link>
             )}
+            {/* 求職者フィルター */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">求職者:</span>
+              <select
+                value={jobSeekerFilter}
+                onChange={(e) => {
+                  setJobSeekerFilter(e.target.value);
+                  // URLも更新
+                  if (e.target.value === "all") {
+                    router.push("/selections");
+                  } else {
+                    router.push(`/selections?jobSeekerId=${e.target.value}`);
+                  }
+                }}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent max-w-[150px]"
+              >
+                <option value="all">全員</option>
+                {jobSeekersList.map((js) => (
+                  <option key={js.id} value={js.id}>
+                    {js.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* 担当者フィルター */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-slate-600">担当者:</span>
               <select
