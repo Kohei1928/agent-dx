@@ -731,6 +731,9 @@ model Proposal {
   note          String?  @db.Text  // CAからのコメント
   status        ProposalStatus @default(draft)
   sentAt        DateTime?  // 送信日時
+  shareToken    String   @unique @default(cuid())  // URL共有用トークン
+  viewCount     Int      @default(0)  // 閲覧回数
+  lastViewedAt  DateTime?  // 最終閲覧日時
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -740,6 +743,7 @@ model Proposal {
   @@index([jobSeekerId])
   @@index([createdById])
   @@index([status])
+  @@index([shareToken])
 }
 
 // 提案表アイテム（提案する求人）
