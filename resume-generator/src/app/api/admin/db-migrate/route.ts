@@ -17,9 +17,10 @@ export async function POST(request: NextRequest) {
 
     console.log("Starting prisma db push...");
     
-    // prisma db push を実行
-    const { stdout, stderr } = await execAsync("npx prisma db push --accept-data-loss", {
+    // prisma db push を実行（node_modules内のprismaを直接呼び出し）
+    const { stdout, stderr } = await execAsync("./node_modules/.bin/prisma db push --accept-data-loss", {
       timeout: 120000, // 2分タイムアウト
+      cwd: process.cwd(),
     });
 
     console.log("Prisma db push stdout:", stdout);
