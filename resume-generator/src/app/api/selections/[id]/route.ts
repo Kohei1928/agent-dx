@@ -39,6 +39,9 @@ export async function GET(
           orderBy: { createdAt: "desc" },
           take: 10,
         },
+        interviewDetails: {
+          orderBy: { interviewRound: "asc" },
+        },
       },
     });
 
