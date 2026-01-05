@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const direction = searchParams.get("direction");
     const status = searchParams.get("status");
+    const assignedCAId = searchParams.get("assignedCAId");
+    const myEmail = searchParams.get("myEmail");
 
     const skip = (page - 1) * limit;
 
@@ -27,6 +29,26 @@ export async function GET(request: NextRequest) {
 
     if (status && status !== "all") {
       where.status = status;
+    }
+
+    // CA（担当者）フィルター
+    if (myEmail) {
+      // 自分の担当選考のメールのみ
+      // User IDを取得
+      const user = await prisma.user.findFirst({
+        where: { email: myEmail },
+      });
+      if (user) {
+        where.selection = {
+          ...where.selection,
+          assignedCAId: user.id,
+        };
+      }
+    } else if (assignedCAId && assignedCAId !== "all") {
+      where.selection = {
+        ...where.selection,
+        assignedCAId: assignedCAId,
+      };
     }
 
     if (search) {

@@ -171,7 +171,13 @@ export default function SelectionDetailPage() {
   // メッセージ作成
   const [newMessageSubject, setNewMessageSubject] = useState("");
   const [newMessageBody, setNewMessageBody] = useState("");
+  const [newMessageTo, setNewMessageTo] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [sendDirectly, setSendDirectly] = useState(true); // ra@から直接送信
+  
+  // メール同期
+  const [syncingEmails, setSyncingEmails] = useState(false);
+  const [syncResult, setSyncResult] = useState<{total: number; imported: number} | null>(null);
   
   // 辞退・お見送りモーダル
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -442,24 +448,64 @@ export default function SelectionDetailPage() {
     
     setSendingMessage(true);
     try {
-      const res = await fetch(`/api/selections/${id}/messages`, {
+      const res = await fetch(`/api/selections/${id}/emails/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          to: newMessageTo || selection.companyEmail,
           subject: newMessageSubject,
-          body: newMessageBody,
+          message: newMessageBody,
+          sendDirectly: sendDirectly,
         }),
       });
       
       if (res.ok) {
+        const data = await res.json();
         setNewMessageSubject("");
         setNewMessageBody("");
+        setNewMessageTo("");
         fetchSelection();
+        if (data.sentDirectly) {
+          alert("✅ メールを送信しました");
+        } else {
+          alert("📤 RA事務へ送信依頼しました");
+        }
+      } else {
+        const data = await res.json();
+        alert("❌ " + (data.error || "送信に失敗しました"));
       }
     } catch (error) {
       console.error("Failed to send message:", error);
+      alert("送信に失敗しました");
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  // Gmailから選考に関連するメールを同期
+  const handleSyncEmails = async () => {
+    if (!selection) return;
+    
+    setSyncingEmails(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch(`/api/selections/${id}/emails/sync`, {
+        method: "POST",
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setSyncResult({ total: data.summary.total, imported: data.summary.imported });
+        fetchSelection();
+      } else {
+        const data = await res.json();
+        alert("❌ " + (data.error || "同期に失敗しました"));
+      }
+    } catch (error) {
+      console.error("Failed to sync emails:", error);
+      alert("メール同期に失敗しました");
+    } finally {
+      setSyncingEmails(false);
     }
   };
 
@@ -886,10 +932,41 @@ export default function SelectionDetailPage() {
           {activeTab === "messages" && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-slate-900">メッセージ</h3>
-                <span className="text-sm text-slate-500">
-                  {selection.messages.length}件
-                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">メッセージ・メール</h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    ra@migi-nanameue.co.jp 経由でのメールやり取り
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {syncResult && (
+                    <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                      ✓ {syncResult.imported}件インポート
+                    </span>
+                  )}
+                  <button
+                    onClick={handleSyncEmails}
+                    disabled={syncingEmails}
+                    className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+                  >
+                    {syncingEmails ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                        同期中...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Gmailから同期
+                      </>
+                    )}
+                  </button>
+                  <span className="text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                    {selection.messages.length}件
+                  </span>
+                </div>
               </div>
               
               {/* Message List */}
@@ -947,35 +1024,110 @@ export default function SelectionDetailPage() {
               
               {/* New Message Form */}
               <div className="border-t border-slate-200 pt-6">
-                <h4 className="font-semibold text-slate-900 mb-4">新規メッセージを作成</h4>
+                <h4 className="font-semibold text-slate-900 mb-4">📧 メールを送信</h4>
+                
+                {/* 送信方法の選択 */}
+                <div className="flex items-center gap-4 mb-4 p-4 bg-slate-50 rounded-xl">
+                  <span className="text-sm font-medium text-slate-700">送信方法:</span>
+                  <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all ${
+                    sendDirectly ? "bg-blue-100 text-blue-700 ring-2 ring-blue-500" : "bg-white text-slate-600"
+                  }`}>
+                    <input
+                      type="radio"
+                      checked={sendDirectly}
+                      onChange={() => setSendDirectly(true)}
+                      className="sr-only"
+                    />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    ra@から直接送信
+                  </label>
+                  <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-all ${
+                    !sendDirectly ? "bg-orange-100 text-orange-700 ring-2 ring-orange-500" : "bg-white text-slate-600"
+                  }`}>
+                    <input
+                      type="radio"
+                      checked={!sendDirectly}
+                      onChange={() => setSendDirectly(false)}
+                      className="sr-only"
+                    />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v1" />
+                    </svg>
+                    RA事務へ依頼
+                  </label>
+                </div>
+
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">送信先</label>
+                    <input
+                      type="email"
+                      value={newMessageTo}
+                      onChange={(e) => setNewMessageTo(e.target.value)}
+                      placeholder={selection.companyEmail || "企業のメールアドレス"}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    {selection.companyEmail && !newMessageTo && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        空欄の場合、企業メール ({selection.companyEmail}) に送信されます
+                      </p>
+                    )}
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">件名</label>
                     <input
                       type="text"
                       value={newMessageSubject}
                       onChange={(e) => setNewMessageSubject(e.target.value)}
-                      placeholder={`[S-${selection.selectionTag}] `}
+                      placeholder={`[S-${selection.selectionTag}] 件名を入力...`}
                       className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
+                    <p className="text-xs text-slate-500 mt-1">
+                      ※ 選考タグ [S-{selection.selectionTag}] が自動で付与されます
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">本文</label>
                     <textarea
                       value={newMessageBody}
                       onChange={(e) => setNewMessageBody(e.target.value)}
-                      rows={5}
+                      rows={6}
                       className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
                       placeholder="メッセージを入力..."
                     />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setNewMessageSubject("");
+                        setNewMessageBody("");
+                        setNewMessageTo("");
+                      }}
+                      className="px-4 py-2 text-slate-600 hover:text-slate-800"
+                    >
+                      クリア
+                    </button>
                     <button
                       onClick={handleSendMessage}
                       disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
-                      className="btn-orange px-6 py-2 disabled:opacity-50"
+                      className={`px-6 py-2 rounded-lg font-medium disabled:opacity-50 transition-colors ${
+                        sendDirectly 
+                          ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                          : "bg-orange-500 hover:bg-orange-600 text-white"
+                      }`}
                     >
-                      {sendingMessage ? "送信中..." : "RA事務へ送信依頼"}
+                      {sendingMessage ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          送信中...
+                        </span>
+                      ) : sendDirectly ? (
+                        "📧 ra@から送信"
+                      ) : (
+                        "📤 RA事務へ依頼"
+                      )}
                     </button>
                   </div>
                 </div>

@@ -35,6 +35,12 @@ type Pagination = {
   totalPages: number;
 };
 
+type CA = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export default function EmailsPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
@@ -52,12 +58,36 @@ export default function EmailsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  
+  // CA（担当者）フィルター
+  const [caList, setCaList] = useState<CA[]>([]);
+  const [selectedCA, setSelectedCA] = useState<string>("all");
+  const [mySelectionsOnly, setMySelectionsOnly] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.push("/");
     }
   }, [authStatus, router]);
+
+  // CA一覧を取得
+  const fetchCAList = useCallback(async () => {
+    try {
+      const res = await fetch("/api/users");
+      if (res.ok) {
+        const data = await res.json();
+        setCaList(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch CA list:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session) {
+      fetchCAList();
+    }
+  }, [session, fetchCAList]);
 
   const fetchMessages = useCallback(async (page: number = 1) => {
     setLoading(true);
@@ -76,6 +106,13 @@ export default function EmailsPage() {
       if (statusFilter !== "all") {
         params.set("status", statusFilter);
       }
+      
+      // CA（担当者）フィルター
+      if (mySelectionsOnly && session?.user?.email) {
+        params.set("myEmail", session.user.email);
+      } else if (selectedCA !== "all") {
+        params.set("assignedCAId", selectedCA);
+      }
 
       const res = await fetch(`/api/messages?${params.toString()}`);
       if (res.ok) {
@@ -88,13 +125,13 @@ export default function EmailsPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, directionFilter, statusFilter]);
+  }, [searchQuery, directionFilter, statusFilter, selectedCA, mySelectionsOnly, session]);
 
   useEffect(() => {
     if (session) {
       fetchMessages(pagination.page);
     }
-  }, [session, directionFilter, statusFilter]);
+  }, [session, directionFilter, statusFilter, selectedCA, mySelectionsOnly]);
 
   // 検索デバウンス
   useEffect(() => {
@@ -236,6 +273,49 @@ export default function EmailsPage() {
             <option value="sent">送信済み</option>
             <option value="failed">送信失敗</option>
           </select>
+          
+          {/* CA（担当者）フィルター */}
+          <select
+            value={selectedCA}
+            onChange={(e) => {
+              setSelectedCA(e.target.value);
+              if (e.target.value !== "all") {
+                setMySelectionsOnly(false);
+              }
+            }}
+            disabled={mySelectionsOnly}
+            className="form-select bg-slate-50 border-2 border-transparent rounded-xl focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all py-3 pl-4 pr-10 text-slate-700 font-medium disabled:opacity-50"
+          >
+            <option value="all">すべてのCA</option>
+            {caList.map((ca) => (
+              <option key={ca.id} value={ca.id}>
+                {ca.name || ca.email}
+              </option>
+            ))}
+          </select>
+          
+          {/* 自分の担当のみトグル */}
+          <label className={`flex items-center gap-2 px-4 py-3 rounded-xl cursor-pointer transition-all ${
+            mySelectionsOnly 
+              ? "bg-blue-100 text-blue-700 ring-2 ring-blue-500" 
+              : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+          }`}>
+            <input
+              type="checkbox"
+              checked={mySelectionsOnly}
+              onChange={(e) => {
+                setMySelectionsOnly(e.target.checked);
+                if (e.target.checked) {
+                  setSelectedCA("all");
+                }
+              }}
+              className="sr-only"
+            />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="text-sm font-medium whitespace-nowrap">自分の担当のみ</span>
+          </label>
         </div>
 
         {/* Messages List */}
