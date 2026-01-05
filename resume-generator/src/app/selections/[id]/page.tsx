@@ -180,6 +180,23 @@ export default function SelectionDetailPage() {
   const [reasonComment, setReasonComment] = useState("");
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
+  // 面接詳細モーダル
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [editingInterview, setEditingInterview] = useState<InterviewDetail | null>(null);
+  const [interviewForm, setInterviewForm] = useState({
+    interviewRound: 1,
+    scheduledAt: "",
+    duration: "60",
+    format: "online" as "online" | "onsite",
+    location: "",
+    onlineUrl: "",
+    interviewers: "",
+    preparation: "",
+    dressCode: "",
+    notes: "",
+  });
+  const [savingInterview, setSavingInterview] = useState(false);
+
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.push("/");
@@ -280,6 +297,136 @@ export default function SelectionDetailPage() {
     setSelectedReason("");
     setReasonComment("");
     setPendingStatus(null);
+  };
+
+  // 面接追加モーダルを開く
+  const openAddInterviewModal = () => {
+    const nextRound = selection?.interviewDetails?.length 
+      ? Math.max(...selection.interviewDetails.map(i => i.interviewRound)) + 1 
+      : 1;
+    setInterviewForm({
+      interviewRound: nextRound,
+      scheduledAt: "",
+      duration: "60",
+      format: "online",
+      location: "",
+      onlineUrl: "",
+      interviewers: "",
+      preparation: "",
+      dressCode: "",
+      notes: "",
+    });
+    setEditingInterview(null);
+    setShowInterviewModal(true);
+  };
+
+  // 面接編集モーダルを開く
+  const openEditInterviewModal = (interview: InterviewDetail) => {
+    setInterviewForm({
+      interviewRound: interview.interviewRound,
+      scheduledAt: interview.scheduledAt 
+        ? new Date(interview.scheduledAt).toISOString().slice(0, 16) 
+        : "",
+      duration: interview.duration?.toString() || "60",
+      format: interview.format,
+      location: interview.location || "",
+      onlineUrl: interview.onlineUrl || "",
+      interviewers: interview.interviewers || "",
+      preparation: interview.preparation || "",
+      dressCode: interview.dressCode || "",
+      notes: interview.notes || "",
+    });
+    setEditingInterview(interview);
+    setShowInterviewModal(true);
+  };
+
+  // 面接詳細保存
+  const handleSaveInterview = async () => {
+    if (!selection) return;
+    setSavingInterview(true);
+    try {
+      const url = editingInterview 
+        ? `/api/selections/${id}/interviews/${editingInterview.id}`
+        : `/api/selections/${id}/interviews`;
+      
+      const res = await fetch(url, {
+        method: editingInterview ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(interviewForm),
+      });
+
+      if (res.ok) {
+        await fetchSelection(); // データ再取得
+        setShowInterviewModal(false);
+      } else {
+        const data = await res.json();
+        alert(data.error || "保存に失敗しました");
+      }
+    } catch (error) {
+      console.error("Failed to save interview:", error);
+      alert("保存に失敗しました");
+    } finally {
+      setSavingInterview(false);
+    }
+  };
+
+  // 面接詳細削除
+  const handleDeleteInterview = async (interviewId: string) => {
+    if (!confirm("この面接詳細を削除しますか？")) return;
+    
+    try {
+      const res = await fetch(`/api/selections/${id}/interviews/${interviewId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        await fetchSelection();
+      }
+    } catch (error) {
+      console.error("Failed to delete interview:", error);
+    }
+  };
+
+  // 面接案内をコピー
+  const copyInterviewGuidance = (interview: InterviewDetail) => {
+    const roundLabel = interview.interviewRound === 1 ? "一次面接" :
+                       interview.interviewRound === 2 ? "二次面接" :
+                       interview.interviewRound === 3 ? "最終面接" :
+                       `${interview.interviewRound}次面接`;
+    
+    const dateStr = interview.scheduledAt 
+      ? new Date(interview.scheduledAt).toLocaleDateString("ja-JP", {
+          year: "numeric", month: "long", day: "numeric", weekday: "long",
+          hour: "2-digit", minute: "2-digit"
+        })
+      : "日程調整中";
+
+    let guidance = `【${selection?.companyName} ${roundLabel}のご案内】\n\n`;
+    guidance += `■ 日時: ${dateStr}\n`;
+    guidance += `■ 所要時間: ${interview.duration || 60}分\n`;
+    guidance += `■ 形式: ${interview.format === "online" ? "オンライン" : "対面"}\n`;
+    
+    if (interview.format === "online" && interview.onlineUrl) {
+      guidance += `■ 参加URL: ${interview.onlineUrl}\n`;
+    }
+    if (interview.format === "onsite" && interview.location) {
+      guidance += `■ 場所: ${interview.location}\n`;
+    }
+    if (interview.interviewers) {
+      guidance += `\n■ 面接官: ${interview.interviewers}\n`;
+    }
+    if (interview.preparation) {
+      guidance += `\n■ 準備事項:\n${interview.preparation}\n`;
+    }
+    if (interview.dressCode) {
+      guidance += `\n■ 服装: ${interview.dressCode}\n`;
+    }
+    if (interview.notes) {
+      guidance += `\n■ 備考:\n${interview.notes}\n`;
+    }
+    
+    navigator.clipboard.writeText(guidance);
+    setCopiedGuidance(true);
+    setTimeout(() => setCopiedGuidance(false), 2000);
   };
 
   const handleModalClose = () => {
@@ -525,10 +672,7 @@ export default function SelectionDetailPage() {
                 <h3 className="text-lg font-semibold text-slate-900">面接詳細</h3>
                 <button
                   className="btn-orange px-4 py-2 text-sm flex items-center gap-2"
-                  onClick={() => {
-                    // TODO: 面接詳細追加モーダルを開く
-                    alert("面接詳細追加機能は準備中です");
-                  }}
+                  onClick={openAddInterviewModal}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -649,9 +793,19 @@ export default function SelectionDetailPage() {
                               )}
                             </button>
                             <button
+                              onClick={() => openEditInterviewModal(interview)}
                               className="px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-300 transition-colors"
                             >
                               編集
+                            </button>
+                            <button
+                              onClick={() => handleDeleteInterview(interview.id)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="削除"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
                             </button>
                           </div>
                         </div>
@@ -1084,6 +1238,184 @@ export default function SelectionDetailPage() {
                   className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50"
                 >
                   {updating ? "更新中..." : "確定"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 面接詳細モーダル */}
+        {showInterviewModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
+              <div className="p-6 border-b border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900">
+                  {editingInterview ? "面接詳細を編集" : "面接詳細を追加"}
+                </h3>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* 面接回数 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">面接回数</label>
+                  <select
+                    value={interviewForm.interviewRound}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, interviewRound: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value={1}>一次面接</option>
+                    <option value={2}>二次面接</option>
+                    <option value={3}>最終面接</option>
+                    <option value={4}>4次面接</option>
+                    <option value={5}>5次面接</option>
+                  </select>
+                </div>
+
+                {/* 日時 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">日時</label>
+                    <input
+                      type="datetime-local"
+                      value={interviewForm.scheduledAt}
+                      onChange={(e) => setInterviewForm({ ...interviewForm, scheduledAt: e.target.value })}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">所要時間（分）</label>
+                    <input
+                      type="number"
+                      value={interviewForm.duration}
+                      onChange={(e) => setInterviewForm({ ...interviewForm, duration: e.target.value })}
+                      placeholder="60"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+
+                {/* 形式 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">形式</label>
+                  <div className="flex gap-4">
+                    <label className={`flex-1 p-4 rounded-lg border-2 cursor-pointer text-center transition-all ${
+                      interviewForm.format === "online" ? "border-orange-500 bg-orange-50" : "border-slate-200 hover:border-slate-300"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="format"
+                        value="online"
+                        checked={interviewForm.format === "online"}
+                        onChange={() => setInterviewForm({ ...interviewForm, format: "online" })}
+                        className="sr-only"
+                      />
+                      <span className="text-2xl block mb-1">🖥</span>
+                      <span className="text-sm font-medium">オンライン</span>
+                    </label>
+                    <label className={`flex-1 p-4 rounded-lg border-2 cursor-pointer text-center transition-all ${
+                      interviewForm.format === "onsite" ? "border-orange-500 bg-orange-50" : "border-slate-200 hover:border-slate-300"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="format"
+                        value="onsite"
+                        checked={interviewForm.format === "onsite"}
+                        onChange={() => setInterviewForm({ ...interviewForm, format: "onsite" })}
+                        className="sr-only"
+                      />
+                      <span className="text-2xl block mb-1">🏢</span>
+                      <span className="text-sm font-medium">対面</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* オンラインURL or 場所 */}
+                {interviewForm.format === "online" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">オンラインURL（Zoom等）</label>
+                    <input
+                      type="url"
+                      value={interviewForm.onlineUrl}
+                      onChange={(e) => setInterviewForm({ ...interviewForm, onlineUrl: e.target.value })}
+                      placeholder="https://zoom.us/j/..."
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">場所</label>
+                    <input
+                      type="text"
+                      value={interviewForm.location}
+                      onChange={(e) => setInterviewForm({ ...interviewForm, location: e.target.value })}
+                      placeholder="〇〇ビル 5F 会議室A"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                )}
+
+                {/* 面接官 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">面接官</label>
+                  <input
+                    type="text"
+                    value={interviewForm.interviewers}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, interviewers: e.target.value })}
+                    placeholder="田中太郎（人事部長）、佐藤花子（現場マネージャー）"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                {/* 服装 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">服装</label>
+                  <input
+                    type="text"
+                    value={interviewForm.dressCode}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, dressCode: e.target.value })}
+                    placeholder="スーツ / ビジネスカジュアル / 私服可"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                {/* 準備事項 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">準備事項</label>
+                  <textarea
+                    value={interviewForm.preparation}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, preparation: e.target.value })}
+                    rows={3}
+                    placeholder="・履歴書、職務経歴書を印刷してお持ちください&#10;・過去の成果物があればお持ちください"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  />
+                </div>
+
+                {/* 備考 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">備考・注意事項</label>
+                  <textarea
+                    value={interviewForm.notes}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, notes: e.target.value })}
+                    rows={3}
+                    placeholder="その他メモ"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowInterviewModal(false)}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-800"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleSaveInterview}
+                  disabled={savingInterview}
+                  className="btn-orange px-6 py-2 disabled:opacity-50"
+                >
+                  {savingInterview ? "保存中..." : (editingInterview ? "更新" : "追加")}
                 </button>
               </div>
             </div>
