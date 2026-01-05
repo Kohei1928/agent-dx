@@ -23,50 +23,48 @@ export async function POST(request: NextRequest) {
     const dayAfterTomorrow = new Date(tomorrow);
     dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
 
-    // 明日の面接予定がある選考を取得
-    const selectionsWithInterviews = await prisma.selection.findMany({
+    // 明日の面接予定がある面接詳細を取得
+    const interviewDetails = await prisma.interviewDetail.findMany({
       where: {
-        nextInterviewDate: {
+        scheduledAt: {
           gte: tomorrow,
           lt: dayAfterTomorrow,
         },
-        // アクティブな選考ステータスのみ
-        status: {
-          in: [
-            "first_interview",
-            "second_interview",
-            "final_interview",
-            "schedule_confirmed",
-          ],
+        selection: {
+          status: {
+            in: [
+              "first_interview",
+              "second_interview",
+              "final_interview",
+              "schedule_confirmed",
+            ],
+          },
         },
       },
       include: {
-        interviewDetails: {
-          orderBy: { scheduledAt: "desc" },
-          take: 1,
-        },
+        selection: true,
       },
     });
 
     const baseUrl = process.env.NEXTAUTH_URL || "https://agent-dx-production.up.railway.app";
     const results: { selectionId: string; success: boolean }[] = [];
 
-    for (const selection of selectionsWithInterviews) {
-      const interviewDetail = selection.interviewDetails[0];
+    for (const interviewDetail of interviewDetails) {
+      const selection = interviewDetail.selection;
 
       const success = await sendInterviewReminderSlack({
         jobSeekerName: selection.jobSeekerName,
         companyName: selection.companyName,
         jobTitle: selection.jobTitle || undefined,
-        interviewDate: selection.nextInterviewDate!,
-        interviewTime: interviewDetail?.scheduledAt
+        interviewDate: interviewDetail.scheduledAt!,
+        interviewTime: interviewDetail.scheduledAt
           ? new Date(interviewDetail.scheduledAt).toLocaleTimeString("ja-JP", {
               hour: "2-digit",
               minute: "2-digit",
               timeZone: "Asia/Tokyo",
             })
           : undefined,
-        interviewFormat: interviewDetail?.format || undefined,
+        interviewFormat: interviewDetail.format || undefined,
         selectionUrl: `${baseUrl}/selections/${selection.id}`,
       });
 

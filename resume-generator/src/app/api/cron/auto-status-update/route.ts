@@ -27,14 +27,18 @@ export async function POST(request: NextRequest) {
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
-    // 面接予定日が過ぎた選考を取得
+    // 面接予定日が過ぎた選考を取得（InterviewDetailから検索）
     const selectionsToUpdate = await prisma.selection.findMany({
       where: {
-        nextInterviewDate: {
-          lt: todayStart, // 今日より前
-        },
         status: {
           in: ["first_interview", "second_interview", "final_interview"],
+        },
+        interviewDetails: {
+          some: {
+            scheduledAt: {
+              lt: todayStart, // 今日より前
+            },
+          },
         },
       },
     });
