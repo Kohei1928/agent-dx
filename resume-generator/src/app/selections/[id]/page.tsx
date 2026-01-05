@@ -1076,7 +1076,6 @@ export default function SelectionDetailPage() {
             </div>
           )}
         </div>
-        </div>
 
         {/* 右側：チャットエリア（CIRCUS風） */}
         <div className="w-[420px] border-l border-slate-200 flex flex-col bg-white">
