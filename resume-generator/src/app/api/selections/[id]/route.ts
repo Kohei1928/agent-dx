@@ -22,16 +22,21 @@ export async function GET(
       where: { id },
       include: {
         jobSeeker: {
-          select: {
-            id: true,
-            name: true,
-            nameKana: true,
-            email: true,
-            phone: true,
-            scheduleToken: true,
+          include: {
+            resumeData: true,
+            cvData: true,
+            questionnaireData: true,
+            recommendationLetter: true,
+            generatedDocuments: {
+              where: {
+                documentType: { in: ["resume", "cv"] },
+              },
+              orderBy: { createdAt: "desc" },
+            },
           },
         },
         company: true,
+        job: true,
         messages: {
           orderBy: { createdAt: "desc" },
         },
