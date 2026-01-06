@@ -972,15 +972,14 @@ export default function SelectionDetailPage() {
                   <span className="text-sm text-slate-900">{selection.assignedCAName}</span>
                 </div>
               
-                {/* 求職者詳細ページへのリンク */}
-                <div className="mt-4 pt-4 border-t border-slate-200">
-                  <Link
-                    href={`/job-seekers/${selection.jobSeekerId}`}
-                    className="text-orange-600 hover:text-orange-700 text-sm font-medium"
-                  >
-                    求職者詳細ページを見る →
-                  </Link>
-                </div>
+              {/* 求職者詳細ページへのリンク */}
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <Link
+                  href={`/job-seekers/${selection.jobSeekerId}`}
+                  className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                >
+                  求職者詳細ページを見る →
+                </Link>
               </div>
             </div>
           )}
