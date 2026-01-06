@@ -618,382 +618,352 @@ export default function SelectionDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex h-full min-h-[calc(100vh-64px)]">
+      <div className="flex h-full min-h-[calc(100vh-64px)] bg-gradient-to-br from-slate-50 to-slate-100/50">
         {/* 左側：選考情報（スクロール可能）*/}
-        <div className="flex-1 min-w-0 max-w-[calc(100%-400px)] overflow-y-auto p-6">
-          {/* CIRCUS風ヘッダー */}
-          <div className="mb-6">
-            {/* ナビゲーション */}
-            <div className="flex items-center gap-4 mb-4">
-              <Link
-                href="/selections"
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
-              >
+        <div className="flex-1 min-w-0 max-w-[calc(100%-420px)] overflow-y-auto p-8">
+          
+          {/* ミニマルなブレッドクラム */}
+          <div className="flex items-center gap-3 mb-6">
+            <Link
+              href="/selections"
+              className="group flex items-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <div className="w-7 h-7 rounded-lg bg-white shadow-sm border border-slate-200/60 flex items-center justify-center group-hover:border-slate-300 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
                 </svg>
-                選考一覧を見る
-              </Link>
-              <Link
-                href="/jobs/search"
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                別の求人を探す
-              </Link>
-            </div>
-            
-            {/* タイトル */}
-            <h1 className="text-xl font-semibold text-slate-700 mb-4">
-              {selection.jobSeekerName}さんの選考 
-              <span className="text-slate-400 text-sm ml-2">(選考ID: {selection.selectionTag})</span>
-            </h1>
-            
-            {/* CIRCUS風ステータスエリア */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+              </div>
+              <span className="font-medium">選考一覧</span>
+            </Link>
+            <span className="text-slate-300">/</span>
+            <span className="text-sm font-medium text-slate-600">{selection.companyName}</span>
+          </div>
+
+          {/* メインカード */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden mb-6">
+            {/* ヘッダー：グラデーション背景 */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-8 py-6">
               <div className="flex items-start justify-between">
-                {/* 左側：ステータス表示 */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
+                      <span className="text-lg">👤</span>
+                    </div>
                     <div>
-                      <span className="text-3xl font-bold text-slate-900">{statusConfig.label}</span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-slate-500">次回面接予定日</span>
-                        <span className="text-sm font-semibold text-slate-700">
-                          {nextInterviewDate 
-                            ? new Date(nextInterviewDate).toLocaleDateString("ja-JP", { month: "long", day: "numeric" })
-                            : "未定"
-                          }
-                        </span>
-                      </div>
+                      <h1 className="text-xl font-semibold text-white">
+                        {selection.jobSeekerName}
+                      </h1>
+                      <p className="text-slate-300 text-sm">{selection.companyName} • {selection.jobTitle || "求人"}</p>
                     </div>
                   </div>
-                  
-                  {/* CIRCUS風アクションボタン */}
-                  <div className="flex items-center gap-3 mt-4">
-                    <button
-                      onClick={() => {
-                        // TODO: 結果催促機能
-                        alert("結果催促機能は今後実装予定です");
-                      }}
-                      className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      結果を催促する
-                    </button>
-                    <Link
-                      href="/jobs/search"
-                      className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      別の求人を探す
-                    </Link>
-                    {availableTransitions.includes("withdrawn") && (
-                      <button
-                        onClick={() => handleStatusChange("withdrawn")}
-                        disabled={updating}
-                        className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
-                      >
-                        辞退する
-                      </button>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-slate-400 font-mono">#{selection.selectionTag}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* ステータスバー */}
+            <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  {/* ステータスバッジ */}
+                  <div className="flex items-center gap-3">
+                    <div className={`px-4 py-2 rounded-full text-sm font-semibold ${statusConfig.color}`}>
+                      {statusConfig.label}
+                    </div>
+                    {nextInterviewDate && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-full">
+                        <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm font-medium text-purple-700">
+                          {new Date(nextInterviewDate).toLocaleDateString("ja-JP", { month: "short", day: "numeric" })}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
                 
-                {/* 右側：クイックアクション */}
-                {availableTransitions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 max-w-xs">
-                    {availableTransitions.slice(0, 4).map((nextStatus) => {
-                      const nextConfig = getStatusConfig(nextStatus);
-                      const isNegative = ["withdrawn", "rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
-                      if (nextStatus === "withdrawn") return null; // 辞退は左側に表示
-                      return (
-                        <button
-                          key={nextStatus}
-                          onClick={() => handleStatusChange(nextStatus)}
-                          disabled={updating}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                            isNegative
-                              ? "bg-red-100 hover:bg-red-200 text-red-600"
-                              : "bg-green-100 hover:bg-green-200 text-green-600"
-                          } disabled:opacity-50`}
-                        >
-                          {nextConfig.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              
-              {/* 選考履歴タイムライン（横並び） */}
-              {selection.statusHistory && selection.statusHistory.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-slate-100">
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                    {selection.statusHistory.slice(-5).reverse().map((history, idx, arr) => {
-                      const historyConfig = getStatusConfig(history.toStatus);
-                      const date = new Date(history.createdAt);
-                      return (
-                        <div key={history.id} className="flex items-center gap-2 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-600">
-                              {date.toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}日
-                            </span>
-                            <span className="text-sm text-slate-700">{historyConfig.label}</span>
-                          </div>
-                          {idx < arr.length - 1 && (
-                            <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                {/* クイックアクション */}
+                <div className="flex items-center gap-2">
+                  {availableTransitions.slice(0, 3).map((nextStatus) => {
+                    if (nextStatus === "withdrawn") return null;
+                    const nextConfig = getStatusConfig(nextStatus);
+                    const isNegative = ["rejected", "cancelled", "document_rejected", "offer_rejected"].includes(nextStatus);
+                    return (
+                      <button
+                        key={nextStatus}
+                        onClick={() => handleStatusChange(nextStatus)}
+                        disabled={updating}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                          isNegative
+                            ? "bg-red-500 hover:bg-red-600 text-white shadow-sm shadow-red-200"
+                            : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-200"
+                        } disabled:opacity-50`}
+                      >
+                        {nextConfig.label}
+                      </button>
+                    );
+                  })}
+                  {availableTransitions.includes("withdrawn") && (
+                    <button
+                      onClick={() => handleStatusChange("withdrawn")}
+                      disabled={updating}
+                      className="px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                    >
+                      辞退
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             
-            {/* 社内管理用セクション */}
-            <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
-              <p className="text-xs text-slate-500 mb-3">社内管理用</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">選考ラベル</label>
-                  <select
-                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm"
-                    defaultValue=""
-                  >
-                    <option value="">未選択</option>
-                    <option value="hot">注目案件</option>
-                    <option value="follow">要フォロー</option>
-                    <option value="priority">優先対応</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">選考メモ</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="メモを入力..."
-                      className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm"
-                    />
-                    <button className="p-1.5 hover:bg-slate-100 rounded">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </button>
-                  </div>
+            {/* タイムライン */}
+            {selection.statusHistory && selection.statusHistory.length > 0 && (
+              <div className="px-8 py-4 bg-white">
+                <div className="flex items-center gap-1 overflow-x-auto">
+                  {selection.statusHistory.slice(-6).map((history, idx, arr) => {
+                    const historyConfig = getStatusConfig(history.toStatus);
+                    const isLast = idx === arr.length - 1;
+                    return (
+                      <div key={history.id} className="flex items-center shrink-0">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isLast ? 'bg-orange-50' : 'bg-slate-50'}`}>
+                          <span className="text-xs text-slate-400">
+                            {new Date(history.createdAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
+                          </span>
+                          <span className={`text-xs font-medium ${isLast ? 'text-orange-600' : 'text-slate-600'}`}>
+                            {historyConfig.label}
+                          </span>
+                        </div>
+                        {idx < arr.length - 1 && (
+                          <svg className="w-4 h-4 text-slate-200 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* CIRCUS風タブ */}
-          <div className="flex items-center gap-1 mb-4 border-b border-slate-200 overflow-x-auto">
+          {/* モダンなピルタブ */}
+          <div className="flex items-center gap-2 mb-6">
             {[
-              { key: "overview", label: "候補者情報" },
-              { key: "job", label: "求人情報" },
+              { key: "overview", label: "候補者", icon: "👤" },
+              { key: "job", label: "求人", icon: "💼" },
             ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   activeTab === tab.key
-                    ? "border-orange-500 text-orange-600 bg-orange-50"
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                    ? "bg-slate-800 text-white shadow-lg shadow-slate-200"
+                    : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/60"
                 }`}
               >
+                <span>{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
           </div>
 
           {/* Tab Content */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6">
           {/* 候補者情報タブ（CIRCUS風） */}
           {activeTab === "overview" && (
-            <div className="space-y-1">
-              {/* 基本情報セクション（CIRCUS完全再現） */}
-              <h3 className="text-lg font-bold text-slate-900 mb-4">基本情報</h3>
-              
-              {/* CIRCUS風テーブルレイアウト */}
-              <div className="border-t border-slate-200">
-                {/* 求職者ID */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">求職者ID</span>
-                  <span className="text-sm text-slate-900">{selection.jobSeekerId.slice(-8)}</span>
+            <div className="space-y-6">
+              {/* プロフィールカード */}
+              <div className="flex items-start gap-5 p-5 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
+                  <span className="text-2xl font-bold text-white">
+                    {(selection.jobSeeker.name || "?").charAt(0)}
+                  </span>
                 </div>
-                
-                {/* 求職者名 + 年齢 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">求職者名</span>
-                  <span className="text-sm text-slate-900">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-slate-800">
                     {selection.jobSeeker.name}
                     {selection.jobSeeker.birthDate && (
-                      <span className="text-slate-500 ml-1">
-                        ({Math.floor((new Date().getTime() - new Date(selection.jobSeeker.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}歳)
+                      <span className="text-sm font-normal text-slate-500 ml-2">
+                        {Math.floor((new Date().getTime() - new Date(selection.jobSeeker.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}歳
                       </span>
                     )}
-                  </span>
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-0.5">{selection.jobSeeker.nameKana || ""}</p>
+                  <div className="flex items-center gap-4 mt-3">
+                    {selection.jobSeeker.email && (
+                      <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {selection.jobSeeker.email}
+                      </span>
+                    )}
+                    {selection.jobSeeker.phone && (
+                      <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        {selection.jobSeeker.phone}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Link
+                  href={`/job-seekers/${selection.jobSeekerId}`}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all"
+                >
+                  詳細を見る
+                </Link>
+              </div>
+              
+              {/* 情報グリッド */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* 基本情報カード */}
+                <div className="p-4 bg-slate-50/50 rounded-xl space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">基本情報</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">性別</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.gender === "male" ? "男性" : 
+                         selection.jobSeeker.gender === "female" ? "女性" : "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">居住地</span>
+                      <span className="text-sm font-medium text-slate-700">{selection.jobSeeker.address || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">ID</span>
+                      <span className="text-xs font-mono text-slate-400">{selection.jobSeekerId.slice(-8)}</span>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* ふりがな */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">ふりがな</span>
-                  <span className="text-sm text-slate-900">{selection.jobSeeker.nameKana || "-"}</span>
+                {/* 経験カード */}
+                <div className="p-4 bg-slate-50/50 rounded-xl space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">経験</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">経験社数</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.cvData?.workHistory?.length 
+                          ? `${selection.jobSeeker.cvData.workHistory.length}社` 
+                          : "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">職種</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.cvData?.workHistory?.[0]?.position || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">業種</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.cvData?.workHistory?.[0]?.industry || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">マネジメント</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["マネジメント経験"] || "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 学歴カード */}
+                <div className="p-4 bg-slate-50/50 rounded-xl space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">学歴</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">最終学歴</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.resumeData?.education?.[0]?.degree || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">学校名</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {selection.jobSeeker.resumeData?.education?.[0]?.school || "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 年収カード */}
+                <div className="p-4 bg-slate-50/50 rounded-xl space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">年収</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">現在の年収</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在年収"] || 
+                         (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在の年収"] || 
+                         "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">希望年収</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["希望年収"] || "-"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* 性別 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">性別</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.gender === "male" ? "男性" : 
-                     selection.jobSeeker.gender === "female" ? "女性" : 
-                     selection.jobSeeker.gender || "-"}
-                  </span>
-                </div>
-                
-                {/* 居住地 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">居住地</span>
-                  <span className="text-sm text-slate-900">{selection.jobSeeker.address || "-"}</span>
-                </div>
-                
-                {/* 経験社数 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">経験社数</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.cvData?.workHistory?.length 
-                      ? `${selection.jobSeeker.cvData.workHistory.length}社` 
-                      : "-"}
-                  </span>
-                </div>
-                
-                {/* 経験職種 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">経験職種</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.cvData?.workHistory?.[0]?.position || 
-                     (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["経験職種"] || 
-                     "-"}
-                  </span>
-                </div>
-                
-                {/* 経験業種 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">経験業種</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.cvData?.workHistory?.[0]?.industry || 
-                     (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["経験業種"] || 
-                     "-"}
-                  </span>
-                </div>
-                
-                {/* マネジメント経験 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">マネジメント経験</span>
-                  <span className="text-sm text-slate-900">
-                    {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["マネジメント経験"] || "-"}
-                  </span>
-                </div>
-                
-                {/* 最終学歴 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">最終学歴</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.resumeData?.education?.[0]?.degree || 
-                     (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["最終学歴"] || 
-                     "-"}
-                  </span>
-                </div>
-                
-                {/* 卒業学校名 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">卒業学校名</span>
-                  <span className="text-sm text-slate-900">
-                    {selection.jobSeeker.resumeData?.education?.[0]?.school || 
-                     (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["卒業学校名"] || 
-                     "-"}
-                  </span>
-                </div>
-                
-                {/* 現在の年収 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">現在の年収</span>
-                  <span className="text-sm text-slate-900">
-                    {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在年収"] || 
-                     (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在の年収"] || 
-                     "-"}
-                  </span>
-                </div>
-                
-                {/* 希望年収 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">希望年収</span>
-                  <span className="text-sm text-slate-900">
-                    {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["希望年収"] || "-"}
-                  </span>
-                </div>
-                
-                {/* 電話番号 */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">電話番号</span>
-                  <span className="text-sm text-slate-900">{selection.jobSeeker.phone || "-"}</span>
-                </div>
-                
-                {/* メールアドレス */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">メールアドレス</span>
-                  <span className="text-sm text-slate-900">{selection.jobSeeker.email || "-"}</span>
-                </div>
-                
-                {/* 履歴書 - CIRCUS風ダウンロードリンク */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">履歴書</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-900">
-                      履歴書_{selection.jobSeeker.name}.pdf
-                    </span>
+                {/* 書類カード */}
+                <div className="p-4 bg-slate-50/50 rounded-xl space-y-3">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">書類</h4>
+                  <div className="space-y-2">
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
-                      className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700"
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all group"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-slate-700">履歴書</span>
+                      </div>
+                      <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
-                      ダウンロードする
                     </Link>
-                  </div>
-                </div>
-                
-                {/* 経歴書 - CIRCUS風ダウンロードリンク */}
-                <div className="flex py-3 border-b border-slate-100">
-                  <span className="text-sm text-slate-500 w-36 shrink-0">経歴書</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-900">
-                      職務経歴書_{selection.jobSeeker.name}.pdf
-                    </span>
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}/editor?doc=career`}
-                      className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700"
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all group"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-medium text-slate-700">職務経歴書</span>
+                      </div>
+                      <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
-                      ダウンロードする
                     </Link>
                   </div>
                 </div>
-                
-                {/* 推薦文 */}
-                {selection.jobSeeker.recommendationLetter?.content && (
-                  <div className="flex py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500 w-36 shrink-0">推薦文</span>
-                    <span className="text-sm text-slate-900 whitespace-pre-wrap">
-                      {selection.jobSeeker.recommendationLetter.content}
-                    </span>
-                  </div>
+              </div>
+              
+              {/* 推薦文 */}
+              {selection.jobSeeker.recommendationLetter?.content && (
+                <div className="p-4 bg-amber-50/50 rounded-xl">
+                  <h4 className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">推薦文</h4>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                    {selection.jobSeeker.recommendationLetter.content}
+                  </p>
+                </div>
                 )}
                 
                 {/* 担当CA */}
@@ -1577,48 +1547,60 @@ export default function SelectionDetailPage() {
           </div>
         </div>
 
-        {/* 右側：チャットエリア（CIRCUS風）- 固定幅、スクロール可能 */}
-        <div className="w-[400px] shrink-0 border-l border-slate-200 flex flex-col bg-white h-full overflow-hidden">
-          {/* チャットヘッダー */}
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-slate-900">{selection.companyName}</h3>
-              <p className="text-xs text-slate-500">ra@migi-nanameue.co.jp 経由</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {syncResult && (
-                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                  ✓ {syncResult.imported}件
-                </span>
-              )}
-              <button
-                onClick={handleSyncEmails}
-                disabled={syncingEmails}
-                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors disabled:opacity-50"
-                title="Gmailから同期"
-              >
-                {syncingEmails ? (
-                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
+        {/* 右側：モダンなチャットエリア */}
+        <div className="w-[420px] shrink-0 flex flex-col bg-white h-full overflow-hidden shadow-[-4px_0_24px_-12px_rgba(0,0,0,0.1)]">
+          {/* チャットヘッダー - グラス効果 */}
+          <div className="p-5 border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200">
+                  <span className="text-white font-bold text-sm">
+                    {(selection.companyName || "企").charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 text-sm">{selection.companyName}</h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                    <p className="text-xs text-slate-400">ra@migi-nanameue.co.jp</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {syncResult && (
+                  <span className="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full font-medium">
+                    ✓ {syncResult.imported}件
+                  </span>
                 )}
-              </button>
+                <button
+                  onClick={handleSyncEmails}
+                  disabled={syncingEmails}
+                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                  title="Gmailから同期"
+                >
+                  {syncingEmails ? (
+                    <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* メッセージエリア */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+          {/* メッセージエリア - 洗練された背景 */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gradient-to-b from-slate-50/50 to-white">
             {selection.messages.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
-                <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="w-20 h-20 mb-4 bg-gradient-to-br from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center shadow-inner">
+                  <svg className="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium">メッセージがありません</p>
-                <p className="text-xs mt-1">「同期」ボタンでGmailからメールを取得</p>
+                <p className="text-sm font-medium text-slate-600">まだメッセージがありません</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-[200px]">同期ボタンでGmailからメールを取得できます</p>
               </div>
             ) : (
               Object.entries(messageGroups).map(([date, msgs]) => (
@@ -1706,67 +1688,78 @@ export default function SelectionDetailPage() {
             )}
           </div>
 
-          {/* メッセージ入力エリア */}
-          <div className="border-t border-slate-200 p-4 bg-white">
-            {/* 送信方法選択 */}
-            <div className="flex items-center gap-2 mb-3">
+          {/* メッセージ入力エリア - モダンなデザイン */}
+          <div className="border-t border-slate-100 p-4 bg-gradient-to-t from-slate-50 to-white">
+            {/* 送信方法 - ピルスタイル */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl mb-3">
               <button
                 onClick={() => setSendDirectly(true)}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                   sendDirectly
-                    ? "bg-blue-100 text-blue-700 ring-1 ring-blue-500"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                📧 ra@から送信
+                <span className="flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  直接送信
+                </span>
               </button>
               <button
                 onClick={() => setSendDirectly(false)}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                   !sendDirectly
-                    ? "bg-orange-100 text-orange-700 ring-1 ring-orange-500"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                📤 RA事務へ依頼
+                <span className="flex items-center justify-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  RA事務へ依頼
+                </span>
               </button>
             </div>
             
-            {/* 件名入力 */}
-            <input
-              type="text"
-              value={newMessageSubject}
-              onChange={(e) => setNewMessageSubject(e.target.value)}
-              placeholder={`件名 [S-${selection.selectionTag}]`}
-              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
-            />
-            
-            {/* 本文入力 */}
-            <div className="flex items-end gap-2">
-              <textarea
-                value={newMessageBody}
-                onChange={(e) => setNewMessageBody(e.target.value)}
-                placeholder="メッセージを入力..."
-                rows={2}
-                className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            {/* 入力フィールド - コンパクト */}
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={newMessageSubject}
+                onChange={(e) => setNewMessageSubject(e.target.value)}
+                placeholder={`件名を入力...`}
+                className="w-full px-4 py-2.5 text-sm bg-slate-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 placeholder:text-slate-400"
               />
-              <button
-                onClick={handleSendMessage}
-                disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
-                className={`p-3 rounded-lg transition-colors disabled:opacity-50 ${
-                  sendDirectly
-                    ? "bg-blue-500 hover:bg-blue-600 text-white"
-                    : "bg-orange-500 hover:bg-orange-600 text-white"
-                }`}
-              >
-                {sendingMessage ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                )}
-              </button>
+              
+              <div className="relative">
+                <textarea
+                  value={newMessageBody}
+                  onChange={(e) => setNewMessageBody(e.target.value)}
+                  placeholder="メッセージを入力..."
+                  rows={3}
+                  className="w-full px-4 py-3 pr-14 text-sm bg-slate-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 resize-none placeholder:text-slate-400"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
+                  className={`absolute right-2 bottom-2 p-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 ${
+                    newMessageSubject.trim() && newMessageBody.trim()
+                      ? "bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-lg"
+                      : "bg-slate-200 text-slate-400"
+                  }`}
+                >
+                  {sendingMessage ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
