@@ -119,15 +119,20 @@ export const cvStyles = StyleSheet.create({
     lineHeight: 1.6,
   },
 
-  // 職歴テーブル
+  // 職歴テーブル（枠線なし - 各行に枠線を設定）
   workTable: {
-    borderWidth: BORDER_THICK,
-    borderColor: "#000",
+    // borderWidth は削除 - 各行に個別に設定
   },
 
   workTableHeader: {
     flexDirection: "row",
     backgroundColor: "#f5f5f5",
+    borderTopWidth: BORDER_THICK,
+    borderTopColor: "#000",
+    borderLeftWidth: BORDER_THICK,
+    borderLeftColor: "#000",
+    borderRightWidth: BORDER_THICK,
+    borderRightColor: "#000",
     borderBottomWidth: BORDER_THICK,
     borderBottomColor: "#000",
     minHeight: 24,
@@ -158,6 +163,12 @@ export const cvStyles = StyleSheet.create({
   workTableRow: {
     flexDirection: "row",
     alignItems: "stretch",
+    borderLeftWidth: BORDER_THICK,
+    borderLeftColor: "#000",
+    borderRightWidth: BORDER_THICK,
+    borderRightColor: "#000",
+    borderBottomWidth: BORDER_THICK,
+    borderBottomColor: "#000",
   },
 
   workPeriodCell: {
