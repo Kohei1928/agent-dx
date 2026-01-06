@@ -618,9 +618,9 @@ export default function SelectionDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+      <div className="flex h-full min-h-[calc(100vh-64px)]">
         {/* 左側：選考情報（スクロール可能）*/}
-        <div className="w-[calc(100%-400px)] overflow-y-auto p-6">
+        <div className="flex-1 min-w-0 max-w-[calc(100%-400px)] overflow-y-auto p-6">
           {/* CIRCUS風ヘッダー */}
           <div className="mb-6">
             {/* ナビゲーション */}
