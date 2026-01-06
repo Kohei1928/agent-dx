@@ -222,3 +222,4 @@ GET  /api/ats/:provider/companies       # 企業取得
 5. [ ] 同期履歴・ログ機能の実装
 
 
+
