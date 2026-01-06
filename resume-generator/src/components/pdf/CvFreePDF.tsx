@@ -102,7 +102,7 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
               </View>
 
               {/* 内容 */}
-              <View style={cvStyles.workTableRow}>
+              <View style={cvStyles.workTableRow} wrap={false}>
                 <View style={cvStyles.workPeriodCell}>
                   {/* 期間を改行で表示（新形式）または1行（旧形式） */}
                   {work.startYear && work.startMonth ? (

@@ -117,7 +117,7 @@ export function CvPDF({ data }: CvPDFProps) {
               {/* 業務セットがある場合はprojectsを使用、ない場合は後方互換性のため従来の形式を使用 */}
               {(work.projects && work.projects.length > 0) ? (
                 work.projects.map((project, pIdx) => (
-                  <View key={`project-${pIdx}`}>
+                  <View key={`project-${pIdx}`} wrap={false}>
                     {/* 2つ目以降の業務セットの前に区切り線を追加 */}
                     {pIdx > 0 && <View style={cvStyles.projectDivider} />}
                     <View style={cvStyles.workTableRow}>
@@ -200,7 +200,7 @@ export function CvPDF({ data }: CvPDFProps) {
                 ))
               ) : (
                 /* 後方互換性: projectsがない場合は従来の形式を使用 */
-                <View style={cvStyles.workTableRow}>
+                <View style={cvStyles.workTableRow} wrap={false}>
                   <View style={cvStyles.workPeriodCell}>
                     {work.startYear && work.startMonth ? (
                       <Text style={cvStyles.workPeriodText}>
