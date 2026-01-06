@@ -2,8 +2,15 @@
 
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { cvStyles } from "./styles";
-import { formatDate } from "./utils";
+import { formatDate, cleanLineBreakHyphens } from "./utils";
 import type { CvData } from "@/types";
+
+// プロジェクトが空かどうかをチェック
+function isEmptyWork(work: { startYear?: string; startMonth?: string; period?: string; freeformContent?: string; content?: string }) {
+  const hasDate = (work.startYear && work.startMonth) || work.period;
+  const hasContent = work.freeformContent || work.content;
+  return !hasDate && !hasContent;
+}
 
 // フォント登録
 import "./fonts";
@@ -102,7 +109,7 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
               </View>
 
               {/* 内容 */}
-              <View style={cvStyles.workTableRow} wrap={false}>
+              <View style={cvStyles.workTableRow} minPresenceAhead={80}>
                 <View style={cvStyles.workPeriodCell}>
                   {/* 期間を改行で表示（新形式）または1行（旧形式） */}
                   {work.startYear && work.startMonth ? (
@@ -116,26 +123,26 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
                 <View style={cvStyles.workContentCell}>
                   {/* 自由記述フィールドの内容を表示 */}
                   {work.freeformContent ? (
-                    <Text style={cvStyles.freeformText}>{work.freeformContent}</Text>
+                    <Text style={cvStyles.freeformText}>{cleanLineBreakHyphens(work.freeformContent)}</Text>
                   ) : (
                     /* フォールバック: 通常フィールドがあれば表示 */
                     <>
                       {work.content && (
                         <View>
                           <Text style={cvStyles.workSubTitleFirst}>【業務内容】</Text>
-                          <Text style={cvStyles.freeformText}>{work.content}</Text>
+                          <Text style={cvStyles.freeformText}>{cleanLineBreakHyphens(work.content)}</Text>
                         </View>
                       )}
                       {work.achievements && (
                         <View>
                           <Text style={cvStyles.workSubTitle}>【成果】</Text>
-                          <Text style={cvStyles.freeformText}>{work.achievements}</Text>
+                          <Text style={cvStyles.freeformText}>{cleanLineBreakHyphens(work.achievements)}</Text>
                         </View>
                       )}
                       {work.initiatives && (
                         <View>
                           <Text style={cvStyles.workSubTitle}>【取り組みと成果】</Text>
-                          <Text style={cvStyles.freeformText}>{work.initiatives}</Text>
+                          <Text style={cvStyles.freeformText}>{cleanLineBreakHyphens(work.initiatives)}</Text>
                         </View>
                       )}
                     </>
@@ -152,7 +159,7 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
           <View>
             <Text style={cvStyles.sectionTitle}>■活かせる経験・知識・技術</Text>
             {data.freeformSkills ? (
-              <Text style={cvStyles.freeformText}>{data.freeformSkills}</Text>
+              <Text style={cvStyles.freeformText}>{cleanLineBreakHyphens(data.freeformSkills)}</Text>
             ) : (
               /* フォールバック: 通常のスキルリスト */
               data.skills?.map((skill, i) => (

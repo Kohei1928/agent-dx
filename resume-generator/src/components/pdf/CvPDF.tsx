@@ -2,8 +2,15 @@
 
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { cvStyles } from "./styles";
-import { formatDate, parseBullets, parseMultilineWithBold, parseBulletsWithBold } from "./utils";
+import { formatDate, parseBullets, parseMultilineWithBold, parseBulletsWithBold, cleanLineBreakHyphens } from "./utils";
 import type { CvData } from "@/types";
+
+// プロジェクトが空かどうかをチェック
+function isEmptyProject(project: { startYear?: string; startMonth?: string; content?: string; achievements?: string; initiatives?: string }) {
+  const hasDate = project.startYear && project.startMonth;
+  const hasContent = project.content || project.achievements || project.initiatives;
+  return !hasDate && !hasContent;
+}
 
 // フォント登録
 import "./fonts";
@@ -116,8 +123,10 @@ export function CvPDF({ data }: CvPDFProps) {
 
               {/* 業務セットがある場合はprojectsを使用、ない場合は後方互換性のため従来の形式を使用 */}
               {(work.projects && work.projects.length > 0) ? (
-                work.projects.map((project, pIdx) => (
-                  <View key={`project-${pIdx}`} wrap={false}>
+                work.projects
+                  .filter(project => !isEmptyProject(project))  // 空のプロジェクトを除外
+                  .map((project, pIdx) => (
+                  <View key={`project-${pIdx}`} minPresenceAhead={80}>
                     {/* 2つ目以降の業務セットの前に区切り線を追加 */}
                     {pIdx > 0 && <View style={cvStyles.projectDivider} />}
                     <View style={cvStyles.workTableRow}>
@@ -200,7 +209,7 @@ export function CvPDF({ data }: CvPDFProps) {
                 ))
               ) : (
                 /* 後方互換性: projectsがない場合は従来の形式を使用 */
-                <View style={cvStyles.workTableRow} wrap={false}>
+                <View style={cvStyles.workTableRow} minPresenceAhead={80}>
                   <View style={cvStyles.workPeriodCell}>
                     {work.startYear && work.startMonth ? (
                       <Text style={cvStyles.workPeriodText}>
