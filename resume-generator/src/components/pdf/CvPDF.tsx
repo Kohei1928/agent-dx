@@ -124,9 +124,7 @@ export function CvPDF({ data }: CvPDFProps) {
                       <View style={cvStyles.workPeriodCell}>
                         {project.startYear && project.startMonth ? (
                           <Text style={cvStyles.workPeriodText}>
-                            {`${project.startYear}年${project.startMonth}月`}
-                            {"\n"}〜{"\n"}
-                            {project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}
+                            {`${project.startYear}年${project.startMonth}月\n〜\n${project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}`}
                           </Text>
                         ) : null}
                       </View>
@@ -206,9 +204,7 @@ export function CvPDF({ data }: CvPDFProps) {
                   <View style={cvStyles.workPeriodCell}>
                     {work.startYear && work.startMonth ? (
                       <Text style={cvStyles.workPeriodText}>
-                        {`${work.startYear}年${work.startMonth}月`}
-                        {"\n"}〜{"\n"}
-                        {work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}
+                        {`${work.startYear}年${work.startMonth}月\n〜\n${work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}`}
                       </Text>
                     ) : work.period ? (
                       <Text style={cvStyles.workPeriodText}>{work.period}</Text>
