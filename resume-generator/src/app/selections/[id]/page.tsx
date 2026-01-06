@@ -618,9 +618,9 @@ export default function SelectionDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-64px)]">
-        {/* 左側：選考情報 */}
-        <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+        {/* 左側：選考情報（スクロール可能） */}
+        <div className="flex-1 min-w-0 overflow-y-auto p-6">
           {/* CIRCUS風ヘッダー */}
           <div className="mb-6">
             {/* ナビゲーション */}
@@ -1576,8 +1576,8 @@ export default function SelectionDetailPage() {
           )}
         </div>
 
-        {/* 右側：チャットエリア（CIRCUS風） */}
-        <div className="w-[420px] border-l border-slate-200 flex flex-col bg-white">
+        {/* 右側：チャットエリア（CIRCUS風）- 固定幅、スクロール可能 */}
+        <div className="w-[400px] shrink-0 border-l border-slate-200 flex flex-col bg-white h-full overflow-hidden">
           {/* チャットヘッダー */}
           <div className="p-4 border-b border-slate-200 flex items-center justify-between">
             <div>
