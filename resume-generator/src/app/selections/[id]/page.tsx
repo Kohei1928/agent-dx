@@ -809,8 +809,8 @@ export default function SelectionDetailPage() {
             ))}
           </div>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          {/* Tab Content */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
           {/* 候補者情報タブ（CIRCUS風） */}
           {activeTab === "overview" && (
             <div className="space-y-1">
@@ -1574,6 +1574,7 @@ export default function SelectionDetailPage() {
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {/* 右側：チャットエリア（CIRCUS風）- 固定幅、スクロール可能 */}
@@ -2080,7 +2081,6 @@ export default function SelectionDetailPage() {
             </div>
           </div>
         )}
-      </div>
     </DashboardLayout>
   );
 }
