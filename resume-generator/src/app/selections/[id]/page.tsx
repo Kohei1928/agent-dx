@@ -848,7 +848,6 @@ export default function SelectionDetailPage() {
                   </p>
                 </div>
               )}
-              </div>
             </div>
           )}
           
