@@ -126,7 +126,7 @@ export function CvPDF({ data }: CvPDFProps) {
                 work.projects
                   .filter(project => !isEmptyProject(project))  // 空のプロジェクトを除外
                   .map((project, pIdx) => (
-                  <View key={`project-${pIdx}`} wrap={false}>
+                  <View key={`project-${pIdx}`} minPresenceAhead={120}>
                     {/* 2つ目以降の業務セットの前に区切り線を追加 */}
                     {pIdx > 0 && <View style={cvStyles.projectDivider} />}
                     <View style={cvStyles.workTableRow}>
@@ -209,7 +209,7 @@ export function CvPDF({ data }: CvPDFProps) {
                 ))
               ) : (
                 /* 後方互換性: projectsがない場合は従来の形式を使用 */
-                <View style={cvStyles.workTableRow} wrap={false}>
+                <View style={cvStyles.workTableRow} minPresenceAhead={120}>
                   <View style={cvStyles.workPeriodCell}>
                     {work.startYear && work.startMonth ? (
                       <Text style={cvStyles.workPeriodText}>
