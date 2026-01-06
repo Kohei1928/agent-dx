@@ -199,7 +199,7 @@ export default function DashboardPage() {
                             </td>
                             <td>
                               <span className="badge badge-orange">
-                                {gen.documentType === "resume" ? "履歴書" : "職務経歴書"}
+                              {gen.documentType === "resume" ? "履歴書" : "職務経歴書"}
                               </span>
                             </td>
                             <td className="text-slate-600">
