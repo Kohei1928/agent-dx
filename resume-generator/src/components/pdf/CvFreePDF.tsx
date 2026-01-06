@@ -104,17 +104,11 @@ export function CvFreePDF({ data }: CvFreePDFProps) {
               {/* 内容 */}
               <View style={cvStyles.workTableRow}>
                 <View style={cvStyles.workPeriodCell}>
-                  {/* 期間を3行で表示（新形式）または1行（旧形式） */}
+                  {/* 期間を改行で表示（新形式）または1行（旧形式） */}
                   {work.startYear && work.startMonth ? (
-                    <>
-                      <Text style={cvStyles.workPeriodText}>
-                        {`${work.startYear}年${work.startMonth}月`}
-                      </Text>
-                      <Text style={cvStyles.workPeriodTilde}>〜</Text>
-                      <Text style={cvStyles.workPeriodText}>
-                        {work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}
-                      </Text>
-                    </>
+                    <Text style={cvStyles.workPeriodText}>
+                      {`${work.startYear}年${work.startMonth}月\n〜\n${work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}`}
+                    </Text>
                   ) : (
                     <Text style={cvStyles.workPeriodText}>{work.period || ""}</Text>
                   )}
