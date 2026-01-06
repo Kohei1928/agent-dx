@@ -59,8 +59,17 @@ async function initRedis(): Promise<boolean> {
   try {
     // 動的インポートでRedisクライアントを読み込み
     // ioredis がインストールされていない場合はエラーになる
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ioredisModule = await import("ioredis" as any).catch(() => null);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    let ioredisModule = null;
+    try {
+      // requireを使用してビルド時の静的解析を回避
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      ioredisModule = require("ioredis");
+    } catch {
+      console.warn("⚠️ ioredis not installed, falling back to in-memory rate limiting");
+      console.warn("   To enable Redis, run: npm install ioredis");
+      return false;
+    }
     
     if (!ioredisModule) {
       console.warn("⚠️ ioredis not installed, falling back to in-memory rate limiting");
@@ -68,7 +77,7 @@ async function initRedis(): Promise<boolean> {
       return false;
     }
     
-    const Redis = ioredisModule.default;
+    const Redis = ioredisModule.default || ioredisModule;
     const client = new Redis(redisUrl, {
       maxRetriesPerRequest: 1,
       connectTimeout: 3000,
