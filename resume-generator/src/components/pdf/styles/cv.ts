@@ -165,16 +165,8 @@ export const cvStyles = StyleSheet.create({
     borderRightWidth: BORDER_THIN,
     borderRightColor: "#000",
     padding: 8,
-    flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "center",
-  },
-
-  // 期間テキストを囲むラッパー
-  workPeriodWrapper: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start",
   },
 
   workPeriodText: {
@@ -182,15 +174,7 @@ export const cvStyles = StyleSheet.create({
     fontSize: 9,
     color: "#000",
     textAlign: "center",
-  },
-
-  workPeriodTilde: {
-    fontFamily: "NotoSansJPMedium",
-    fontSize: 9,
-    color: "#000",
-    textAlign: "center",
-    marginTop: 3,
-    marginBottom: 3,
+    lineHeight: 1.6,
   },
 
   workContentCell: {
