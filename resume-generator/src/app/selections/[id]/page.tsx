@@ -673,7 +673,7 @@ export default function SelectionDetailPage() {
                 onClick={() => {
                   // 結果催促のメッセージテンプレートを設定
                   setNewMessageSubject(`[${selection.job?.title || "選考"}] 選考結果のご確認`);
-                  setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエの${session?.user?.name || "担当"}です。\n\n${selection.jobSeeker?.lastName || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
+                  setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエの${session?.user?.name || "担当"}です。\n\n${selection.jobSeeker?.name || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
                 }}
                 className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
               >
@@ -1036,7 +1036,7 @@ export default function SelectionDetailPage() {
                     <button
                       onClick={() => {
                         setNewMessageSubject(`[${selection.job?.title || "選考"}] 書類送付のご連絡`);
-                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.lastName || "候補者"}様の応募書類をお送りいたします。\nご査収の程、よろしくお願いいたします。\n\n【添付書類】\n・履歴書\n・職務経歴書`);
+                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.name || "候補者"}様の応募書類をお送りいたします。\nご査収の程、よろしくお願いいたします。\n\n【添付書類】\n・履歴書\n・職務経歴書`);
                       }}
                       className="w-full p-2 text-left text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors"
                     >
@@ -1045,7 +1045,7 @@ export default function SelectionDetailPage() {
                     <button
                       onClick={() => {
                         setNewMessageSubject(`[${selection.job?.title || "選考"}] 選考結果のご確認`);
-                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.lastName || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
+                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.name || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
                       }}
                       className="w-full p-2 text-left text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors"
                     >
