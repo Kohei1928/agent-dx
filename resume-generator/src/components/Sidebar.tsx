@@ -231,7 +231,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           onClick={toggleRole}
           className={`w-full flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"} px-2 py-2 rounded-lg transition-all text-xs ${
             currentRole === "CA"
-              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
+              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-200"
               : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-200"
           }`}
           title={`${currentRole === "CA" ? "RA" : "CA"}に切り替える`}
@@ -249,7 +249,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           <div className="mt-1.5 flex items-center justify-center gap-1.5">
             <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
               currentRole === "CA"
-                ? "bg-orange-100 text-orange-700"
+                ? "bg-blue-100 text-blue-700"
                 : "bg-emerald-100 text-emerald-700"
             }`}>
               {currentRole}

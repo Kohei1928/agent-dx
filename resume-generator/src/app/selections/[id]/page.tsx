@@ -1070,7 +1070,7 @@ export default function SelectionDetailPage() {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
                           message.direction === "inbound" 
                             ? "bg-gray-200 text-gray-600" 
-                            : "bg-orange-500 text-white"
+                            : "bg-blue-500 text-white"
                         }`}>
                           {message.direction === "inbound" 
                             ? (message.fromName || message.fromEmail || "企").charAt(0)
@@ -1095,11 +1095,11 @@ export default function SelectionDetailPage() {
                           {/* メッセージバブル - テキストは常に左寄せ */}
                           <div className={`rounded-2xl px-4 py-3 text-left ${
                             message.direction === "outbound" 
-                              ? "bg-orange-500 text-white rounded-tr-sm" 
+                              ? "bg-blue-500 text-white rounded-tr-sm" 
                               : "bg-gray-100 text-gray-800 rounded-tl-sm"
                           }`}>
                             {message.subject && (
-                              <p className={`text-sm font-bold mb-2 ${message.direction === "outbound" ? "text-orange-100" : "text-gray-600"}`}>
+                              <p className={`text-sm font-bold mb-2 ${message.direction === "outbound" ? "text-blue-100" : "text-gray-600"}`}>
                                 {message.subject}
                               </p>
                             )}
