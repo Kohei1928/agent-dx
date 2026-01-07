@@ -41,7 +41,7 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   entry_requested: ["entry_completed", "withdrawn", "cancelled"],
   entry_completed: ["document_submitted", "document_screening", "withdrawn", "cancelled"],
   document_submitted: ["document_screening", "withdrawn", "cancelled"],
-  document_screening: ["document_passed", "document_rejected"],
+  document_screening: ["document_passed", "document_rejected", "withdrawn"],
   document_passed: ["scheduling", "withdrawn"],
   document_rejected: [],
   scheduling: ["schedule_confirmed", "withdrawn", "cancelled"],
