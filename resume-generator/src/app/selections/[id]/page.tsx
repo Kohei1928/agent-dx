@@ -969,7 +969,7 @@ export default function SelectionDetailPage() {
           </div>
 
           {/* 右側：メッセージエリア - 60% */}
-          <div className="flex-1 flex flex-col bg-white overflow-hidden border-l border-gray-200">
+          <div className="flex-1 flex flex-col bg-white border-l border-gray-200 h-[calc(100vh-180px)]">
           {/* ヘッダー */}
           <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
@@ -1056,13 +1056,16 @@ export default function SelectionDetailPage() {
               </div>
             ) : (
               <div className="space-y-3 p-3">
-                {selection.messages.map((message) => (
+                {/* 時系列順に並び替え（古い順＝上、新しい順＝下） */}
+                {[...selection.messages]
+                  .sort((a, b) => new Date(a.receivedAt || a.createdAt).getTime() - new Date(b.receivedAt || b.createdAt).getTime())
+                  .map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${message.direction === "outbound" ? "justify-end" : "justify-start"}`}
                   >
-                    <div className={`max-w-[85%] ${message.direction === "outbound" ? "order-2" : "order-1"}`}>
-                      {/* 送信者アイコン（受信時のみ左側に表示） */}
+                    <div className={`max-w-[85%]`}>
+                      {/* 送信者アイコン */}
                       <div className={`flex items-start gap-2 ${message.direction === "outbound" ? "flex-row-reverse" : ""}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
                           message.direction === "inbound" 
@@ -1074,7 +1077,7 @@ export default function SelectionDetailPage() {
                             : (message.createdByCAName || "C").charAt(0)
                           }
                         </div>
-                        <div className={`flex-1 ${message.direction === "outbound" ? "text-right" : ""}`}>
+                        <div className="flex-1">
                           {/* 送信者名と日時 */}
                           <div className={`flex items-center gap-2 mb-1 ${message.direction === "outbound" ? "justify-end" : ""}`}>
                             <span className="text-xs font-medium text-gray-700">
@@ -1089,8 +1092,8 @@ export default function SelectionDetailPage() {
                               })}
                             </span>
                           </div>
-                          {/* メッセージバブル */}
-                          <div className={`rounded-2xl px-4 py-3 ${
+                          {/* メッセージバブル - テキストは常に左寄せ */}
+                          <div className={`rounded-2xl px-4 py-3 text-left ${
                             message.direction === "outbound" 
                               ? "bg-blue-500 text-white rounded-tr-sm" 
                               : "bg-gray-100 text-gray-800 rounded-tl-sm"
