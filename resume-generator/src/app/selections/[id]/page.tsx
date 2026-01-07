@@ -616,694 +616,352 @@ export default function SelectionDetailPage() {
 
   const nextInterviewDate = getNextInterviewDate();
 
+  // 折りたたみの状態管理
+  const [expandedSections, setExpandedSections] = useState({
+    interview: true,  // 面接詳細：展開
+    candidate: true,  // 候補者情報：展開
+    job: false,       // 求人情報：折りたたみ
+    history: false,   // 選考履歴：折りたたみ
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
     <DashboardLayout>
-      <div className="flex h-full min-h-[calc(100vh-64px)] bg-white">
-        {/* 左側：選考情報（スクロール可能）*/}
-        <div className="flex-1 min-w-0 max-w-[calc(100%-400px)] overflow-y-auto border-r border-gray-200">
-          
-          {/* CIRCUSスタイルヘッダー */}
-          <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
-            {/* パンくずリスト */}
-            <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
-              <div className="flex items-center gap-2 text-sm">
-                <Link href="/selections" className="text-blue-600 hover:underline">
-                  選考一覧
-                </Link>
-                <span className="text-gray-400">＞</span>
-                <span className="text-gray-600">{selection.companyName}</span>
+      <div className="flex flex-col h-full min-h-[calc(100vh-64px)] bg-gray-50">
+        {/* コンパクトヘッダー（固定） */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-20">
+          <div className="flex items-center justify-between">
+            {/* 左：候補者名 × 会社名 */}
+            <div className="flex items-center gap-4">
+              <Link href="/selections" className="text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">
+                  {selection.jobSeekerName}
+                  <span className="text-gray-400 font-normal mx-2">×</span>
+                  <span className="font-medium">{selection.companyName}</span>
+                </h1>
               </div>
             </div>
             
-            {/* 候補者・求人情報 */}
-            <div className="px-4 py-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-medium">
-                    {(selection.jobSeekerName || "?").charAt(0)}
-                  </div>
-                  <div>
-                    <h1 className="text-base font-bold text-gray-900">{selection.jobSeekerName}</h1>
-                    <p className="text-sm text-gray-500">{selection.companyName} / {selection.jobTitle || "求人"}</p>
-                  </div>
-                </div>
-                <span className="text-xs text-gray-400 font-mono bg-gray-50 px-2 py-1 rounded">
-                  {selection.selectionTag}
-                </span>
-              </div>
-            </div>
-            
-            {/* ステータス・アクション */}
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 rounded text-sm font-medium ${statusConfig.color}`}>
-                  {statusConfig.label}
-                </span>
-                {nextInterviewDate && (
-                  <span className="text-sm text-gray-500">
-                    次回面接: {new Date(nextInterviewDate).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}日
+            {/* 中央：ステータス + 次回面接 */}
+            <div className="flex items-center gap-4">
+              <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${statusConfig.color}`}>
+                {statusConfig.label}
+              </span>
+              {nextInterviewDate && (
+                <div className="flex items-center gap-2 text-sm">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    {new Date(nextInterviewDate).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}日
                   </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {availableTransitions.slice(0, 2).map((nextStatus) => {
-                  if (nextStatus === "withdrawn") return null;
-                  const nextConfig = getStatusConfig(nextStatus);
-                  return (
-                    <button
-                      key={nextStatus}
-                      onClick={() => handleStatusChange(nextStatus)}
-                      disabled={updating}
-                      className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50"
-                    >
-                      {nextConfig.label}
-                    </button>
-                  );
-                })}
-                {availableTransitions.includes("withdrawn") && (
+                </div>
+              )}
+            </div>
+            
+            {/* 右：アクションボタン */}
+            <div className="flex items-center gap-2">
+              {availableTransitions.slice(0, 2).map((nextStatus) => {
+                if (nextStatus === "withdrawn") return null;
+                const nextConfig = getStatusConfig(nextStatus);
+                return (
                   <button
-                    onClick={() => handleStatusChange("withdrawn")}
+                    key={nextStatus}
+                    onClick={() => handleStatusChange(nextStatus)}
                     disabled={updating}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 rounded disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition-colors"
                   >
-                    辞退
+                    {nextConfig.label}
                   </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* タブナビゲーション - CIRCUSスタイル */}
-          <div className="border-b border-gray-200 bg-white px-4">
-            <div className="flex">
-              {[
-                { key: "overview", label: "候補者情報" },
-                { key: "job", label: "求人情報" },
-              ].map((tab) => (
+                );
+              })}
+              {availableTransitions.includes("withdrawn") && (
                 <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                  className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab.key
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                  onClick={() => handleStatusChange("withdrawn")}
+                  disabled={updating}
+                  className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors"
                 >
-                  {tab.label}
+                  辞退
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tab Content - CIRCUSスタイル */}
-          <div className="p-4">
-          {/* 候補者情報タブ（CIRCUS風テーブル形式） */}
-          {activeTab === "overview" && (
-            <div className="space-y-4">
-              {/* 候補者ヘッダー */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium">
-                    {(selection.jobSeeker.name || "?").charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-gray-900">
-                      {selection.jobSeeker.name}
-                      {selection.jobSeeker.birthDate && (
-                        <span className="text-sm font-normal text-gray-500 ml-2">
-                          ({Math.floor((new Date().getTime() - new Date(selection.jobSeeker.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}歳)
-                        </span>
-                      )}
-                    </h3>
-                    <p className="text-xs text-gray-500">{selection.jobSeeker.nameKana || ""}</p>
-                  </div>
-                </div>
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}`}
-                  className="px-3 py-1.5 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
-                >
-                  詳細を見る
-                </Link>
-              </div>
-              
-              {/* 情報テーブル */}
-              <table className="w-full text-sm">
-                <tbody>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal w-32">性別</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.gender === "male" ? "男性" : 
-                       selection.jobSeeker.gender === "female" ? "女性" : "-"}
-                    </td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal w-32">居住地</th>
-                    <td className="py-2 text-gray-900">{selection.jobSeeker.address || "-"}</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">メール</th>
-                    <td className="py-2 text-gray-900">{selection.jobSeeker.email || "-"}</td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal">電話番号</th>
-                    <td className="py-2 text-gray-900">{selection.jobSeeker.phone || "-"}</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">経験社数</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.cvData?.workHistory?.length 
-                        ? `${selection.jobSeeker.cvData.workHistory.length}社` 
-                        : "-"}
-                    </td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal">職種</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.cvData?.workHistory?.[0]?.position || "-"}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">業種</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.cvData?.workHistory?.[0]?.industry || "-"}
-                    </td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal">マネジメント</th>
-                    <td className="py-2 text-gray-900">
-                      {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["マネジメント経験"] || "-"}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">最終学歴</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.resumeData?.education?.[0]?.degree || "-"}
-                    </td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal">学校名</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.jobSeeker.resumeData?.education?.[0]?.school || "-"}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">現在年収</th>
-                    <td className="py-2 text-gray-900">
-                      {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在年収"] || 
-                       (selection.jobSeeker.hubspotData as Record<string, string> | null)?.["現在の年収"] || 
-                       "-"}
-                    </td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal">希望年収</th>
-                    <td className="py-2 text-gray-900">
-                      {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["希望年収"] || "-"}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">担当CA</th>
-                    <td className="py-2 text-gray-900">{selection.assignedCAName || "-"}</td>
-                    <th className="py-2 px-4 text-left text-gray-500 font-normal"></th>
-                    <td className="py-2 text-gray-900"></td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              {/* 書類リンク */}
-              <div className="flex gap-3 pt-3 border-t border-gray-200">
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 border border-blue-200 rounded hover:bg-blue-50"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  履歴書
-                </Link>
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/editor?doc=career`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 border border-green-200 rounded hover:bg-green-50"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  職務経歴書
-                </Link>
-              </div>
-              
-              {/* 推薦文 */}
-              {selection.jobSeeker.recommendationLetter?.content && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded mt-3">
-                  <h4 className="text-xs font-semibold text-yellow-700 mb-1">推薦文</h4>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {selection.jobSeeker.recommendationLetter.content}
-                  </p>
-                </div>
               )}
             </div>
-          )}
-          
-          {/* 求人情報タブ - CIRCUSスタイル */}
-          {activeTab === "job" && (
-            <div className="space-y-4">
-              {/* 求人ヘッダー */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                <div>
-                  <h3 className="text-base font-bold text-gray-900">{selection.job?.title || selection.jobTitle || "求人情報"}</h3>
-                  <p className="text-sm text-gray-500">{selection.companyName}</p>
-                </div>
-                {selection.jobId && (
-                  <Link
-                    href={`/jobs/${selection.jobId}`}
-                    className="px-3 py-1.5 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
-                  >
-                    求人詳細
-                  </Link>
-                )}
-              </div>
-              
-              {/* 求人情報テーブル */}
-              <table className="w-full text-sm">
-                <tbody>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal w-32">企業名</th>
-                    <td className="py-2 text-gray-900 font-medium">{selection.companyName}</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">想定年収</th>
-                    <td className="py-2 text-gray-900">
-                      {selection.job?.salaryMin && selection.job?.salaryMax 
-                        ? `${selection.job.salaryMin}万円 〜 ${selection.job.salaryMax}万円`
-                        : selection.job?.salaryMin 
-                          ? `${selection.job.salaryMin}万円〜`
-                          : selection.job?.salaryMax 
-                            ? `〜${selection.job.salaryMax}万円`
-                            : "-"}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">勤務地</th>
-                    <td className="py-2 text-gray-900">{selection.job?.locations || "-"}</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">リモート</th>
-                    <td className="py-2 text-gray-900">{selection.job?.remoteWork || "-"}</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">雇用形態</th>
-                    <td className="py-2 text-gray-900">{selection.job?.employmentType || "-"}</td>
-                  </tr>
-                  {selection.job?.workingHours && (
-                    <tr className="border-b border-gray-100">
-                      <th className="py-2 pr-4 text-left text-gray-500 font-normal">勤務時間</th>
-                      <td className="py-2 text-gray-900">{selection.job.workingHours}</td>
-                    </tr>
-                  )}
-                  {selection.companyEmail && (
-                    <tr className="border-b border-gray-100">
-                      <th className="py-2 pr-4 text-left text-gray-500 font-normal">連絡先</th>
-                      <td className="py-2 text-gray-900">{selection.companyEmail}</td>
-                    </tr>
-                  )}
-                  <tr className="border-b border-gray-100">
-                    <th className="py-2 pr-4 text-left text-gray-500 font-normal">選考作成日</th>
-                    <td className="py-2 text-gray-900">
-                      {new Date(selection.createdAt).toLocaleDateString("ja-JP")}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              {/* 詳細情報 */}
-              {selection.job?.description && (
-                <div className="pt-3 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">仕事内容</h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{selection.job.description}</p>
-                </div>
-              )}
-              
-              {selection.job?.requirements && (
-                <div className="pt-3 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">応募要件</h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{selection.job.requirements}</p>
-                </div>
-              )}
-              
-              {selection.job?.benefits && (
-                <div className="pt-3 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">福利厚生</h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{selection.job.benefits}</p>
-                </div>
-              )}
-              
-              {selection.job?.selectionProcess && (
-                <div className="pt-3 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">選考フロー</h4>
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{selection.job.selectionProcess}</p>
-                </div>
-              )}
-            </div>
-          )}
           </div>
         </div>
 
-          {/* Interview Details Tab */}
-          {activeTab === "interview" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-slate-900">面接詳細</h3>
-                <button
-                  className="btn-orange px-4 py-2 text-sm flex items-center gap-2"
-                  onClick={openAddInterviewModal}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  面接を追加
-                </button>
-              </div>
-
-              {(!selection.interviewDetails || selection.interviewDetails.length === 0) ? (
-                <div className="text-center py-12 bg-slate-50 rounded-xl">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🎤</span>
-                  </div>
-                  <p className="text-slate-600 font-medium mb-2">面接詳細がありません</p>
-                  <p className="text-slate-400 text-sm">面接が設定されたら、詳細情報を追加してください</p>
+        {/* メインコンテンツ（左右分割） */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* 左側：情報セクション（折りたたみ式）- 40% */}
+          <div className="w-2/5 min-w-[360px] max-w-[480px] overflow-y-auto border-r border-gray-200 bg-white">
+            
+            {/* 面接詳細セクション */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => toggleSection("interview")}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📅</span>
+                  <span className="font-semibold text-gray-900">面接詳細</span>
+                  {selection.interviewDetails && selection.interviewDetails.length > 0 && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      {selection.interviewDetails.length}件
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {selection.interviewDetails.map((interview, idx) => {
-                    const roundLabel = interview.interviewRound === 1 ? "一次面接" :
-                                       interview.interviewRound === 2 ? "二次面接" :
-                                       interview.interviewRound === 3 ? "最終面接" :
-                                       `${interview.interviewRound}次面接`;
-                    
-                    // 面接案内テキストを生成
-                    const generateGuidanceText = () => {
-                      const lines = [
-                        `【${selection.companyName} ${roundLabel}のご案内】`,
-                        "",
-                        `求職者様: ${selection.jobSeekerName} 様`,
-                        "",
-                      ];
-
-                      if (interview.scheduledAt) {
-                        const dt = new Date(interview.scheduledAt);
-                        lines.push(`■ 日時: ${dt.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "long" })} ${dt.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}〜`);
-                        if (interview.duration) {
-                          lines.push(`  所要時間: 約${interview.duration}分`);
-                        }
-                      }
-                      
-                      lines.push("");
-                      lines.push(`■ 形式: ${interview.format === "online" ? "オンライン" : "対面"}`);
-                      
-                      if (interview.format === "online" && interview.onlineUrl) {
-                        lines.push(`■ URL: ${interview.onlineUrl}`);
-                      }
-                      if (interview.format === "onsite" && interview.location) {
-                        lines.push(`■ 場所: ${interview.location}`);
-                      }
-                      
-                      if (interview.interviewers) {
-                        lines.push(`■ 面接官: ${interview.interviewers}`);
-                      }
-                      
-                      if (interview.preparation) {
-                        lines.push("");
-                        lines.push(`■ 準備事項:`);
-                        lines.push(interview.preparation);
-                      }
-                      
-                      if (interview.dressCode) {
-                        lines.push("");
-                        lines.push(`■ 服装: ${interview.dressCode}`);
-                      }
-                      
-                      if (interview.notes) {
-                        lines.push("");
-                        lines.push(`■ 注意事項:`);
-                        lines.push(interview.notes);
-                      }
-                      
-                      lines.push("");
-                      lines.push("ご不明点がございましたら、お気軽にご連絡ください。");
-                      lines.push(`担当: ${selection.assignedCAName}`);
-                      
-                      return lines.join("\n");
-                    };
-
-                    const handleCopyGuidance = () => {
-                      navigator.clipboard.writeText(generateGuidanceText());
-                      setCopiedGuidance(true);
-                      setTimeout(() => setCopiedGuidance(false), 2000);
-                    };
-                    
-                    return (
-                      <div key={interview.id} className="bg-slate-50 rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                            <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">
-                              {interview.interviewRound}
-                            </span>
-                            {roundLabel}
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={handleCopyGuidance}
-                              className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition-all ${
-                                copiedGuidance
-                                  ? "bg-green-100 text-green-600"
-                                  : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                              }`}
-                            >
-                              {copiedGuidance ? (
-                                <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  コピー完了
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                  </svg>
-                                  案内をコピー
-                                </>
-                              )}
-                            </button>
-                            <button
-                              onClick={() => openEditInterviewModal(interview)}
-                              className="px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-300 transition-colors"
-                            >
-                              編集
-                            </button>
-                            <button
-                              onClick={() => handleDeleteInterview(interview.id)}
-                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                              title="削除"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-slate-500 mb-1">日時</p>
-                            <p className="font-medium text-slate-900">
-                              {interview.scheduledAt 
-                                ? new Date(interview.scheduledAt).toLocaleDateString("ja-JP", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    weekday: "short",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : "未設定"
-                              }
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-slate-500 mb-1">形式</p>
-                            <p className="font-medium text-slate-900">
-                              {interview.format === "online" ? "🖥 オンライン" : "🏢 対面"}
-                            </p>
-                          </div>
-                          {interview.format === "online" && interview.onlineUrl && (
-                            <div className="col-span-2">
-                              <p className="text-sm text-slate-500 mb-1">URL</p>
-                              <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                                {interview.onlineUrl}
-                              </a>
-                            </div>
-                          )}
-                          {interview.format === "onsite" && interview.location && (
-                            <div className="col-span-2">
-                              <p className="text-sm text-slate-500 mb-1">場所</p>
-                              <p className="font-medium text-slate-900">{interview.location}</p>
-                            </div>
-                          )}
-                          {interview.interviewers && (
-                            <div>
-                              <p className="text-sm text-slate-500 mb-1">面接官</p>
-                              <p className="font-medium text-slate-900">{interview.interviewers}</p>
-                            </div>
-                          )}
-                          {interview.dressCode && (
-                            <div>
-                              <p className="text-sm text-slate-500 mb-1">服装</p>
-                              <p className="font-medium text-slate-900">{interview.dressCode}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {interview.preparation && (
-                          <div className="mt-4 pt-4 border-t border-slate-200">
-                            <p className="text-sm text-slate-500 mb-1">準備事項</p>
-                            <p className="text-slate-700 whitespace-pre-wrap">{interview.preparation}</p>
-                          </div>
-                        )}
-                        
-                        {interview.notes && (
-                          <div className="mt-4 pt-4 border-t border-slate-200">
-                            <p className="text-sm text-slate-500 mb-1">注意事項・備考</p>
-                            <p className="text-slate-700 whitespace-pre-wrap">{interview.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Schedule Tab */}
-          {activeTab === "schedule" && (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">日程調整</h3>
-              {selection.jobSeeker.scheduleToken ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <p className="text-green-700 font-medium mb-2">日程調整URL</p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/schedule/${selection.jobSeeker.scheduleToken}`}
-                      className="flex-1 px-3 py-2 bg-white border border-green-200 rounded-lg text-sm"
-                    />
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `${window.location.origin}/schedule/${selection.jobSeeker.scheduleToken}`
-                        );
-                      }}
-                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium"
-                    >
-                      コピー
-                    </button>
-                  </div>
-                  <p className="text-xs text-green-600 mt-2">
-                    このURLを企業に送付すると、面接日程を選択できます
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-500">
-                  日程調整URLが設定されていません
-                </div>
-              )}
-              
-              <div className="mt-6">
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/schedule`}
-                  className="text-orange-600 hover:text-orange-700 text-sm font-medium"
-                >
-                  日程調整画面を開く →
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Documents Tab */}
-          {activeTab === "documents" && (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">書類</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/editor`}
-                  className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
-                >
-                  <div className="text-2xl mb-2">📄</div>
-                  <h4 className="font-medium text-slate-900">履歴書・職務経歴書</h4>
-                  <p className="text-sm text-slate-500">編集・プレビュー</p>
-                </Link>
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/recommendation`}
-                  className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
-                >
-                  <div className="text-2xl mb-2">📝</div>
-                  <h4 className="font-medium text-slate-900">推薦文</h4>
-                  <p className="text-sm text-slate-500">AI生成・編集</p>
-                </Link>
-                <Link
-                  href={`/job-seekers/${selection.jobSeekerId}/pdf`}
-                  className="block p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
-                >
-                  <div className="text-2xl mb-2">📥</div>
-                  <h4 className="font-medium text-slate-900">PDFダウンロード</h4>
-                  <p className="text-sm text-slate-500">書類をダウンロード</p>
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* History Tab */}
-          {activeTab === "history" && (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">ステータス変更履歴</h3>
-              <div className="space-y-4">
-                {selection.statusHistory.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    履歴がありません
-                  </div>
-                ) : (
-                  selection.statusHistory.map((history) => {
-                    const toConfig = getStatusConfig(history.toStatus);
-                    const fromConfig = history.fromStatus ? getStatusConfig(history.fromStatus) : null;
-                    return (
-                      <div
-                        key={history.id}
-                        className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl"
+                <svg className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.interview ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {expandedSections.interview && (
+                <div className="px-4 pb-4">
+                  {(!selection.interviewDetails || selection.interviewDetails.length === 0) ? (
+                    <div className="text-center py-6 bg-gray-50 rounded-lg">
+                      <p className="text-gray-500 text-sm">面接予定なし</p>
+                      <button
+                        onClick={openAddInterviewModal}
+                        className="mt-2 text-sm text-blue-600 hover:underline"
                       >
-                        <div className="flex-shrink-0 w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            {fromConfig && (
-                              <>
-                                <span className={`px-2 py-0.5 rounded text-xs ${fromConfig.color}`}>
-                                  {fromConfig.label}
-                                </span>
-                                <span className="text-slate-400">→</span>
-                              </>
-                            )}
-                            <span className={`px-2 py-0.5 rounded text-xs ${toConfig.color}`}>
-                              {toConfig.label}
-                            </span>
+                        + 面接を追加
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {selection.interviewDetails.map((interview) => {
+                        const roundLabel = interview.interviewRound === 1 ? "1次" :
+                                          interview.interviewRound === 2 ? "2次" :
+                                          interview.interviewRound === 3 ? "最終" :
+                                          `${interview.interviewRound}次`;
+                        return (
+                          <div key={interview.id} className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-semibold text-blue-800">{roundLabel}面接</span>
+                              <button
+                                onClick={() => openEditInterviewModal(interview)}
+                                className="text-xs text-blue-600 hover:underline"
+                              >
+                                編集
+                              </button>
+                            </div>
+                            <div className="text-sm text-gray-700 space-y-1">
+                              <p className="flex items-center gap-2">
+                                <span className="text-gray-500">📅</span>
+                                {interview.scheduledAt 
+                                  ? new Date(interview.scheduledAt).toLocaleDateString("ja-JP", {
+                                      month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit"
+                                    })
+                                  : "日時未定"}
+                              </p>
+                              <p className="flex items-center gap-2">
+                                <span className="text-gray-500">{interview.format === "online" ? "💻" : "🏢"}</span>
+                                {interview.format === "online" ? "オンライン" : "対面"}
+                                {interview.format === "online" && interview.onlineUrl && (
+                                  <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[150px]">
+                                    URL
+                                  </a>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                          {history.note && (
-                            <p className="text-sm text-slate-500 mt-1">{history.note}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-slate-600">{history.changedBy}</p>
-                          <p className="text-xs text-slate-400">{formatDate(history.createdAt)}</p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+                        );
+                      })}
+                      <button
+                        onClick={openAddInterviewModal}
+                        className="w-full py-2 text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        + 面接を追加
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-          </div>
-        </div>
 
-        {/* 右側：CIRCUSスタイル メッセージエリア */}
-        <div className="w-[400px] shrink-0 flex flex-col bg-white h-full overflow-hidden border-l border-gray-200">
+            {/* 候補者情報セクション */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => toggleSection("candidate")}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">👤</span>
+                  <span className="font-semibold text-gray-900">候補者情報</span>
+                </div>
+                <svg className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.candidate ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {expandedSections.candidate && (
+                <div className="px-4 pb-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-lg">
+                      {(selection.jobSeeker.name || "?").charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900">
+                        {selection.jobSeeker.name}
+                        {selection.jobSeeker.birthDate && (
+                          <span className="text-sm font-normal text-gray-500 ml-1">
+                            ({Math.floor((new Date().getTime() - new Date(selection.jobSeeker.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}歳)
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-xs text-gray-500">{selection.jobSeeker.nameKana || ""}</p>
+                    </div>
+                    <Link
+                      href={`/job-seekers/${selection.jobSeekerId}`}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      詳細→
+                    </Link>
+                  </div>
+                  
+                  {/* コンパクトな情報表示 */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">メール:</span>
+                      <span className="ml-1 text-gray-900 truncate">{selection.jobSeeker.email || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">電話:</span>
+                      <span className="ml-1 text-gray-900">{selection.jobSeeker.phone || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">経験:</span>
+                      <span className="ml-1 text-gray-900">
+                        {selection.jobSeeker.cvData?.workHistory?.length 
+                          ? `${selection.jobSeeker.cvData.workHistory.length}社` 
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">希望年収:</span>
+                      <span className="ml-1 text-gray-900">
+                        {(selection.jobSeeker.hubspotData as Record<string, string> | null)?.["希望年収"] || "-"}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* 書類リンク */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <Link
+                      href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                    >
+                      📄 履歴書
+                    </Link>
+                    <Link
+                      href={`/job-seekers/${selection.jobSeekerId}/editor?doc=career`}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                    >
+                      💼 職務経歴書
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 求人情報セクション */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => toggleSection("job")}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🏢</span>
+                  <span className="font-semibold text-gray-900">求人情報</span>
+                </div>
+                <svg className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.job ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {expandedSections.job && (
+                <div className="px-4 pb-4">
+                  <div className="text-sm space-y-2">
+                    <div>
+                      <span className="text-gray-500">求人:</span>
+                      <span className="ml-1 text-gray-900 font-medium">{selection.job?.title || selection.jobTitle || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">想定年収:</span>
+                      <span className="ml-1 text-gray-900">
+                        {selection.job?.salaryMin && selection.job?.salaryMax 
+                          ? `${selection.job.salaryMin}〜${selection.job.salaryMax}万円`
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">勤務地:</span>
+                      <span className="ml-1 text-gray-900">{selection.job?.locations || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">リモート:</span>
+                      <span className="ml-1 text-gray-900">{selection.job?.remoteWork || "-"}</span>
+                    </div>
+                  </div>
+                  {selection.job?.id && (
+                    <Link
+                      href={`/jobs/${selection.job.id}`}
+                      className="block mt-3 text-center py-2 text-xs text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
+                    >
+                      求人詳細を見る →
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 選考履歴セクション */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => toggleSection("history")}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📋</span>
+                  <span className="font-semibold text-gray-900">選考履歴</span>
+                  {selection.statusHistory && selection.statusHistory.length > 0 && (
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      {selection.statusHistory.length}件
+                    </span>
+                  )}
+                </div>
+                <svg className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.history ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {expandedSections.history && (
+                <div className="px-4 pb-4">
+                  {(!selection.statusHistory || selection.statusHistory.length === 0) ? (
+                    <p className="text-sm text-gray-500 text-center py-4">履歴なし</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {selection.statusHistory.slice(0, 5).map((history) => (
+                        <div key={history.id} className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-400 text-xs w-16">
+                            {new Date(history.createdAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-xs ${getStatusConfig(history.toStatus).color}`}>
+                            {getStatusConfig(history.toStatus).label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 右側：メッセージエリア - 60% */}
+          <div className="flex-1 flex flex-col bg-white overflow-hidden border-l border-gray-200">
           {/* ヘッダー */}
           <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
@@ -1437,6 +1095,7 @@ export default function SelectionDetailPage() {
               {sendingMessage ? "送信中..." : "送信"}
             </button>
           </div>
+        </div>
         </div>
       </div>
 
