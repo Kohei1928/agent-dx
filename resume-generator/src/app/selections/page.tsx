@@ -451,7 +451,7 @@ function SelectionsContent() {
         </div>
 
         {/* Tabs - CIRCUS風 */}
-        <div className="flex items-center border-b border-slate-200 bg-white rounded-t-lg overflow-hidden">
+        <div className="flex items-center border-b border-slate-200 bg-white rounded-t-lg overflow-hidden w-full">
           {STATUS_CATEGORIES.map((cat) => {
             const count = cat.key === "all" 
               ? Object.values(categoryCounts).reduce((a, b) => a + b, 0)
@@ -466,7 +466,7 @@ function SelectionsContent() {
               <button
                 key={cat.key}
                 onClick={() => setStatusFilter(cat.key)}
-                className={`relative px-4 py-3 text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`relative flex-1 px-4 py-3 text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isActive
                     ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50'
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
