@@ -679,16 +679,6 @@ function SelectionsContent() {
                                   </option>
                                 ))}
                               </select>
-                              {/* 未選択バッジ（CIRCUS風） */}
-                              <select
-                                className="text-xs px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-500"
-                                defaultValue=""
-                              >
-                                <option value="">未選択 ▼</option>
-                                <option value="pass">通過</option>
-                                <option value="reject">不通過</option>
-                                <option value="hold">保留</option>
-                              </select>
                             </div>
                           )}
                         </td>

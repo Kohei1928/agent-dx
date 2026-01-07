@@ -92,16 +92,6 @@ const subNavItems: NavItem[] = [
     )
   },
   { 
-    href: "/job-seekers/new", 
-    label: "新規求職者登録", 
-    roles: ["CA", "RA"],
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-      </svg>
-    )
-  },
-  { 
     href: "/reports", 
     label: "歩留まりレポート", 
     roles: ["CA", "RA"],
@@ -277,35 +267,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* ナビゲーション */}
       <nav className="flex-1 p-2 overflow-y-auto">
-        {/* メインメニュー */}
-        {!isCollapsed && (
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">メイン</p>
-        )}
-        <ul className="space-y-0.5 mb-3">
-          {filteredMainNav.map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== "/job-seekers" && pathname.startsWith(item.href));
-            
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-2 rounded-lg transition-all text-sm ${
-                    isActive
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
-                      : "text-slate-600 hover:bg-orange-50 hover:text-orange-600"
-                  }`}
-                  title={isCollapsed ? item.label : undefined}
-                >
-                  <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
-                  {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.label}</span>}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* サブメニュー */}
+        {/* アクションメニュー（先に表示） */}
         {filteredSubNav.length > 0 && (
           <>
             {!isCollapsed && (
@@ -319,10 +281,10 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-1.5 rounded-lg transition-all text-xs ${
+                      className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-2 rounded-lg transition-all text-sm ${
                         isActive
                           ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
-                          : "text-slate-500 hover:bg-orange-50 hover:text-orange-600"
+                          : "text-slate-600 hover:bg-orange-50 hover:text-orange-600"
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
@@ -335,6 +297,34 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             </ul>
           </>
         )}
+
+        {/* メインメニュー（後に表示） */}
+        {!isCollapsed && (
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">メイン</p>
+        )}
+        <ul className="space-y-0.5 mb-3">
+          {filteredMainNav.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== "/job-seekers" && pathname.startsWith(item.href));
+            
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-1.5 rounded-lg transition-all text-xs ${
+                    isActive
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
+                      : "text-slate-500 hover:bg-orange-50 hover:text-orange-600"
+                  }`}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
+                  {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.label}</span>}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
         {/* 設定メニュー */}
         {!isCollapsed && (
