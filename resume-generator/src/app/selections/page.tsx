@@ -468,16 +468,18 @@ function SelectionsContent() {
                 onClick={() => setStatusFilter(cat.key)}
                 className={`relative flex-1 px-4 py-3 text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isActive
-                    ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50'
+                    ? 'text-orange-600 bg-orange-50'
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 {showBadge && (
-                  <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1.5">
+                  <span className="absolute -top-1 left-1/2 transform -translate-x-1/2 min-w-[20px] h-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1.5" style={{ marginLeft: '40px' }}>
                     {count > 99 ? '99+' : count}
                   </span>
                 )}
-                {cat.label}（{count}）
+                <span className={`relative ${isActive ? 'after:absolute after:bottom-[-12px] after:left-0 after:right-0 after:h-[2px] after:bg-orange-500' : ''}`}>
+                  {cat.label}（{count}）
+                </span>
               </button>
             );
           })}
