@@ -191,7 +191,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   return (
     <div 
       className={`${
-        isCollapsed ? "w-20" : "w-72"
+        isCollapsed ? "w-16" : "w-56"
       } bg-white min-h-screen flex flex-col transition-all duration-300 ease-in-out relative border-r border-slate-200`}
     >
       {/* 折りたたみトグルボタン */}
@@ -211,50 +211,50 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       </button>
 
       {/* ロゴ・タイトル */}
-      <div className={`${isCollapsed ? "p-4" : "p-6"} border-b border-slate-100`}>
-        <Link href="/job-seekers" className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-100 flex-shrink-0">
-            <span className="text-white font-bold text-lg">DX</span>
+      <div className={`${isCollapsed ? "p-3" : "p-4"} border-b border-slate-100`}>
+        <Link href="/job-seekers" className="flex items-center gap-2">
+          <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md shadow-orange-100 flex-shrink-0">
+            <span className="text-white font-bold text-sm">DX</span>
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <h1 className="text-slate-900 font-bold text-lg whitespace-nowrap">より転-DX</h1>
-              <p className="text-slate-400 text-xs whitespace-nowrap">人材紹介業務効率化</p>
+              <h1 className="text-slate-900 font-bold text-sm whitespace-nowrap">より転-DX</h1>
+              <p className="text-slate-400 text-[10px] whitespace-nowrap">人材紹介業務効率化</p>
             </div>
           )}
         </Link>
       </div>
 
       {/* CA/RA 切り替えボタン */}
-      <div className={`${isCollapsed ? "px-2 py-3" : "px-4 py-3"} border-b border-slate-100`}>
+      <div className={`${isCollapsed ? "px-2 py-2" : "px-3 py-2"} border-b border-slate-100`}>
         <button
           onClick={toggleRole}
-          className={`w-full flex items-center ${isCollapsed ? "justify-center" : "gap-2"} px-3 py-2.5 rounded-xl transition-all ${
+          className={`w-full flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"} px-2 py-2 rounded-lg transition-all text-xs ${
             currentRole === "CA"
-              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200"
-              : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-200"
+              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
+              : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-200"
           }`}
           title={`${currentRole === "CA" ? "RA" : "CA"}に切り替える`}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
           {!isCollapsed && (
-            <span className="font-medium text-sm">
-              {currentRole === "CA" ? "RAに切り替える" : "CAに切り替える"}
+            <span className="font-medium">
+              {currentRole === "CA" ? "RAに切替" : "CAに切替"}
             </span>
           )}
         </button>
         {!isCollapsed && (
-          <div className="mt-2 flex items-center justify-center gap-2">
-            <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+          <div className="mt-1.5 flex items-center justify-center gap-1.5">
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
               currentRole === "CA"
-                ? "bg-blue-100 text-blue-700"
+                ? "bg-orange-100 text-orange-700"
                 : "bg-emerald-100 text-emerald-700"
             }`}>
-              {currentRole}モード
+              {currentRole}
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-[10px] text-slate-400 truncate">
               {currentRole === "CA" ? "キャリアアドバイザー" : "リクルーティングアドバイザー"}
             </span>
           </div>
@@ -262,12 +262,12 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* ナビゲーション */}
-      <nav className="flex-1 p-4 overflow-y-auto">
+      <nav className="flex-1 p-2 overflow-y-auto">
         {/* メインメニュー */}
         {!isCollapsed && (
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">メイン</p>
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">メイン</p>
         )}
-        <ul className="space-y-1 mb-4">
+        <ul className="space-y-0.5 mb-3">
           {filteredMainNav.map((item) => {
             const isActive = pathname === item.href || 
               (item.href !== "/job-seekers" && pathname.startsWith(item.href));
@@ -276,14 +276,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 ${isCollapsed ? "px-3 justify-center" : "px-4"} py-3 rounded-xl transition-all ${
+                  className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-2 rounded-lg transition-all text-sm ${
                     isActive
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
                       : "text-slate-600 hover:bg-orange-50 hover:text-orange-600"
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <span className="flex-shrink-0">{item.icon}</span>
+                  <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
                   {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.label}</span>}
                 </Link>
               </li>
@@ -295,9 +295,9 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {filteredSubNav.length > 0 && (
           <>
             {!isCollapsed && (
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">アクション</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">アクション</p>
             )}
-            <ul className="space-y-1 mb-4">
+            <ul className="space-y-0.5 mb-3">
               {filteredSubNav.map((item) => {
                 const isActive = pathname === item.href;
                 
@@ -305,14 +305,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-3 ${isCollapsed ? "px-3 justify-center" : "px-4"} py-2.5 rounded-xl transition-all text-sm ${
+                      className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-1.5 rounded-lg transition-all text-xs ${
                         isActive
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200"
+                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
                           : "text-slate-500 hover:bg-orange-50 hover:text-orange-600"
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <span className="flex-shrink-0">{item.icon}</span>
+                      <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
                       {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.label}</span>}
                     </Link>
                   </li>
@@ -324,9 +324,9 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
         {/* 設定メニュー */}
         {!isCollapsed && (
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">設定</p>
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 px-2">設定</p>
         )}
-        <ul className="space-y-1">
+        <ul className="space-y-0.5">
           {filteredSettingsNav.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href);
             
@@ -334,14 +334,14 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 ${isCollapsed ? "px-3 justify-center" : "px-4"} py-2.5 rounded-xl transition-all text-sm ${
+                  className={`flex items-center gap-2 ${isCollapsed ? "px-2 justify-center" : "px-3"} py-1.5 rounded-lg transition-all text-xs ${
                     isActive
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200"
                       : "text-slate-500 hover:bg-orange-50 hover:text-orange-600"
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <span className="flex-shrink-0">{item.icon}</span>
+                  <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
                   {!isCollapsed && <span className="font-medium whitespace-nowrap">{item.label}</span>}
                 </Link>
               </li>
@@ -352,33 +352,33 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* ユーザー情報 */}
       {session?.user && (
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-2 border-t border-slate-100">
           {isCollapsed ? (
             // 折りたたみ時: アイコンのみ
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               {session.user.image ? (
                 <img
                   src={session.user.image}
                   alt={session.user.name || ""}
-                  className="w-10 h-10 rounded-full border-2 border-orange-500"
+                  className="w-8 h-8 rounded-full border-2 border-orange-500"
                   title={session.user.name || ""}
                 />
               ) : (
                 <div 
-                  className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center"
+                  className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center"
                   title={session.user.name || ""}
                 >
-                  <span className="text-white text-sm font-bold">
+                  <span className="text-white text-xs font-bold">
                     {session.user.name?.charAt(0) || "U"}
                   </span>
                 </div>
               )}
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                 title="ログアウト"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </button>
@@ -386,34 +386,34 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           ) : (
             // 展開時: フル表示
             <>
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 {session.user.image ? (
                   <img
                     src={session.user.image}
                     alt={session.user.name || ""}
-                    className="w-10 h-10 rounded-full border-2 border-orange-500 flex-shrink-0"
+                    className="w-8 h-8 rounded-full border-2 border-orange-500 flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-sm font-bold">
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">
                       {session.user.name?.charAt(0) || "U"}
                     </span>
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-slate-900 text-sm font-medium truncate">
+                  <p className="text-slate-900 text-xs font-medium truncate">
                     {session.user.name}
                   </p>
-                  <p className="text-slate-400 text-xs truncate">
+                  <p className="text-slate-400 text-[10px] truncate">
                     {session.user.email}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="w-full px-4 py-2.5 text-sm text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors flex items-center gap-2"
+                className="w-full px-2 py-1.5 text-xs text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors flex items-center gap-1.5"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 <span>ログアウト</span>

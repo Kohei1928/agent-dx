@@ -10,11 +10,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 const STATUS_CONFIG: Record<string, { label: string; color: string; category: string }> = {
   proposal: { label: "候補リスト", color: "bg-slate-100 text-slate-600", category: "候補リスト" },
   not_applying: { label: "応募しない", color: "bg-gray-100 text-gray-500", category: "応募しない" },
-  entry_preparing: { label: "エントリー準備中", color: "bg-blue-100 text-blue-600", category: "選考中" },
-  entry_requested: { label: "エントリー依頼済", color: "bg-blue-100 text-blue-600", category: "選考中" },
-  entry_completed: { label: "エントリー完了", color: "bg-blue-100 text-blue-600", category: "選考中" },
-  document_submitted: { label: "書類提出済み", color: "bg-blue-100 text-blue-600", category: "選考中" },
-  document_screening: { label: "書類選考中", color: "bg-blue-100 text-blue-600", category: "選考中" },
+  entry_preparing: { label: "エントリー準備中", color: "bg-orange-100 text-orange-600", category: "選考中" },
+  entry_requested: { label: "エントリー依頼済", color: "bg-orange-100 text-orange-600", category: "選考中" },
+  entry_completed: { label: "エントリー完了", color: "bg-orange-100 text-orange-600", category: "選考中" },
+  document_submitted: { label: "書類提出済み", color: "bg-orange-100 text-orange-600", category: "選考中" },
+  document_screening: { label: "書類選考中", color: "bg-orange-100 text-orange-600", category: "選考中" },
   document_passed: { label: "書類通過", color: "bg-green-100 text-green-600", category: "選考中" },
   document_rejected: { label: "書類不通過", color: "bg-red-100 text-red-600", category: "選考終了" },
   scheduling: { label: "日程調整中", color: "bg-yellow-100 text-yellow-600", category: "選考中" },
@@ -657,7 +657,7 @@ export default function SelectionDetailPage() {
               </span>
               {nextInterviewDate && (
                 <div className="flex items-center gap-2 text-sm">
-                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span className="text-gray-700 font-medium">
@@ -719,7 +719,7 @@ export default function SelectionDetailPage() {
                   <span className="text-lg">📅</span>
                   <span className="font-semibold text-gray-900">面接詳細</span>
                   {selection.interviewDetails && selection.interviewDetails.length > 0 && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                    <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
                       {selection.interviewDetails.length}件
                     </span>
                   )}
@@ -735,7 +735,7 @@ export default function SelectionDetailPage() {
                       <p className="text-gray-500 text-sm">面接予定なし</p>
                       <button
                         onClick={openAddInterviewModal}
-                        className="mt-2 text-sm text-blue-600 hover:underline"
+                        className="mt-2 text-sm text-orange-600 hover:underline"
                       >
                         + 面接を追加
                       </button>
@@ -748,12 +748,12 @@ export default function SelectionDetailPage() {
                                           interview.interviewRound === 3 ? "最終" :
                                           `${interview.interviewRound}次`;
                         return (
-                          <div key={interview.id} className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <div key={interview.id} className="p-3 bg-orange-50 rounded-lg border border-orange-100">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="font-semibold text-blue-800">{roundLabel}面接</span>
+                              <span className="font-semibold text-orange-800">{roundLabel}面接</span>
                               <button
                                 onClick={() => openEditInterviewModal(interview)}
-                                className="text-xs text-blue-600 hover:underline"
+                                className="text-xs text-orange-600 hover:underline"
                               >
                                 編集
                               </button>
@@ -771,7 +771,7 @@ export default function SelectionDetailPage() {
                                 <span className="text-gray-500">{interview.format === "online" ? "💻" : "🏢"}</span>
                                 {interview.format === "online" ? "オンライン" : "対面"}
                                 {interview.format === "online" && interview.onlineUrl && (
-                                  <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[150px]">
+                                  <a href={interview.onlineUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:underline truncate max-w-[150px]">
                                     URL
                                   </a>
                                 )}
@@ -782,7 +782,7 @@ export default function SelectionDetailPage() {
                       })}
                       <button
                         onClick={openAddInterviewModal}
-                        className="w-full py-2 text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+                        className="w-full py-2 text-sm text-orange-600 border border-dashed border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
                       >
                         + 面接を追加
                       </button>
@@ -825,7 +825,7 @@ export default function SelectionDetailPage() {
                     </div>
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}`}
-                      className="text-xs text-blue-600 hover:underline"
+                      className="text-xs text-orange-600 hover:underline"
                     >
                       詳細→
                     </Link>
@@ -861,7 +861,7 @@ export default function SelectionDetailPage() {
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-orange-600 bg-orange-50 rounded hover:bg-orange-100 transition-colors"
                     >
                       📄 履歴書
                     </Link>
@@ -917,7 +917,7 @@ export default function SelectionDetailPage() {
                   {selection.job?.id && (
                     <Link
                       href={`/jobs/${selection.job.id}`}
-                      className="block mt-3 text-center py-2 text-xs text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors"
+                      className="block mt-3 text-center py-2 text-xs text-orange-600 border border-orange-200 rounded hover:bg-orange-50 transition-colors"
                     >
                       求人詳細を見る →
                     </Link>
@@ -985,10 +985,10 @@ export default function SelectionDetailPage() {
               <button
                 onClick={handleSyncEmails}
                 disabled={syncingEmails}
-                className="px-3 py-1.5 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50 disabled:opacity-50 flex items-center gap-1"
+                className="px-3 py-1.5 text-sm text-orange-600 border border-orange-600 rounded hover:bg-orange-50 disabled:opacity-50 flex items-center gap-1"
               >
                 {syncingEmails ? (
-                  <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3 h-3 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1009,14 +1009,14 @@ export default function SelectionDetailPage() {
                 {/* 空状態時のアクション提案 */}
                 <div className="p-4 space-y-3">
                   {/* 同期のヒント */}
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
                     <div className="flex items-start gap-2">
-                      <svg className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div>
-                        <p className="text-sm font-medium text-blue-800">メールを同期しましょう</p>
-                        <p className="text-xs text-blue-600 mt-0.5">「同期」ボタンでra@のメールから関連メッセージを取得できます</p>
+                        <p className="text-sm font-medium text-orange-800">メールを同期しましょう</p>
+                        <p className="text-xs text-orange-600 mt-0.5">「同期」ボタンでra@のメールから関連メッセージを取得できます</p>
                       </div>
                     </div>
                   </div>
@@ -1070,7 +1070,7 @@ export default function SelectionDetailPage() {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
                           message.direction === "inbound" 
                             ? "bg-gray-200 text-gray-600" 
-                            : "bg-blue-500 text-white"
+                            : "bg-orange-500 text-white"
                         }`}>
                           {message.direction === "inbound" 
                             ? (message.fromName || message.fromEmail || "企").charAt(0)
@@ -1095,11 +1095,11 @@ export default function SelectionDetailPage() {
                           {/* メッセージバブル - テキストは常に左寄せ */}
                           <div className={`rounded-2xl px-4 py-3 text-left ${
                             message.direction === "outbound" 
-                              ? "bg-blue-500 text-white rounded-tr-sm" 
+                              ? "bg-orange-500 text-white rounded-tr-sm" 
                               : "bg-gray-100 text-gray-800 rounded-tl-sm"
                           }`}>
                             {message.subject && (
-                              <p className={`text-sm font-bold mb-2 ${message.direction === "outbound" ? "text-blue-100" : "text-gray-600"}`}>
+                              <p className={`text-sm font-bold mb-2 ${message.direction === "outbound" ? "text-orange-100" : "text-gray-600"}`}>
                                 {message.subject}
                               </p>
                             )}
@@ -1126,7 +1126,7 @@ export default function SelectionDetailPage() {
                     type="radio"
                     checked={sendDirectly}
                     onChange={() => setSendDirectly(true)}
-                    className="text-blue-600 w-3 h-3"
+                    className="text-orange-600 w-3 h-3"
                   />
                   直接送信
                 </label>
@@ -1135,7 +1135,7 @@ export default function SelectionDetailPage() {
                     type="radio"
                     checked={!sendDirectly}
                     onChange={() => setSendDirectly(false)}
-                    className="text-blue-600 w-3 h-3"
+                    className="text-orange-600 w-3 h-3"
                   />
                   RA事務へ依頼
                 </label>
@@ -1143,7 +1143,7 @@ export default function SelectionDetailPage() {
               <button
                 onClick={handleSendMessage}
                 disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
-                className="px-4 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-1 text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sendingMessage ? "..." : "送信"}
               </button>
@@ -1156,14 +1156,14 @@ export default function SelectionDetailPage() {
                 value={newMessageSubject}
                 onChange={(e) => setNewMessageSubject(e.target.value)}
                 placeholder="件名"
-                className="w-1/3 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="w-1/3 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-orange-500"
               />
               <input
                 type="text"
                 value={newMessageBody}
                 onChange={(e) => setNewMessageBody(e.target.value)}
                 placeholder="メッセージを入力..."
-                className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-orange-500"
               />
             </div>
           </div>
