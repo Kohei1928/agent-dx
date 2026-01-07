@@ -675,7 +675,7 @@ export default function SelectionDetailPage() {
                   setNewMessageSubject(`[${selection.job?.title || "選考"}] 選考結果のご確認`);
                   setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエの${session?.user?.name || "担当"}です。\n\n${selection.jobSeeker?.name || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
                 }}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-sm font-medium text-orange-600 border border-orange-300 hover:bg-orange-50 rounded-lg transition-colors flex items-center gap-1"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -684,7 +684,7 @@ export default function SelectionDetailPage() {
               </button>
               <Link
                 href={`/jobs/search?jobSeekerId=${selection.jobSeeker?.id || ""}`}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-sm font-medium text-orange-600 border border-orange-300 hover:bg-orange-50 rounded-lg transition-colors flex items-center gap-1"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -861,13 +861,13 @@ export default function SelectionDetailPage() {
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}/editor?doc=resume`}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-orange-600 bg-orange-50 rounded hover:bg-orange-100 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors border border-orange-200"
                     >
                       📄 履歴書
                     </Link>
                     <Link
                       href={`/job-seekers/${selection.jobSeekerId}/editor?doc=career`}
-                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors border border-green-200"
                     >
                       💼 職務経歴書
                     </Link>
@@ -985,7 +985,7 @@ export default function SelectionDetailPage() {
               <button
                 onClick={handleSyncEmails}
                 disabled={syncingEmails}
-                className="px-3 py-1.5 text-sm text-orange-600 border border-orange-600 rounded hover:bg-orange-50 disabled:opacity-50 flex items-center gap-1"
+                className="px-3 py-1.5 text-sm text-orange-600 border border-orange-300 rounded-lg hover:bg-orange-50 disabled:opacity-50 flex items-center gap-1"
               >
                 {syncingEmails ? (
                   <div className="w-3 h-3 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
@@ -1143,7 +1143,7 @@ export default function SelectionDetailPage() {
               <button
                 onClick={handleSendMessage}
                 disabled={sendingMessage || !newMessageSubject.trim() || !newMessageBody.trim()}
-                className="px-4 py-1 text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-1.5 text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sendingMessage ? "..." : "送信"}
               </button>
@@ -1156,14 +1156,14 @@ export default function SelectionDetailPage() {
                 value={newMessageSubject}
                 onChange={(e) => setNewMessageSubject(e.target.value)}
                 placeholder="件名"
-                className="w-1/3 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+                className="w-1/3 px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
               <input
                 type="text"
                 value={newMessageBody}
                 onChange={(e) => setNewMessageBody(e.target.value)}
                 placeholder="メッセージを入力..."
-                className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+                className="flex-1 px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
           </div>
