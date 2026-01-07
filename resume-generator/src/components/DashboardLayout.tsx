@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar isCollapsed={isCollapsed} onToggle={handleToggleSidebar} />
-      <main className="flex-1 overflow-auto relative z-10">
+      <main className="flex-1 overflow-auto">
         {children}
       </main>
     </div>

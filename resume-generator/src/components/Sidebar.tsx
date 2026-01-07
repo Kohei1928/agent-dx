@@ -196,34 +196,47 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     >
       {/* ロゴ・タイトル */}
       <div className={`${isCollapsed ? "p-3" : "p-4"} border-b border-slate-100`}>
-        <div className="flex items-center justify-between">
-          <Link href="/job-seekers" className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md shadow-orange-100 flex-shrink-0">
-              <span className="text-white font-bold text-sm">DX</span>
-            </div>
-            {!isCollapsed && (
+        {isCollapsed ? (
+          // 折りたたみ状態：ロゴをクリックで展開
+          <div className="flex flex-col items-center gap-2">
+            <Link href="/job-seekers">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md shadow-orange-100">
+                <span className="text-white font-bold text-sm">DX</span>
+              </div>
+            </Link>
+            <button
+              onClick={onToggle}
+              className="w-full py-1.5 flex items-center justify-center text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors"
+              title="サイドバーを展開"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          // 展開状態：ロゴとタイトル、折りたたみボタン
+          <div className="flex items-center justify-between">
+            <Link href="/job-seekers" className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md shadow-orange-100 flex-shrink-0">
+                <span className="text-white font-bold text-sm">DX</span>
+              </div>
               <div className="overflow-hidden">
                 <h1 className="text-slate-900 font-bold text-sm whitespace-nowrap">より転-DX</h1>
                 <p className="text-slate-400 text-[10px] whitespace-nowrap">人材紹介業務効率化</p>
               </div>
-            )}
-          </Link>
-          {/* 折りたたみトグルボタン */}
-          <button
-            onClick={onToggle}
-            className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors shrink-0"
-            title={isCollapsed ? "サイドバーを展開" : "サイドバーを折りたたむ"}
-          >
-            <svg
-              className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            </Link>
+            <button
+              onClick={onToggle}
+              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors shrink-0"
+              title="サイドバーを折りたたむ"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* CA/RA 切り替えボタン */}
