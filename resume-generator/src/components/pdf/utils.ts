@@ -3,6 +3,26 @@
  */
 
 /**
+ * テキストから改行時のハイフンを除去
+ * "行-\n" → "行\n" のように変換
+ * また "- " で始まる孤立した行も前の行と結合
+ */
+export function cleanLineBreakHyphens(text: string): string {
+  if (!text) return "";
+  
+  return text
+    // 行末のハイフン+改行を除去（ハイフンの前にスペースがある場合も対応）
+    .replace(/\s*-\s*\n/g, "\n")
+    // 行末のハイフン+スペースを除去
+    .replace(/\s*-\s*$/gm, "")
+    // 先頭が "- " で始まる行を前の行と結合（箇条書きではない場合）
+    .replace(/\n-\s+(?![・\-\*])/g, "")
+    // 連続する空白を1つに
+    .replace(/  +/g, " ")
+    .trim();
+}
+
+/**
  * 日付文字列から年・月・日を抽出（タイムゾーン安全）
  */
 function extractDateParts(dateStr: string): { year: number; month: number; day: number } | null {
@@ -146,7 +166,10 @@ export function parseBoldText(text: string): TextSegment[] {
 export function parseMultilineWithBold(text: string): TextSegment[][] {
   if (!text) return [];
   
-  return text.split("\n").map(line => parseBoldText(line));
+  // 改行時のハイフンをクリーニング
+  const cleanedText = cleanLineBreakHyphens(text);
+  
+  return cleanedText.split("\n").map(line => parseBoldText(line));
 }
 
 /**
@@ -156,7 +179,10 @@ export function parseMultilineWithBold(text: string): TextSegment[][] {
 export function parseBulletsWithBold(text: string): { segments: TextSegment[], rawText: string }[] {
   if (!text) return [];
   
-  return text
+  // 改行時のハイフンをクリーニング
+  const cleanedText = cleanLineBreakHyphens(text);
+  
+  return cleanedText
     .split("\n")
     .map(line => line.trim())
     .filter(line => line.length > 0)

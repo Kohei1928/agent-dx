@@ -2,8 +2,15 @@
 
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { cvStyles } from "./styles";
-import { formatDate, parseBullets, parseMultilineWithBold, parseBulletsWithBold } from "./utils";
+import { formatDate, parseBullets, parseMultilineWithBold, parseBulletsWithBold, cleanLineBreakHyphens } from "./utils";
 import type { CvData } from "@/types";
+
+// プロジェクトが空かどうかをチェック
+function isEmptyProject(project: { startYear?: string; startMonth?: string; content?: string; achievements?: string; initiatives?: string }) {
+  const hasDate = project.startYear && project.startMonth;
+  const hasContent = project.content || project.achievements || project.initiatives;
+  return !hasDate && !hasContent;
+}
 
 // フォント登録
 import "./fonts";
@@ -116,25 +123,19 @@ export function CvPDF({ data }: CvPDFProps) {
 
               {/* 業務セットがある場合はprojectsを使用、ない場合は後方互換性のため従来の形式を使用 */}
               {(work.projects && work.projects.length > 0) ? (
-                work.projects.map((project, pIdx) => (
+                work.projects
+                  .filter(project => !isEmptyProject(project))  // 空のプロジェクトを除外
+                  .map((project, pIdx) => (
                   <View key={`project-${pIdx}`}>
                     {/* 2つ目以降の業務セットの前に区切り線を追加 */}
                     {pIdx > 0 && <View style={cvStyles.projectDivider} />}
                     <View style={cvStyles.workTableRow}>
                       <View style={cvStyles.workPeriodCell}>
                         {project.startYear && project.startMonth ? (
-                          <>
-                            <Text style={cvStyles.workPeriodText}>
-                              {`${project.startYear}年${project.startMonth}月`}
-                            </Text>
-                            <Text style={cvStyles.workPeriodTilde}>〜</Text>
-                            <Text style={cvStyles.workPeriodText}>
-                              {project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}
-                            </Text>
-                          </>
-                        ) : (
-                          <Text style={cvStyles.workPeriodText}></Text>
-                        )}
+                          <Text style={cvStyles.workPeriodText}>
+                            {`${project.startYear}年${project.startMonth}月\n〜\n${project.isCurrentJob ? "現在" : (project.endYear && project.endMonth ? `${project.endYear}年${project.endMonth}月` : "")}`}
+                          </Text>
+                        ) : null}
                       </View>
                       <View style={cvStyles.workContentCell}>
                         {/* 業務内容（太字対応） */}
@@ -144,14 +145,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.content).map((item, j) => (
                               <View key={`content-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`content-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`content-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -164,14 +167,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.achievements).map((item, j) => (
                               <View key={`achievement-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`achievement-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`achievement-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -184,14 +189,16 @@ export function CvPDF({ data }: CvPDFProps) {
                             {parseBulletsWithBold(project.initiatives).map((item, j) => (
                               <View key={`initiative-${j}`} style={cvStyles.workBulletLine}>
                                 <Text style={cvStyles.workBulletPrefix}>・</Text>
-                                {item.segments.map((seg, k) => (
-                                  <Text
-                                    key={`initiative-seg-${j}-${k}`}
-                                    style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                                  >
-                                    {seg.text}
-                                  </Text>
-                                ))}
+                                <View style={cvStyles.workBulletTextContainer}>
+                                  {item.segments.map((seg, k) => (
+                                    <Text
+                                      key={`initiative-seg-${j}-${k}`}
+                                      style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                    >
+                                      {seg.text}
+                                    </Text>
+                                  ))}
+                                </View>
                               </View>
                             ))}
                           </View>
@@ -205,18 +212,12 @@ export function CvPDF({ data }: CvPDFProps) {
                 <View style={cvStyles.workTableRow}>
                   <View style={cvStyles.workPeriodCell}>
                     {work.startYear && work.startMonth ? (
-                      <>
-                        <Text style={cvStyles.workPeriodText}>
-                          {`${work.startYear}年${work.startMonth}月`}
-                        </Text>
-                        <Text style={cvStyles.workPeriodTilde}>〜</Text>
-                        <Text style={cvStyles.workPeriodText}>
-                          {work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}
-                        </Text>
-                      </>
-                    ) : (
-                      <Text style={cvStyles.workPeriodText}>{work.period || ""}</Text>
-                    )}
+                      <Text style={cvStyles.workPeriodText}>
+                        {`${work.startYear}年${work.startMonth}月\n〜\n${work.isCurrentJob ? "現在" : (work.endYear && work.endMonth ? `${work.endYear}年${work.endMonth}月` : "")}`}
+                      </Text>
+                    ) : work.period ? (
+                      <Text style={cvStyles.workPeriodText}>{work.period}</Text>
+                    ) : null}
                   </View>
                   <View style={cvStyles.workContentCell}>
                     {/* 業務内容（太字対応） */}
@@ -226,14 +227,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.content).map((item, j) => (
                           <View key={`content-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`content-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`content-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>
@@ -246,14 +249,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.achievements).map((item, j) => (
                           <View key={`achievement-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`achievement-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`achievement-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>
@@ -266,14 +271,16 @@ export function CvPDF({ data }: CvPDFProps) {
                         {parseBulletsWithBold(work.initiatives).map((item, j) => (
                           <View key={`initiative-${j}`} style={cvStyles.workBulletLine}>
                             <Text style={cvStyles.workBulletPrefix}>・</Text>
-                            {item.segments.map((seg, k) => (
-                              <Text
-                                key={`initiative-seg-${j}-${k}`}
-                                style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
-                              >
-                                {seg.text}
-                              </Text>
-                            ))}
+                            <View style={cvStyles.workBulletTextContainer}>
+                              {item.segments.map((seg, k) => (
+                                <Text
+                                  key={`initiative-seg-${j}-${k}`}
+                                  style={seg.bold ? cvStyles.workBulletBold : cvStyles.workBulletNormal}
+                                >
+                                  {seg.text}
+                                </Text>
+                              ))}
+                            </View>
                           </View>
                         ))}
                       </View>

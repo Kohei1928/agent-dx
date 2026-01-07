@@ -119,15 +119,20 @@ export const cvStyles = StyleSheet.create({
     lineHeight: 1.6,
   },
 
-  // 職歴テーブル
+  // 職歴テーブル（枠線なし - 各行に枠線を設定）
   workTable: {
-    borderWidth: BORDER_THICK,
-    borderColor: "#000",
+    // borderWidth は削除 - 各行に個別に設定
   },
 
   workTableHeader: {
     flexDirection: "row",
     backgroundColor: "#f5f5f5",
+    borderTopWidth: BORDER_THICK,
+    borderTopColor: "#000",
+    borderLeftWidth: BORDER_THICK,
+    borderLeftColor: "#000",
+    borderRightWidth: BORDER_THICK,
+    borderRightColor: "#000",
     borderBottomWidth: BORDER_THICK,
     borderBottomColor: "#000",
     minHeight: 24,
@@ -158,6 +163,12 @@ export const cvStyles = StyleSheet.create({
   workTableRow: {
     flexDirection: "row",
     alignItems: "stretch",
+    borderLeftWidth: BORDER_THICK,
+    borderLeftColor: "#000",
+    borderRightWidth: BORDER_THICK,
+    borderRightColor: "#000",
+    borderBottomWidth: BORDER_THICK,
+    borderBottomColor: "#000",
   },
 
   workPeriodCell: {
@@ -174,14 +185,7 @@ export const cvStyles = StyleSheet.create({
     fontSize: 9,
     color: "#000",
     textAlign: "center",
-  },
-
-  workPeriodTilde: {
-    fontFamily: "NotoSansJPMedium",
-    fontSize: 9,
-    color: "#000",
-    textAlign: "center",
-    marginVertical: 3,
+    lineHeight: 1.6,
   },
 
   workContentCell: {
@@ -215,20 +219,29 @@ export const cvStyles = StyleSheet.create({
     lineHeight: 1.5,
   },
 
-  // 太字対応の箇条書き行
+  // 太字対応の箇条書き行（・と本文を正しく整列）
   workBulletLine: {
     flexDirection: "row",
-    flexWrap: "wrap",
     marginLeft: 6,
     marginBottom: 2,
-    lineHeight: 1.5,
   },
 
-  // 箇条書きのプレフィックス（・）
+  // 箇条書きのプレフィックス（・）- 固定幅
   workBulletPrefix: {
     fontFamily: "NotoSansJPMedium",
     fontSize: 9,
     color: "#000",
+    width: 10,
+    flexShrink: 0,
+    lineHeight: 1.5,
+  },
+
+  // 箇条書き本文コンテナ（折り返し対応）
+  workBulletTextContainer: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    lineHeight: 1.5,
   },
 
   // 箇条書き内の通常テキスト
@@ -236,6 +249,7 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPMedium",
     fontSize: 9,
     color: "#000",
+    lineHeight: 1.5,
   },
 
   // 箇条書き内の太字テキスト
@@ -243,6 +257,7 @@ export const cvStyles = StyleSheet.create({
     fontFamily: "NotoSansJPBold",
     fontSize: 9,
     color: "#000",
+    lineHeight: 1.5,
   },
 
   // スキルセクション
