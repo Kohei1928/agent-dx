@@ -79,6 +79,7 @@ function ProposalsContent() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const selectedJobSeekerId = searchParams.get("jobSeekerId");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -166,6 +167,16 @@ function ProposalsContent() {
     return acc;
   }, [] as GroupedProposals[]);
 
+  // 選択された求職者のグループを取得
+  const selectedGroup = selectedJobSeekerId 
+    ? groupedProposals.find(g => g.jobSeeker.id === selectedJobSeekerId)
+    : null;
+
+  // 選択された求職者の全求人アイテムを取得
+  const selectedJobItems = selectedGroup 
+    ? selectedGroup.proposals.flatMap(p => p.items)
+    : [];
+
   if (status === "loading") {
     return (
       <DashboardLayout>
@@ -230,8 +241,95 @@ function ProposalsContent() {
           </div>
         </div>
 
-        {/* Cards Grid - CIRCUS風 */}
-        {loading ? (
+        {/* 詳細表示モード */}
+        {selectedJobSeekerId && selectedGroup ? (
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            {/* 詳細ヘッダー */}
+            <div className="relative bg-gradient-to-br from-slate-600 to-slate-800 p-6">
+              <div className="absolute inset-0 opacity-20">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <pattern id="detail-pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                    <circle cx="10" cy="10" r="2" fill="white" opacity="0.3" />
+                  </pattern>
+                  <rect width="100" height="100" fill="url(#detail-pattern)" />
+                </svg>
+              </div>
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <Link
+                    href="/proposals"
+                    className="inline-flex items-center gap-1 text-slate-300 hover:text-white text-sm mb-2 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    一覧に戻る
+                  </Link>
+                  <h2 className="text-white font-bold text-2xl">
+                    {selectedGroup.jobSeeker.name}
+                  </h2>
+                  <p className="text-slate-300 text-sm mt-1">
+                    保存した求人：{selectedJobItems.length}件
+                  </p>
+                </div>
+                <Link
+                  href={`/proposals/new?jobSeekerId=${selectedJobSeekerId}`}
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  求人を追加
+                </Link>
+              </div>
+            </div>
+
+            {/* 求人リスト */}
+            <div className="p-6">
+              {selectedJobItems.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-slate-500">保存した求人はありません</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedJobItems.map((item, idx) => (
+                    <div
+                      key={`${item.id}-${idx}`}
+                      className="bg-slate-50 rounded-lg p-4 border border-slate-200 hover:border-orange-300 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-slate-900 text-sm leading-tight">
+                          {item.job.title}
+                        </h4>
+                        <Link
+                          href={`/jobs/${item.job.id}`}
+                          className="text-orange-500 hover:text-orange-600 text-xs font-medium shrink-0 ml-2"
+                        >
+                          詳細 →
+                        </Link>
+                      </div>
+                      <p className="text-slate-600 text-xs mb-3">
+                        {item.job.company.name}
+                      </p>
+                      {(item.job.salaryMin || item.job.salaryMax) && (
+                        <div className="flex items-center gap-1 text-xs text-slate-500">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>
+                            {item.job.salaryMin ? `${item.job.salaryMin}万` : ""}
+                            {item.job.salaryMin && item.job.salaryMax ? " 〜 " : ""}
+                            {item.job.salaryMax ? `${item.job.salaryMax}万` : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="spinner"></div>
             <p className="text-slate-500 ml-4">読み込み中...</p>
