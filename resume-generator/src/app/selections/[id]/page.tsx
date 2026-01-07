@@ -667,27 +667,35 @@ export default function SelectionDetailPage() {
               )}
             </div>
             
-            {/* 右：アクションボタン */}
+            {/* 右：CAアクションボタン（法人の選考状態変更は不可） */}
             <div className="flex items-center gap-2">
-              {availableTransitions.slice(0, 2).map((nextStatus) => {
-                if (nextStatus === "withdrawn") return null;
-                const nextConfig = getStatusConfig(nextStatus);
-                return (
-                  <button
-                    key={nextStatus}
-                    onClick={() => handleStatusChange(nextStatus)}
-                    disabled={updating}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition-colors"
-                  >
-                    {nextConfig.label}
-                  </button>
-                );
-              })}
+              <button
+                onClick={() => {
+                  // 結果催促のメッセージテンプレートを設定
+                  setNewMessageSubject(`[${selection.job?.title || "選考"}] 選考結果のご確認`);
+                  setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエの${session?.user?.name || "担当"}です。\n\n${selection.jobSeeker?.lastName || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                結果を催促
+              </button>
+              <Link
+                href={`/jobs/search?jobSeekerId=${selection.jobSeeker?.id || ""}`}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                別求人を探す
+              </Link>
               {availableTransitions.includes("withdrawn") && (
                 <button
                   onClick={() => handleStatusChange("withdrawn")}
                   disabled={updating}
-                  className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors"
+                  className="px-3 py-1.5 text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors"
                 >
                   辞退
                 </button>
@@ -997,12 +1005,54 @@ export default function SelectionDetailPage() {
           {/* メッセージ一覧 */}
           <div className="flex-1 overflow-y-auto">
             {selection.messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <p className="text-sm text-gray-500">メッセージがありません</p>
-                <p className="text-xs text-gray-400 mt-1">同期ボタンでGmailからメールを取得</p>
+              <div className="flex flex-col h-full">
+                {/* 空状態時のアクション提案 */}
+                <div className="p-4 space-y-3">
+                  {/* 同期のヒント */}
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-blue-800">メールを同期しましょう</p>
+                        <p className="text-xs text-blue-600 mt-0.5">「同期」ボタンでra@のメールから関連メッセージを取得できます</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* クイックアクション */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">クイックアクション</p>
+                    <button
+                      onClick={() => {
+                        setNewMessageSubject(`[${selection.job?.title || "選考"}] 面接日程調整のお願い`);
+                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n面接日程の調整をお願いしたく、ご連絡いたしました。\n候補日をいくつかお知らせください。\n\nよろしくお願いいたします。`);
+                      }}
+                      className="w-full p-2 text-left text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors"
+                    >
+                      📅 面接日程の調整を依頼する
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewMessageSubject(`[${selection.job?.title || "選考"}] 書類送付のご連絡`);
+                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.lastName || "候補者"}様の応募書類をお送りいたします。\nご査収の程、よろしくお願いいたします。\n\n【添付書類】\n・履歴書\n・職務経歴書`);
+                      }}
+                      className="w-full p-2 text-left text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors"
+                    >
+                      📄 書類を送付する
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewMessageSubject(`[${selection.job?.title || "選考"}] 選考結果のご確認`);
+                        setNewMessageBody(`ご担当者様\n\nお世話になっております。\n株式会社ミギナナメウエです。\n\n${selection.jobSeeker?.lastName || "候補者"}様の選考結果について、ご確認させていただきたくご連絡いたしました。\nお忙しいところ恐れ入りますが、選考状況をお知らせいただけますと幸いです。\n\nよろしくお願いいたします。`);
+                      }}
+                      className="w-full p-2 text-left text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors"
+                    >
+                      ⏰ 選考結果を確認する
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
