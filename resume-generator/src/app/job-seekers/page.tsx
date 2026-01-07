@@ -7,6 +7,15 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 
+type Selection = {
+  id: string;
+  status: string;
+  companyName: string;
+  jobTitle: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type JobSeeker = {
   id: string;
   name: string;
@@ -21,7 +30,92 @@ type JobSeeker = {
   _count: {
     generatedDocuments: number;
     schedules: number;
+    selections?: number;
   };
+  selections?: Selection[];
+};
+
+type PhaseCounts = {
+  all: number;
+  pre_entry_phase: number;
+  document_phase: number;
+  interview_phase: number;
+  offer_phase: number;
+  offer_accepted_phase: number;
+  pre_employment_phase: number;
+  employed_phase: number;
+  ended_phase: number;
+};
+
+// 選考フェーズの表示名
+const PHASE_LABELS: Record<string, string> = {
+  all: "すべて",
+  pre_entry_phase: "エントリー前",
+  document_phase: "書類選考中",
+  interview_phase: "面接中",
+  offer_phase: "内定",
+  offer_accepted_phase: "内定承諾",
+  pre_employment_phase: "入社前",
+  employed_phase: "入社済み",
+  ended_phase: "終了",
+};
+
+// 選考ステータスの表示名
+const STATUS_LABELS: Record<string, string> = {
+  proposal: "提案中",
+  not_applying: "応募しない",
+  entry_preparing: "エントリー準備中",
+  entry_requested: "エントリー依頼済み",
+  entry_completed: "エントリー完了",
+  document_submitted: "書類提出済み",
+  document_screening: "書類選考中",
+  document_passed: "書類通過",
+  document_rejected: "書類不通過",
+  scheduling: "日程調整中",
+  schedule_confirmed: "日程確定",
+  first_interview: "一次面接予定",
+  first_interview_done: "一次面接完了",
+  second_interview: "二次面接予定",
+  second_interview_done: "二次面接完了",
+  final_interview: "最終面接予定",
+  final_interview_done: "最終面接完了",
+  offer: "内定",
+  offer_accepted: "内定承諾",
+  offer_rejected: "内定辞退",
+  pre_entry: "入社前",
+  employed: "入社済み",
+  withdrawn: "辞退",
+  rejected: "不採用",
+  cancelled: "キャンセル",
+};
+
+// ステータスの色
+const STATUS_COLORS: Record<string, string> = {
+  proposal: "bg-slate-100 text-slate-600",
+  not_applying: "bg-slate-100 text-slate-500",
+  entry_preparing: "bg-yellow-100 text-yellow-700",
+  entry_requested: "bg-yellow-100 text-yellow-700",
+  entry_completed: "bg-blue-100 text-blue-700",
+  document_submitted: "bg-blue-100 text-blue-700",
+  document_screening: "bg-blue-100 text-blue-700",
+  document_passed: "bg-green-100 text-green-700",
+  document_rejected: "bg-red-100 text-red-600",
+  scheduling: "bg-purple-100 text-purple-700",
+  schedule_confirmed: "bg-purple-100 text-purple-700",
+  first_interview: "bg-indigo-100 text-indigo-700",
+  first_interview_done: "bg-indigo-100 text-indigo-700",
+  second_interview: "bg-indigo-100 text-indigo-700",
+  second_interview_done: "bg-indigo-100 text-indigo-700",
+  final_interview: "bg-indigo-100 text-indigo-700",
+  final_interview_done: "bg-indigo-100 text-indigo-700",
+  offer: "bg-emerald-100 text-emerald-700",
+  offer_accepted: "bg-emerald-200 text-emerald-800",
+  offer_rejected: "bg-red-100 text-red-600",
+  pre_entry: "bg-teal-100 text-teal-700",
+  employed: "bg-green-200 text-green-800",
+  withdrawn: "bg-red-100 text-red-600",
+  rejected: "bg-red-100 text-red-600",
+  cancelled: "bg-slate-100 text-slate-500",
 };
 
 type Pagination = {
@@ -48,6 +142,11 @@ function JobSeekersContent() {
   const [copiedFormId, setCopiedFormId] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
   
+  // ロール管理
+  const [currentRole, setCurrentRole] = useState<"CA" | "RA">("CA");
+  const [selectedPhase, setSelectedPhase] = useState("all");
+  const [phaseCounts, setPhaseCounts] = useState<PhaseCounts | null>(null);
+  
   // 選択状態
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
@@ -69,26 +168,66 @@ function JobSeekersContent() {
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
+  // ロールをローカルストレージから読み込み
+  useEffect(() => {
+    const savedRole = localStorage.getItem("userRole") as "CA" | "RA" | null;
+    if (savedRole) {
+      setCurrentRole(savedRole);
+    }
+  }, []);
+
+  // ロール変更を監視
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newRole = localStorage.getItem("userRole") as "CA" | "RA" | null;
+      if (newRole && newRole !== currentRole) {
+        setCurrentRole(newRole);
+        setSelectedPhase("all");
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    
+    // 定期的にチェック（同一ウィンドウでの変更を検知）
+    const interval = setInterval(() => {
+      const savedRole = localStorage.getItem("userRole") as "CA" | "RA" | null;
+      if (savedRole && savedRole !== currentRole) {
+        setCurrentRole(savedRole);
+        setSelectedPhase("all");
+      }
+    }, 500);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [currentRole]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
     }
   }, [status, router]);
 
-  const fetchJobSeekers = useCallback(async (page: number, search: string, includeHidden: boolean) => {
+  const fetchJobSeekers = useCallback(async (page: number, search: string, includeHidden: boolean, role: "CA" | "RA", phase: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: String(page),
         limit: "20",
+        mode: role.toLowerCase(),
         ...(search && { search }),
         ...(includeHidden && { includeHidden: "true" }),
+        ...(role === "RA" && phase !== "all" && { phase }),
       });
       const res = await fetch(`/api/job-seekers?${params}`);
       if (res.ok) {
-        const { data, pagination: pag } = await res.json();
-        setJobSeekers(data);
-        setPagination(pag);
+        const result = await res.json();
+        setJobSeekers(result.data);
+        setPagination(result.pagination);
+        if (result.phaseCounts) {
+          setPhaseCounts(result.phaseCounts);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch job seekers:", error);
@@ -99,22 +238,22 @@ function JobSeekersContent() {
 
   useEffect(() => {
     if (session) {
-      fetchJobSeekers(currentPage, searchQuery, showHidden);
+      fetchJobSeekers(currentPage, searchQuery, showHidden, currentRole, selectedPhase);
     }
-  }, [session, currentPage, showHidden, fetchJobSeekers]);
+  }, [session, currentPage, showHidden, currentRole, selectedPhase, fetchJobSeekers]);
 
   // 検索実行（デバウンス）
   useEffect(() => {
     const timer = setTimeout(() => {
       if (session) {
-        fetchJobSeekers(1, searchQuery, showHidden);
+        fetchJobSeekers(1, searchQuery, showHidden, currentRole, selectedPhase);
         if (searchQuery && currentPage !== 1) {
           router.push("/job-seekers?page=1");
         }
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, session, showHidden]);
+  }, [searchQuery, session, showHidden, currentRole, selectedPhase]);
 
   const handleCopyUrl = async (e: React.MouseEvent, jobSeeker: JobSeeker) => {
     e.stopPropagation();
@@ -347,27 +486,73 @@ function JobSeekersContent() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                currentRole === "RA" 
+                  ? "bg-gradient-to-br from-emerald-100 to-emerald-50"
+                  : "bg-gradient-to-br from-orange-100 to-orange-50"
+              }`}>
+                <svg className={`w-5 h-5 ${currentRole === "RA" ? "text-emerald-600" : "text-orange-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               求職者一覧
+              {currentRole === "RA" && (
+                <span className="text-lg font-normal text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
+                  選考管理モード
+                </span>
+              )}
             </h1>
             <p className="text-slate-500 mt-2">
-              登録されている求職者の管理・履歴書生成・日程調整
+              {currentRole === "RA" 
+                ? "求職者ごとの選考状況を管理・入社までの進捗を確認"
+                : "登録されている求職者の管理・履歴書生成・日程調整"
+              }
             </p>
           </div>
-          <button
-            onClick={() => setShowNewModal(true)}
-            className="btn-orange px-6 py-3 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            <span>新規求職者登録</span>
-          </button>
+          {currentRole === "CA" && (
+            <button
+              onClick={() => setShowNewModal(true)}
+              className="btn-orange px-6 py-3 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              <span>新規求職者登録</span>
+            </button>
+          )}
         </div>
+
+        {/* RA用フェーズタブ */}
+        {currentRole === "RA" && phaseCounts && (
+          <div className="mb-6 -mx-2">
+            <div className="flex flex-wrap gap-2 px-2">
+              {Object.entries(PHASE_LABELS).map(([key, label]) => {
+                const count = phaseCounts[key as keyof PhaseCounts] || 0;
+                const isActive = selectedPhase === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedPhase(key)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                      isActive
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {label}
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-200 text-slate-500"
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Search and Filters */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -483,12 +668,21 @@ function JobSeekersContent() {
                       type="checkbox"
                       checked={selectedIds.size === jobSeekers.length && jobSeekers.length > 0}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 accent-orange-500 rounded"
+                      className={`w-4 h-4 rounded ${currentRole === "RA" ? "accent-emerald-500" : "accent-orange-500"}`}
                     />
                   </th>
                   <th className="text-left">求職者情報</th>
-                  <th className="text-left">連携状況</th>
-                  <th className="text-left">日程候補</th>
+                  {currentRole === "RA" ? (
+                    <>
+                      <th className="text-left">選考状況</th>
+                      <th className="text-left">進行中の選考</th>
+                    </>
+                  ) : (
+                    <>
+                      <th className="text-left">連携状況</th>
+                      <th className="text-left">日程候補</th>
+                    </>
+                  )}
                   <th className="text-center">アクション</th>
                 </tr>
               </thead>
@@ -503,7 +697,7 @@ function JobSeekersContent() {
                         type="checkbox"
                         checked={selectedIds.has(jobSeeker.id)}
                         onChange={() => handleSelect(jobSeeker.id)}
-                        className="w-4 h-4 accent-orange-500 rounded"
+                        className={`w-4 h-4 rounded ${currentRole === "RA" ? "accent-emerald-500" : "accent-orange-500"}`}
                       />
                     </td>
                     <td>
@@ -522,104 +716,207 @@ function JobSeekersContent() {
                         )}
                       </div>
                     </td>
-                    <td>
-                      <div className="flex flex-col gap-1">
-                        {jobSeeker.hubspotContactId ? (
-                          <span className="badge badge-green">HubSpot連携済み</span>
-                        ) : (
-                          <span className="badge badge-gray">HubSpot未連携</span>
-                        )}
-                        {jobSeeker._count.generatedDocuments > 0 && (
-                          <span className="badge badge-orange">履歴書生成済み</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="font-semibold text-slate-900">
-                        {jobSeeker._count?.schedules || 0}件
-                      </span>
-                    </td>
+                    {currentRole === "RA" ? (
+                      <>
+                        <td>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-slate-900">
+                              {jobSeeker._count?.selections || 0}件の選考
+                            </span>
+                            {jobSeeker.selections && jobSeeker.selections.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {(() => {
+                                  const statusCounts: Record<string, number> = {};
+                                  jobSeeker.selections.forEach(s => {
+                                    statusCounts[s.status] = (statusCounts[s.status] || 0) + 1;
+                                  });
+                                  return Object.entries(statusCounts).slice(0, 3).map(([status, count]) => (
+                                    <span 
+                                      key={status}
+                                      className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[status] || "bg-slate-100 text-slate-600"}`}
+                                    >
+                                      {STATUS_LABELS[status] || status}: {count}
+                                    </span>
+                                  ));
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="space-y-1 max-w-xs">
+                            {jobSeeker.selections && jobSeeker.selections.length > 0 ? (
+                              jobSeeker.selections.slice(0, 2).map(selection => (
+                                <div key={selection.id} className="text-sm">
+                                  <div className="font-medium text-slate-800 truncate">
+                                    {selection.companyName}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[selection.status] || "bg-slate-100 text-slate-600"}`}>
+                                      {STATUS_LABELS[selection.status] || selection.status}
+                                    </span>
+                                    {selection.jobTitle && (
+                                      <span className="text-xs text-slate-400 truncate max-w-24">
+                                        {selection.jobTitle}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <span className="text-slate-400 text-sm">選考なし</span>
+                            )}
+                            {jobSeeker.selections && jobSeeker.selections.length > 2 && (
+                              <span className="text-xs text-slate-400">
+                                他 {jobSeeker.selections.length - 2}件
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>
+                          <div className="flex flex-col gap-1">
+                            {jobSeeker.hubspotContactId ? (
+                              <span className="badge badge-green">HubSpot連携済み</span>
+                            ) : (
+                              <span className="badge badge-gray">HubSpot未連携</span>
+                            )}
+                            {jobSeeker._count.generatedDocuments > 0 && (
+                              <span className="badge badge-orange">履歴書生成済み</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="font-semibold text-slate-900">
+                            {jobSeeker._count?.schedules || 0}件
+                          </span>
+                        </td>
+                      </>
+                    )}
                     <td>
                       <div className="flex items-center justify-center gap-2 flex-nowrap">
-                        <Link
-                          href={`/job-seekers/${jobSeeker.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-1"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          レジュメ
-                        </Link>
-                        
-                        <Link
-                          href={`/selections?jobSeekerId=${jobSeeker.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                          </svg>
-                          選考管理
-                        </Link>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openProposalModal(jobSeeker.id, jobSeeker.name);
-                          }}
-                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          提案作成
-                        </button>
-                        
-                        <Link
-                          href={`/job-seekers/${jobSeeker.id}/schedule`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          日程調整
-                        </Link>
-                        
-                        <button
-                          onClick={(e) => handleCopyUrl(e, jobSeeker)}
-                          disabled={!jobSeeker.scheduleToken}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                            !jobSeeker.scheduleToken
-                              ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                              : copiedId === jobSeeker.id
-                                ? 'bg-green-600 text-white'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                          }`}
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                          </svg>
-                          {copiedId === jobSeeker.id ? 'コピー!' : '日程URL'}
-                        </button>
-                        
-                        <button
-                          onClick={(e) => handleCopyFormUrl(e, jobSeeker)}
-                          disabled={!jobSeeker.formToken}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                            !jobSeeker.formToken
-                              ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                              : copiedFormId === jobSeeker.id
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
-                          }`}
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          {copiedFormId === jobSeeker.id ? 'コピー!' : 'フォーム'}
-                        </button>
+                        {currentRole === "RA" ? (
+                          <>
+                            {/* RA用アクション */}
+                            <Link
+                              href={`/selections?jobSeekerId=${jobSeeker.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                              </svg>
+                              選考を見る
+                            </Link>
+                            
+                            <Link
+                              href={`/job-seekers/${jobSeeker.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              詳細
+                            </Link>
+                            
+                            <Link
+                              href={`/job-seekers/${jobSeeker.id}/schedule`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-purple-100 hover:bg-purple-200 text-purple-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              日程
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            {/* CA用アクション */}
+                            <Link
+                              href={`/job-seekers/${jobSeeker.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              レジュメ
+                            </Link>
+                            
+                            <Link
+                              href={`/selections?jobSeekerId=${jobSeeker.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                              </svg>
+                              選考管理
+                            </Link>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openProposalModal(jobSeeker.id, jobSeeker.name);
+                              }}
+                              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              提案作成
+                            </button>
+                            
+                            <Link
+                              href={`/job-seekers/${jobSeeker.id}/schedule`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              日程調整
+                            </Link>
+                            
+                            <button
+                              onClick={(e) => handleCopyUrl(e, jobSeeker)}
+                              disabled={!jobSeeker.scheduleToken}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                                !jobSeeker.scheduleToken
+                                  ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                  : copiedId === jobSeeker.id
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                              }`}
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                              </svg>
+                              {copiedId === jobSeeker.id ? 'コピー!' : '日程URL'}
+                            </button>
+                            
+                            <button
+                              onClick={(e) => handleCopyFormUrl(e, jobSeeker)}
+                              disabled={!jobSeeker.formToken}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                                !jobSeeker.formToken
+                                  ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                  : copiedFormId === jobSeeker.id
+                                    ? 'bg-orange-600 text-white'
+                                    : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200'
+                              }`}
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              {copiedFormId === jobSeeker.id ? 'コピー!' : 'フォーム'}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

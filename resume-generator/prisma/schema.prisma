@@ -503,6 +503,10 @@ enum SelectionStatus {
   offer_accepted        // 内定承諾
   offer_rejected        // 内定辞退
   
+  // 入社
+  pre_entry             // 入社前（内定承諾後〜入社日まで）
+  employed              // 入社済み
+  
   // 終了
   withdrawn             // 辞退（求職者）
   rejected              // 不採用（企業）
