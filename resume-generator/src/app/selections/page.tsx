@@ -451,7 +451,7 @@ function SelectionsContent() {
         </div>
 
         {/* Tabs - CIRCUS風 */}
-        <div className="flex items-center border-b border-slate-200 bg-white rounded-t-lg overflow-hidden w-full">
+        <div className="flex items-center border-b border-slate-200 bg-white rounded-t-lg w-full">
           {STATUS_CATEGORIES.map((cat) => {
             const count = cat.key === "all" 
               ? Object.values(categoryCounts).reduce((a, b) => a + b, 0)
