@@ -1055,41 +1055,56 @@ export default function SelectionDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="space-y-3 p-3">
                 {selection.messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`p-3 hover:bg-gray-50 ${message.direction === "outbound" ? "bg-blue-50/30" : ""}`}
+                    className={`flex ${message.direction === "outbound" ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="flex items-start gap-2">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
-                        message.direction === "inbound" 
-                          ? "bg-gray-200 text-gray-600" 
-                          : "bg-blue-100 text-blue-600"
-                      }`}>
-                        {message.direction === "inbound" 
-                          ? (message.fromName || message.fromEmail || "企").charAt(0)
-                          : (message.createdByCAName || "C").charAt(0)
-                        }
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium text-gray-700 truncate">
-                            {message.direction === "inbound" 
-                              ? (message.fromName || message.fromEmail || "企業")
-                              : (message.createdByCAName || "CA")
-                            }
-                          </span>
-                          <span className="text-xs text-gray-400 shrink-0 ml-2">
-                            {new Date(message.receivedAt || message.createdAt).toLocaleDateString("ja-JP", {
-                              month: "numeric", day: "numeric"
-                            })}
-                          </span>
+                    <div className={`max-w-[85%] ${message.direction === "outbound" ? "order-2" : "order-1"}`}>
+                      {/* 送信者アイコン（受信時のみ左側に表示） */}
+                      <div className={`flex items-start gap-2 ${message.direction === "outbound" ? "flex-row-reverse" : ""}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
+                          message.direction === "inbound" 
+                            ? "bg-gray-200 text-gray-600" 
+                            : "bg-blue-500 text-white"
+                        }`}>
+                          {message.direction === "inbound" 
+                            ? (message.fromName || message.fromEmail || "企").charAt(0)
+                            : (message.createdByCAName || "C").charAt(0)
+                          }
                         </div>
-                        {message.subject && (
-                          <p className="text-sm font-medium text-gray-900 truncate">{message.subject}</p>
-                        )}
-                        <p className="text-xs text-gray-500 line-clamp-2">{message.body}</p>
+                        <div className={`flex-1 ${message.direction === "outbound" ? "text-right" : ""}`}>
+                          {/* 送信者名と日時 */}
+                          <div className={`flex items-center gap-2 mb-1 ${message.direction === "outbound" ? "justify-end" : ""}`}>
+                            <span className="text-xs font-medium text-gray-700">
+                              {message.direction === "inbound" 
+                                ? (message.fromName || message.fromEmail || "企業")
+                                : (message.createdByCAName || "CA")
+                              }
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {new Date(message.receivedAt || message.createdAt).toLocaleDateString("ja-JP", {
+                                month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"
+                              })}
+                            </span>
+                          </div>
+                          {/* メッセージバブル */}
+                          <div className={`rounded-2xl px-4 py-3 ${
+                            message.direction === "outbound" 
+                              ? "bg-blue-500 text-white rounded-tr-sm" 
+                              : "bg-gray-100 text-gray-800 rounded-tl-sm"
+                          }`}>
+                            {message.subject && (
+                              <p className={`text-sm font-bold mb-2 ${message.direction === "outbound" ? "text-blue-100" : "text-gray-600"}`}>
+                                {message.subject}
+                              </p>
+                            )}
+                            <p className={`text-sm whitespace-pre-wrap ${message.direction === "outbound" ? "text-white" : "text-gray-800"}`}>
+                              {message.body}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1461,5 +1476,6 @@ export default function SelectionDetailPage() {
     </DashboardLayout>
   );
 }
+
 
 
