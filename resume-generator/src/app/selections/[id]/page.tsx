@@ -243,6 +243,14 @@ export default function SelectionDetailPage() {
   });
   const [savingInterview, setSavingInterview] = useState(false);
 
+  // 折りたたみの状態管理
+  const [expandedSections, setExpandedSections] = useState({
+    interview: true,  // 面接詳細：展開
+    candidate: true,  // 候補者情報：展開
+    job: false,       // 求人情報：折りたたみ
+    history: false,   // 選考履歴：折りたたみ
+  });
+
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.push("/");
@@ -615,14 +623,6 @@ export default function SelectionDetailPage() {
   };
 
   const nextInterviewDate = getNextInterviewDate();
-
-  // 折りたたみの状態管理
-  const [expandedSections, setExpandedSections] = useState({
-    interview: true,  // 面接詳細：展開
-    candidate: true,  // 候補者情報：展開
-    job: false,       // 求人情報：折りたたみ
-    history: false,   // 選考履歴：折りたたみ
-  });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
