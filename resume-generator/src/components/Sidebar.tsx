@@ -210,7 +210,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </Link>
           <button
             onClick={onToggle}
-            className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded transition-colors shrink-0"
+            className="w-6 h-6 flex items-center justify-center text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors shrink-0"
             title={isCollapsed ? "サイドバーを展開" : "サイドバーを折りたたむ"}
           >
             <svg 
