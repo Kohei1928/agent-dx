@@ -466,9 +466,9 @@ function SelectionsContent() {
               <button
                 key={cat.key}
                 onClick={() => setStatusFilter(cat.key)}
-                className={`relative px-5 py-3.5 text-sm font-medium transition-all flex items-center gap-2 ${
+                className={`relative px-4 py-3 text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
                   isActive
-                    ? 'text-green-600 border-b-2 border-green-500 bg-green-50'
+                    ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50'
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
@@ -496,7 +496,7 @@ function SelectionsContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 maxLength={30}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
             {/* フィルターボタン */}
