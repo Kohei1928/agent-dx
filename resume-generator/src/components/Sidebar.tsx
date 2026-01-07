@@ -198,7 +198,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className={`${isCollapsed ? "p-3" : "p-4"} border-b border-slate-100`}>
         {isCollapsed ? (
           // 折りたたみ状態：縦に配置
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-3">
             <Link href="/job-seekers">
               <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md shadow-orange-100">
                 <span className="text-white font-bold text-sm">DX</span>
@@ -206,11 +206,11 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             </Link>
             <button
               onClick={onToggle}
-              className="w-8 h-6 flex items-center justify-center text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded border border-orange-200 transition-colors"
+              className="w-10 h-8 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 rounded-lg shadow-md shadow-orange-200 transition-all"
               title="サイドバーを展開"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
               </svg>
             </button>
           </div>
