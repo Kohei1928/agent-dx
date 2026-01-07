@@ -191,7 +191,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   return (
     <div 
       className={`${
-        isCollapsed ? "w-16" : "w-56"
+        isCollapsed ? "w-16" : "w-48"
       } bg-white min-h-screen flex flex-col transition-all duration-300 ease-in-out relative border-r border-slate-200`}
     >
       {/* ロゴ・タイトル */}
